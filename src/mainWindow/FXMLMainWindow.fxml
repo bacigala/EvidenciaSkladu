@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane id="AnchorPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="548.0" prefWidth="843.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mainWindow.FXMLMainWindowController">
+   <children>
+      <MenuBar layoutY="1.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <menus>
+          <Menu mnemonicParsing="false" text="Aplikácia">
+            <items>
+              <MenuItem mnemonicParsing="false" onAction="#openConnectionSettings" text="Pripojiť k serveru" />
+                  <MenuItem mnemonicParsing="false" onAction="#openLogInSettings" text="Prihlásiť používateľa" />
+                  <MenuItem mnemonicParsing="false" text="Ukončiť" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Zobrazenie" />
+            <Menu mnemonicParsing="false" text="Správa">
+               <items>
+                  <MenuItem mnemonicParsing="false" text="Položky" />
+                  <MenuItem mnemonicParsing="false" text="Kategórie" />
+                  <MenuItem mnemonicParsing="false" text="Používatelia" />
+               </items>
+            </Menu>
+        </menus>
+      </MenuBar>
+      <TableView fx:id="theMainTable" layoutX="6.0" layoutY="25.0" onMouseClicked="#itemSelected" prefHeight="418.0" prefWidth="373.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="240.0" AnchorPane.topAnchor="35.0" />
+      <VBox alignment="TOP_CENTER" prefHeight="460.0" prefWidth="220.0" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="35.0">
+         <children>
+            <Label alignment="TOP_CENTER" contentDisplay="TOP" text="Zvolená položka" textAlignment="CENTER" />
+            <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+               <children>
+                  <VBox prefHeight="200.0" prefWidth="100.0">
+                     <children>
+                        <Label text="Názov" />
+                        <TextField fx:id="nameTextField" editable="false" />
+                     </children>
+                  </VBox>
+                  <VBox layoutX="10.0" layoutY="10.0" prefHeight="200.0" prefWidth="100.0">
+                     <children>
+                        <Label text="Kód" />
+                        <TextField fx:id="codeTextField" editable="false" />
+                     </children>
+                  </VBox>
+                  <VBox layoutX="10.0" layoutY="10.0" prefHeight="200.0" prefWidth="100.0">
+                     <children>
+                        <Label text="Aktuálny počet" />
+                        <TextField fx:id="curAmountTextField" editable="false" />
+                     </children>
+                  </VBox>
+                  <VBox layoutX="10.0" layoutY="144.0" prefHeight="200.0" prefWidth="100.0">
+                     <children>
+                        <Label text="Minimálny počet" />
+                        <TextField fx:id="minAmountTextField" editable="false" />
+                     </children>
+                  </VBox>
+                  <VBox layoutX="10.0" layoutY="160.0" prefHeight="200.0" prefWidth="100.0">
+                     <children>
+                        <Label text="Jednotka" />
+                        <TextField fx:id="unitTextField" editable="false" />
+                     </children>
+                  </VBox>
+                  <VBox layoutX="10.0" layoutY="178.0" prefHeight="200.0" prefWidth="100.0">
+                     <children>
+                        <Label text="Kategória" />
+                        <ChoiceBox fx:id="categoryChoiceBox" disable="true" prefHeight="25.0" prefWidth="243.0" />
+                     </children>
+                  </VBox>
+                  <VBox layoutX="10.0" layoutY="220.0" prefHeight="200.0" prefWidth="100.0">
+                     <children>
+                        <Label text="Akcie" />
+                        <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#itemSupply" text="Vklad" />
+                              <Button mnemonicParsing="false" onAction="#itemRequest" text="Výber" />
+                              <Button mnemonicParsing="false" onAction="#itemTransactions" text="Pohyby" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+            <Separator prefWidth="200.0">
+               <VBox.margin>
+                  <Insets bottom="20.0" top="20.0" />
+               </VBox.margin>
+            </Separator>
+            <Label text="Databáza">
+               <VBox.margin>
+                  <Insets bottom="10.0" />
+               </VBox.margin>
+            </Label>
+            <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#reloadMainTable" text="Obnoviť" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>
