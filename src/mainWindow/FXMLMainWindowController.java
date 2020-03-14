@@ -5,6 +5,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import databaseAccess.Category;
+import databaseAccess.ConnectionDetails;
+import databaseAccess.Item;
+import databaseAccess.QueryHandler;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,6 +20,9 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 //import com.sun.javafx.scene.control.skin.TableViewSkin;
 import javafx.scene.control.TableColumn;
+import dialog.*;
+import dialog.DialogFactory;
+import javafx.scene.control.Alert;
 
 public class FXMLMainWindowController implements Initializable {
      
@@ -29,7 +36,12 @@ public class FXMLMainWindowController implements Initializable {
     
     @FXML
     private void openConnectionSettings(ActionEvent event) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLConnection.fxml"));       
+        DialogFactory df = new DialogFactory();
+        df.showAlert(Alert.AlertType.INFORMATION, "HelloThere");
+
+        df.showCustomSuccessDialog();
+
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLConnection.fxml"));
         Parent root1 = (Parent) fxmlLoader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));  
@@ -37,16 +49,17 @@ public class FXMLMainWindowController implements Initializable {
         FXMLConnectionController controller = fxmlLoader.<FXMLConnectionController>getController();
         
         // default db connection details - for test purposes
-        controller.initData(new ConnectionDetails("192.168.1.16", "3306",
+        controller.initData(new ConnectionDetails("192.168.1.15", "3306",
                 "zubardb", "pouzivatel01", "heslo"));
         stage.setTitle("Server");
         stage.showAndWait();
+
         openLogInSettings();
     }
     
     @FXML
     private void openLogInSettings() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLLogIn.fxml"));       
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLLogIn.fxml"));
         Parent root1 = (Parent) fxmlLoader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));  
@@ -116,7 +129,7 @@ public class FXMLMainWindowController implements Initializable {
     private void itemSupply() throws IOException {
         Item selectedItem = theMainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLItemSupplyDialog.fxml"));       
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLItemSupplyDialog.fxml"));
             Parent root1 = (Parent) fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root1));  
