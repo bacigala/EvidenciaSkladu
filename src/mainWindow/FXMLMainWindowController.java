@@ -5,11 +5,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import databaseAccess.Category;
-import databaseAccess.ConnectionDetails;
 import databaseAccess.Item;
 import databaseAccess.QueryHandler;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -18,54 +15,33 @@ import javafx.scene.Scene;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-//import com.sun.javafx.scene.control.skin.TableViewSkin;
 import javafx.scene.control.TableColumn;
 import dialog.*;
 import dialog.DialogFactory;
 import javafx.scene.control.Alert;
 
+/**
+ * The main window of the application.
+ */
+
 public class FXMLMainWindowController implements Initializable {
      
-    @FXML private javafx.scene.control.TableView<Item> theMainTable;
-    @FXML private javafx.scene.control.TextField nameTextField;
-    @FXML private javafx.scene.control.TextField codeTextField;
-    @FXML private javafx.scene.control.TextField curAmountTextField;
-    @FXML private javafx.scene.control.TextField minAmountTextField;
-    @FXML private javafx.scene.control.TextField unitTextField;
-    @FXML private javafx.scene.control.ChoiceBox<Category> categoryChoiceBox;
-    
-    @FXML
-    private void openConnectionSettings(ActionEvent event) throws IOException {
-        DialogFactory df = new DialogFactory();
-        df.showAlert(Alert.AlertType.INFORMATION, "HelloThere");
-
-        df.showCustomSuccessDialog();
-
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLConnection.fxml"));
-        Parent root1 = (Parent) fxmlLoader.load();
-        Stage stage = new Stage();
-        stage.setScene(new Scene(root1));  
-        stage.initModality(Modality.APPLICATION_MODAL);
-        FXMLConnectionController controller = fxmlLoader.<FXMLConnectionController>getController();
-        
-        // default db connection details - for test purposes
-        controller.initData(new ConnectionDetails("192.168.1.15", "3306",
-                "zubardb", "pouzivatel01", "heslo"));
-        stage.setTitle("Server");
-        stage.showAndWait();
-
-        openLogInSettings();
-    }
+    @FXML private javafx.scene.control.TableView<Item> mainTable;
+    @FXML private javafx.scene.control.TableView<Item> selectedItemPropertiesTable;
+    @FXML private javafx.scene.control.Button itemSupplyButton;
+    @FXML private javafx.scene.control.Button itemWithdrawalButton;
+    @FXML private javafx.scene.control.Button itemDetailsChangeButton;
+    @FXML private javafx.scene.control.Button itemMoveHistoryButton;
+    @FXML private javafx.scene.control.Button databaseRefreshButton;
+    @FXML private javafx.scene.control.Menu adminMenu;
     
     @FXML
     private void openLogInSettings() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLLogIn.fxml"));
-        Parent root1 = (Parent) fxmlLoader.load();
-        Stage stage = new Stage();
-        stage.setScene(new Scene(root1));  
-        stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setTitle("Používateľ");
-        stage.showAndWait();
+        if (DialogFactory.getInstance().showUserLoginDialog()) {
+            userLoginState();
+        } else {
+            userLogoutState();
+        }
         reloadMainTable();
     }
         
@@ -90,44 +66,63 @@ public class FXMLMainWindowController implements Initializable {
         TableColumn unitColumn = new TableColumn("Jednotka");
         unitColumn.setCellValueFactory(new PropertyValueFactory<>("unit"));
               
-        theMainTable.getColumns().addAll(catColumn, idColumn, nameColumn,
+        mainTable.getColumns().addAll(catColumn, idColumn, nameColumn,
                 barcodeColumn, curAmountColumn, unitColumn);
-        
-        //autoFitTable(theMainTable);
+
+        // test default connection settings, require login information
+        QueryHandler queryHandler = QueryHandler.getInstance();
+        if (queryHandler.setBasicUserConnectionDetails()) {
+            // successfully established database connection
+            try {
+                openLogInSettings();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            String message = "Nepodarilo sa pripojiť na server s použitím prednastavných hodnôt, upravte ich prosím " +
+                    "v nastaveniach.";
+            DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, message);
+        }
     }   
     
     @FXML
     private boolean reloadMainTable() {
-        clearDetails();
+        clearItemDetails();
         QueryHandler qh = QueryHandler.getInstance();
         if (qh.reloadItemList()) {
-            theMainTable.getItems().clear();
+            mainTable.getItems().clear();
             for (Item i : qh.getItemList()) {
-                theMainTable.getItems().add(i);
+                mainTable.getItems().add(i);
             } 
             return true;
         }
         return false;
     }
-    
-    // fires after a row gets selected
+
+    /**
+     * Loads item details after one is selected.
+     */
     @FXML
     private void itemSelected() {
-        Item selectedItem = theMainTable.getSelectionModel().getSelectedItem();
+        Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
-            nameTextField.setText(selectedItem.getName());
-            codeTextField.setText(selectedItem.getBarcode());
-            curAmountTextField.setText(Integer.toString(selectedItem.getCurAmount()));
-            minAmountTextField.setText(Integer.toString(selectedItem.getMinAmount()));
-            unitTextField.setText(selectedItem.getUnit());
-            //TODO: category choiceBox
+            //todo load item details from extra attributes db table
+
+            //enable buttons for item manipulation
+            itemSupplyButton.setDisable(false);
+            itemWithdrawalButton.setDisable(false);
+            itemDetailsChangeButton.setDisable(false);
+            itemMoveHistoryButton.setDisable(false);
         }
     }
-    
-    // button "Vklad"
+
+    /**
+     * BUTTON "Vklad" (item supply)
+     * @throws IOException
+     */
     @FXML
     private void itemSupply() throws IOException {
-        Item selectedItem = theMainTable.getSelectionModel().getSelectedItem();
+        Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLItemSupplyDialog.fxml"));
             Parent root1 = (Parent) fxmlLoader.load();
@@ -140,21 +135,27 @@ public class FXMLMainWindowController implements Initializable {
             reloadMainTable();
         }
     }
-    
-    // button "Vyber"
+
+    /**
+     * BUTTON "Vyber" (item withdrawal)
+     */
     @FXML
     private void itemRequest() {
-        Item selectedItem = theMainTable.getSelectionModel().getSelectedItem();
+        Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
+            // todo  dialog na vyber polozky
             System.out.println("Vyber polozky...");
         }
     }
-    
-    // button "Pohyby"
+
+    /**
+     * BUTTON "Pohyby" (item move history)
+     */
     @FXML
     private void itemTransactions() {
-        Item selectedItem = theMainTable.getSelectionModel().getSelectedItem();
+        Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
+            // todo zobraz historiu polozky
             System.out.println("Pohyby polozky...");
         }
     }
@@ -190,15 +191,46 @@ public class FXMLMainWindowController implements Initializable {
     
      */
 
-    
-    // clears displayed details
-    private void clearDetails() {
-        nameTextField.setText("");
-        codeTextField.setText("");
-        curAmountTextField.setText("");
-        minAmountTextField.setText("");
-        unitTextField.setText("");
-        // todo category choiceBox clear
+    /**
+     * Disables GUI functions and hides all visible information which require login to be viewed.
+     */
+    private void userLogoutState() {
+        clearItemDetails();
+        mainTable.getItems().clear();
+        databaseRefreshButton.setDisable(true);
+        adminMenu.setDisable(true);
     }
-    
+
+    /**
+     * Enables GUI functions for logged-in user.
+     */
+    private void userLoginState() {
+        databaseRefreshButton.setDisable(false);
+        if (QueryHandler.getInstance().hasAdmin()) {
+            adminMenu.setDisable(false);
+        }
+    }
+
+    /**
+     * Clears displayed item details and disables buttons related to item manipulation.
+     */
+    private void clearItemDetails() {
+        selectedItemPropertiesTable.getItems().clear();
+        itemSupplyButton.setDisable(true);
+        itemWithdrawalButton.setDisable(true);
+        itemDetailsChangeButton.setDisable(true);
+        itemMoveHistoryButton.setDisable(true);
+    }
+
+    /**
+     * Closes application.
+     */
+    @FXML
+    private void closeApplicationAction(){
+        QueryHandler queryHandler = QueryHandler.getInstance();
+        queryHandler.logOut();
+        Stage stage = (Stage) mainTable.getScene().getWindow();
+        stage.close();
+    }
+
 }

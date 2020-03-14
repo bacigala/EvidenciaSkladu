@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="256.0" prefWidth="262.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dialog.FXMLUserLoginDialogController">
+   <children>
+      <MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <menus>
+          <Menu mnemonicParsing="false" text="Pripojenie">
+            <items>
+                  <MenuItem mnemonicParsing="false" onAction="#openConnectionDetails" text="Nastavenia" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+      <VBox alignment="CENTER" focusTraversable="true" prefWidth="212.0" spacing="20.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="35.0">
+         <children>
+            <VBox alignment="CENTER" prefWidth="100.0">
+               <children>
+                  <Label text="Používateľské meno" />
+                  <TextField fx:id="usernameTextField" alignment="CENTER" promptText="pouzivatelskemeno" />
+               </children>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </VBox>
+            <VBox alignment="CENTER" prefWidth="100.0">
+               <children>
+                  <Label alignment="TOP_LEFT" text="Heslo" />
+                  <PasswordField fx:id="passwordTextField" alignment="CENTER" promptText="heslo" />
+               </children>
+            </VBox>
+            <Button fx:id="loginButton" mnemonicParsing="false" onAction="#loginButtonAction" text="Prihlásiť sa" />
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

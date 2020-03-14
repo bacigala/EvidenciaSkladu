@@ -60,7 +60,7 @@ public class Item {
     }
     
     public String getCategoryName() {
-        QueryHandler qh = QueryHandler.getInstance();
-        return qh.getCategoryMap().get(getCategory()).getName();
+        return QueryHandler.getInstance().getCategoryMap().get(getCategory()).getName();
     }
+
 }

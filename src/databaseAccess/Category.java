@@ -1,11 +1,11 @@
 
 package databaseAccess;
 
+import java.awt.Color;
+
 /**
  * Represents one record in the table "category".
  */
-
-import java.awt.Color;
 
 public class Category {
     private int id;
@@ -47,4 +47,5 @@ public class Category {
     public String getNote() {
         return note;
     }
+
 }

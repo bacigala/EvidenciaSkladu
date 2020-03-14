@@ -1,31 +1,39 @@
 
 package databaseAccess;
 
-/**
- * Singleton class, performs all interaction with the database.
- */
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Savepoint;
-import java.sql.Statement;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Class responsible for all interaction with the database.
+ * Singleton.
+ */
+
 public class QueryHandler {
+    // singleton instance
     private static final QueryHandler queryHandler = new QueryHandler();
-    private ConnectionDetails connDetails = null;
+
+    // logged in user info
+    private boolean loggedUserAdmin = false;
+    private String loggedUserUsername = "";
     private String loggedUserName = "";
     private int loggedUserId = 0;
+
+    // connection details
+    private String databaseIp = "192.168.1.15";
+    private String databasePort = "3306";
+    private String databaseName = "zubardb";
+    private String databaseUsername;
+    private String databasePassword;
+
+    // last retrieved list of items and map of categories
     private ArrayList<Item> itemList = new ArrayList<>();
-    private HashMap<Integer,Category> categoryMap = new HashMap<>();
+    private HashMap<Integer, Category> categoryMap = new HashMap<>();
+
 
     /**
      * Empty constructor - singleton class.
@@ -40,50 +48,76 @@ public class QueryHandler {
     }
 
     /**
-     * Creates connection based on current connection details.
+     * @return connection based on current connection details.
      */
-    private Connection getConnection(ConnectionDetails cd) throws SQLException {
-        if (cd == null) return null;               
-        return DriverManager.getConnection("jdbc:mysql://" 
-                + cd.getIp() + ":" + cd.getPort() + "/" 
-                + cd.getDbName(), cd.getUsername(), cd.getPassword());
+    private Connection getConnection() {
+        Connection connection = null;
+        try {
+            connection = DriverManager.getConnection("jdbc:mysql://"
+                    + databaseIp + ":" + databasePort + "/"
+                    + databaseName, databaseUsername, databasePassword);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return connection;
     }
 
-    private Connection getConnection() throws SQLException {
-        return getConnection(connDetails);
-    }
-        
-    // sets new connection details, returns true if they are valid
-    public boolean setConnectionDetails(ConnectionDetails connectionDetails) {
-        if (connectionDetails == null) return false;
-        Connection conn = null;
-        try {
-            conn = getConnection(connectionDetails);            
-        } catch (SQLException e) {
-            return false;
-        } finally {
+    /**
+     * @return true if valid connection details are present.
+     */
+    public boolean hasConnectionDetails() {
+        Connection connection = getConnection();
+        boolean result = connection != null;
+        if (result) {
             try {
-                if (conn != null) conn.close();
+                connection.close();
             } catch (SQLException e) {
-                return false;
+                e.printStackTrace();
             }
         }
-        connDetails = connectionDetails;
-        return true;
+        return result;
     }
-    
-    // returns true if valid connection details are present
-    public boolean hasConnectionDetails() {
-        return connDetails != null;
+
+    /**
+     * Setups connection with basic database privileges. (additional protection)
+     * @return true if logged in.
+     */
+    public boolean setBasicUserConnectionDetails() {
+        databaseUsername = "basic-user";
+        databasePassword = "CwJNF7zJciaxMY3v";
+        return hasConnectionDetails();
     }
-    
-    // removes record about connection details
-    public boolean dropConnectionDetails() {
-        connDetails = null;
-        return true;
+
+    public boolean setBasicUserConnectionDetails(String ip, String port) {
+        databaseIp = ip;
+        databasePort = port;
+        return setBasicUserConnectionDetails();
     }
-     
-    // verifies the username and password, returns true if valid
+
+    /**
+     * Setups connection with admin database privileges.
+     * @return true if logged in.
+     */
+    private boolean setAdminUserConnectionDetails() {
+        databaseUsername = "admin-user";
+        databasePassword = "scfAT4nHm5MKJu9D";
+        return hasConnectionDetails();
+    }
+
+    public String getDatabaseIp() {
+        return databaseIp;
+    }
+
+    public String getDatabasePort() {
+        return databasePort;
+    }
+
+    /**
+     * Verifies username and password.
+     * @param username Username to be tested.
+     * @param password Password to be tested.
+     * @return true if username and password are valid.
+     */
     public boolean logIn(String username, String password) {
         if (loggedUserId > 0) return false;       
         
@@ -93,8 +127,8 @@ public class QueryHandler {
         
         try {   
             conn = getConnection();
-            statement = conn.prepareStatement(
-                    "SELECT * FROM account WHERE login = ? AND password = ?");
+            assert conn != null;
+            statement = conn.prepareStatement("SELECT * FROM account WHERE login = ? AND password = ?");
             statement.setString(1, username);
             statement.setString(2, password);
             result = statement.executeQuery();
@@ -102,10 +136,13 @@ public class QueryHandler {
                 loggedUserName = result.getString("name") + " "
                         + result.getString("surname");
                 loggedUserId = result.getInt("id");
+                loggedUserAdmin = result.getBoolean("admin");
+                loggedUserUsername = username;
             } else {
                 return false;
             }            
         } catch (SQLException e) {
+            e.printStackTrace();
             return false;
         } finally {
             try {
@@ -113,19 +150,35 @@ public class QueryHandler {
                 if (statement != null) statement.close();
                 if (conn != null) conn.close();
             } catch (SQLException e) {
-                
+                e.printStackTrace();
             }
         }
-        return true;
+        // if logged in user is an admin, switch to ADMIN database access
+        if (loggedUserAdmin) {
+            return setAdminUserConnectionDetails();
+        } else {
+            return setBasicUserConnectionDetails();
+        }
     }
-    
-    // removes saved info about logged in user
+
+    /**
+     * Removes information about currently logged user + sets BASIC database user for further database access.
+     */
     public void logOut() {
-        loggedUserId = 0;
+        setBasicUserConnectionDetails();
+        loggedUserAdmin = false;
+        loggedUserUsername = "";
         loggedUserName = "";
+        loggedUserId = 0;
+
+        // delete login-required access content
+        itemList.clear();
+        categoryMap.clear();
     }
-    
-    // returns logged in user ID
+
+    /**
+     * @return currently logged user ID, 0 if no user is present.
+     */
     public int getLoggedUserId() {
         return loggedUserId;
     }
@@ -134,17 +187,22 @@ public class QueryHandler {
     public String getLoggedUserName() {
         return loggedUserName;
     }
-    
-    // returns rurrently set connection details
-    public ConnectionDetails getConnectionDettails() {
-        return connDetails;
+
+    // returns username of currently logged in uer
+    public String getLoggedUserUsername() {
+        return loggedUserUsername;
     }
     
     // returns true if verified user is logged in
     public boolean hasUser() {
         return loggedUserId > 0;
-    }        
-    
+    }
+
+    // returns true if verified admin is logged in
+    public boolean hasAdmin() {
+        return loggedUserAdmin;
+    }
+
     // reloads list of Items from database
     public boolean reloadItemList() {      
         if (!hasConnectionDetails() || !hasUser()) return false;
@@ -156,7 +214,8 @@ public class QueryHandler {
         // RELOAD OF ITEMS
         ArrayList<Item> newItemList = new ArrayList<>();
         try {   
-            conn = getConnection();            
+            conn = getConnection();
+            assert conn != null;
             statement = conn.prepareStatement(
                     "SELECT * FROM item");
             result = statement.executeQuery();
@@ -228,8 +287,14 @@ public class QueryHandler {
     public HashMap<Integer,Category> getCategoryMap() {
         return categoryMap;
     }
-    
-    // ITEM SUPPLY - supplies specified amount of items in name of currently logged user to database, returns true on success
+
+    /**
+     * Tries to create all required records in the database for item supply.
+     * @param itemId ID of the supplied item.
+     * @param supplyAmount amount of items supplied.
+     * @param expiration expiration date of the item supplied.
+     * @return true if supply was successful.
+     */
     public boolean itemSupply(int itemId, int supplyAmount, LocalDate expiration) {
         if (!hasConnectionDetails() || !hasUser()) return false;
                  
@@ -237,12 +302,12 @@ public class QueryHandler {
         PreparedStatement statement = null;
         ResultSet result = null; 
         Savepoint savepoint1 = null;
-        ArrayList<Item> newItemList = new ArrayList<>();
         int curAmount;
         int moveId;
         
         try {   
-            conn = getConnection(); 
+            conn = getConnection();
+            assert conn != null;
             conn.setAutoCommit(false);
             savepoint1 = conn.setSavepoint("Savepoint1");            
             
@@ -257,7 +322,7 @@ public class QueryHandler {
                 throw new SQLException();
             }
             
-            // increase no. of items present
+            // increment no. of items present
             statement = conn.prepareStatement(
                     "UPDATE item SET cur_amount = ? WHERE id = ?");
             statement.setInt(1, curAmount + supplyAmount);
@@ -290,6 +355,7 @@ public class QueryHandler {
         } catch (Throwable e) {
             e.printStackTrace();
             try {
+                assert conn != null;
                 conn.rollback(savepoint1);
             } catch (SQLException ex) {
                 Logger.getLogger(QueryHandler.class.getName()).log(Level.SEVERE, null, ex);
@@ -301,10 +367,9 @@ public class QueryHandler {
                 if (statement != null) statement.close();
                 if (conn != null) conn.close();
             } catch (SQLException e) {
-                
+                e.printStackTrace();
             }
         }
-        
         return true;       
     }
     
