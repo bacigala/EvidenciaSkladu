@@ -16,13 +16,13 @@
                           <VBox prefHeight="200.0" prefWidth="100.0">
                              <children>
                                 <Label text="Názov" />
-                                <TextField fx:id="nameTextField" disable="true" editable="false" />
+                                <TextField fx:id="nameTextField" editable="false" />
                              </children>
                           </VBox>
                           <VBox layoutX="10.0" layoutY="10.0" prefHeight="200.0" prefWidth="100.0">
                              <children>
                                 <Label text="Kód" />
-                                <TextField fx:id="codeTextField" disable="true" editable="false" />
+                                <TextField fx:id="codeTextField" editable="false" />
                              </children>
                           </VBox>
                           <VBox layoutX="10.0" layoutY="10.0" prefHeight="200.0" prefWidth="100.0">
@@ -34,19 +34,19 @@
                           <VBox layoutX="10.0" layoutY="144.0" prefHeight="200.0" prefWidth="100.0">
                              <children>
                                 <Label text="Minimálny počet" />
-                                <TextField fx:id="minAmountTextField" disable="true" editable="false" />
+                                <TextField fx:id="minAmountTextField" editable="false" />
                              </children>
                           </VBox>
                           <VBox layoutX="10.0" layoutY="160.0" prefHeight="200.0" prefWidth="100.0">
                              <children>
                                 <Label text="Jednotka" />
-                                <TextField fx:id="unitTextField" disable="true" editable="false" />
+                                <TextField fx:id="unitTextField" editable="false" />
                              </children>
                           </VBox>
                           <VBox layoutX="10.0" layoutY="178.0" prefHeight="200.0" prefWidth="100.0">
                              <children>
                                 <Label text="Kategória" />
-                                <ChoiceBox fx:id="categoryChoiceBox" disable="true" prefHeight="25.0" prefWidth="243.0">
+                                <ChoiceBox fx:id="categoryChoiceBox" prefHeight="25.0" prefWidth="243.0">
                                  <VBox.margin>
                                     <Insets />
                                  </VBox.margin></ChoiceBox>
@@ -58,15 +58,10 @@
             </AnchorPane>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="398.0" prefWidth="350.0">
                <children>
-                  <VBox alignment="TOP_CENTER" layoutX="90.0" layoutY="91.0" prefHeight="129.0" prefWidth="187.0" spacing="10.0" AnchorPane.bottomAnchor="259.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+                  <VBox alignment="TOP_CENTER" layoutX="90.0" layoutY="91.0" prefHeight="293.0" prefWidth="276.0" spacing="10.0" AnchorPane.bottomAnchor="70.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
                      <children>
                         <Label text="Rozširujúce údaje" />
-                        <TableView fx:id="itemCustomAttributes" prefHeight="200.0" prefWidth="200.0">
-                          <columns>
-                            <TableColumn minWidth="0.0" prefWidth="135.0" text="Atribút" />
-                            <TableColumn prefWidth="135.0" text="Hodnota" />
-                          </columns>
-                        </TableView>
+                        <TableView fx:id="tableCustomAttributes" prefHeight="155.0" prefWidth="276.0" VBox.vgrow="ALWAYS" />
                      </children></VBox>
                   <HBox alignment="CENTER" layoutX="4.0" layoutY="337.0" prefHeight="51.0" prefWidth="187.0" spacing="30.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="337.0">
                      <children>

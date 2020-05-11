@@ -3,9 +3,11 @@ package dialog;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import databaseAccess.Category;
+import databaseAccess.CustomAttribute;
 import databaseAccess.Item;
 import databaseAccess.QueryHandler;
 import javafx.fxml.FXML;
@@ -27,7 +29,7 @@ public class FXMLItemModifyDialogController implements Initializable {
     @FXML private javafx.scene.control.TextField minAmountTextField;
     @FXML private javafx.scene.control.TextField unitTextField;
     @FXML private javafx.scene.control.ChoiceBox<Category> categoryChoiceBox;
-    @FXML private javafx.scene.control.TableView<Item> tableCustomAttributes;
+    @FXML private javafx.scene.control.TableView<CustomAttribute> tableCustomAttributes;
     
     private Item item;
     
@@ -36,7 +38,7 @@ public class FXMLItemModifyDialogController implements Initializable {
 
     }  
     
-    public void initData(Item item) {
+    public void initData(Item item, ArrayList<CustomAttribute> customAttributes) {
         if (item != null) {
             QueryHandler qh = QueryHandler.getInstance();
             this.item = item;
@@ -50,18 +52,26 @@ public class FXMLItemModifyDialogController implements Initializable {
 
             // custom attributes table
             TableColumn attributeName = new TableColumn("Atribút");
-            attributeName.setCellValueFactory(new PropertyValueFactory<>("attributeName"));
+            attributeName.setCellValueFactory(new PropertyValueFactory<>("name"));
 
             TableColumn attributeValue = new TableColumn("Hodnota");
-            attributeValue.setCellValueFactory(new PropertyValueFactory<>("attributeValue"));
+            attributeValue.setCellValueFactory(new PropertyValueFactory<>("value"));
 
             tableCustomAttributes.getColumns().addAll(attributeName, attributeValue);
+
+            // populate custom attributes table
+            if (customAttributes != null) {
+                for (CustomAttribute ca : customAttributes) {
+                    tableCustomAttributes.getItems().add(ca);
+                }
+            }
         }
     }
     
     // button "Ulozit"
     @FXML
     private void saveButton() throws IOException {
+        // todo implement the save button
 //        QueryHandler qh = QueryHandler.getInstance();
 //        DialogFactory df = DialogFactory.getInstance();
 //        try {

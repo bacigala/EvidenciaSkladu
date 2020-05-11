@@ -4,10 +4,10 @@ package databaseAccess;
  *  Represents couple (attribute; value)
  */
 
-public class customAttribute {
+public class CustomAttribute {
     private final String name, value;
 
-    public customAttribute(String name, String value) {
+    public CustomAttribute(String name, String value) {
         this.name = name;
         this.value = value;
     }

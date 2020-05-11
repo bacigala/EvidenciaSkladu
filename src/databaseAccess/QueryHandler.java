@@ -391,7 +391,7 @@ public class QueryHandler {
             conn = getConnection();
             assert conn != null;
             statement = conn.prepareStatement(
-                    "SELECT * FROM attribute WHERE id = ?");
+                    "SELECT * FROM attribute WHERE item_id = ?");
             statement.setInt(1, itemId);
             result = statement.executeQuery();
             while (result.next()) {

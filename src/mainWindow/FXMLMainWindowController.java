@@ -3,8 +3,10 @@ package mainWindow;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
+import databaseAccess.CustomAttribute;
 import databaseAccess.Item;
 import databaseAccess.QueryHandler;
 import javafx.fxml.FXML;
@@ -12,6 +14,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -27,14 +30,17 @@ import javafx.scene.control.Alert;
 public class FXMLMainWindowController implements Initializable {
      
     @FXML private javafx.scene.control.TableView<Item> mainTable;
-    @FXML private javafx.scene.control.TableView<Item> selectedItemPropertiesTable;
+    @FXML private javafx.scene.control.TableView<CustomAttribute> selectedItemPropertiesTable;
     @FXML private javafx.scene.control.Button itemSupplyButton;
     @FXML private javafx.scene.control.Button itemWithdrawalButton;
     @FXML private javafx.scene.control.Button itemDetailsChangeButton;
     @FXML private javafx.scene.control.Button itemMoveHistoryButton;
     @FXML private javafx.scene.control.Button databaseRefreshButton;
     @FXML private javafx.scene.control.Menu adminMenu;
-    
+
+    //stores currently selected item custom attributes
+    private ArrayList<CustomAttribute> selectedItemCustomAttributes = null;
+
     @FXML
     private void openLogInSettings() throws IOException {
         if (DialogFactory.getInstance().showUserLoginDialog()) {
@@ -69,14 +75,17 @@ public class FXMLMainWindowController implements Initializable {
         mainTable.getColumns().addAll(catColumn, idColumn, nameColumn,
                 barcodeColumn, curAmountColumn, unitColumn);
 
+        mainTable.setPlaceholder(new Label("Niet čo zobraziť :("));
+
         // aside item details table
         TableColumn attributeName = new TableColumn("Atribút");
-        attributeName.setCellValueFactory(new PropertyValueFactory<>("attributeName"));
+        attributeName.setCellValueFactory(new PropertyValueFactory<>("name"));
 
         TableColumn attributeValue = new TableColumn("Hodnota");
-        attributeValue.setCellValueFactory(new PropertyValueFactory<>("attributeValue"));
+        attributeValue.setCellValueFactory(new PropertyValueFactory<>("value"));
 
         selectedItemPropertiesTable.getColumns().addAll(attributeName, attributeValue);
+        selectedItemPropertiesTable.setPlaceholder(new Label("Bez ďalších atribútov."));
 
         // test default connection settings, require login information
         QueryHandler queryHandler = QueryHandler.getInstance();
@@ -113,9 +122,19 @@ public class FXMLMainWindowController implements Initializable {
      */
     @FXML
     private void itemSelected() {
+        // clear previously loaded custom attributes
+        selectedItemPropertiesTable.getItems().clear();
+
+        QueryHandler qh = QueryHandler.getInstance();
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
-            //todo load item details from extra attributes db table
+            ArrayList<CustomAttribute> newCustomAttributes = qh.getItemCustomAttributes(selectedItem.getId());
+            if (newCustomAttributes != null) {
+                for (CustomAttribute ca : newCustomAttributes) {
+                    selectedItemPropertiesTable.getItems().add(ca);
+                }
+            }
+            selectedItemCustomAttributes = newCustomAttributes;
 
             //enable buttons for item manipulation
             itemSupplyButton.setDisable(false);
@@ -183,8 +202,8 @@ public class FXMLMainWindowController implements Initializable {
             Stage stage = new Stage();
             stage.setScene(new Scene(root1));
             stage.initModality(Modality.APPLICATION_MODAL);
-            FXMLItemModifyDialogController controller = fxmlLoader.<FXMLItemModifyDialogController>getController();
-            controller.initData(selectedItem);
+            FXMLItemModifyDialogController controller = fxmlLoader.getController();
+            controller.initData(selectedItem, selectedItemCustomAttributes);
             stage.showAndWait();
             reloadMainTable();
         }
@@ -248,6 +267,7 @@ public class FXMLMainWindowController implements Initializable {
      */
     private void clearItemDetails() {
         selectedItemPropertiesTable.getItems().clear();
+        selectedItemCustomAttributes = null;
         itemSupplyButton.setDisable(true);
         itemWithdrawalButton.setDisable(true);
         itemDetailsChangeButton.setDisable(true);
