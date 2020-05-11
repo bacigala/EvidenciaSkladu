@@ -3,12 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="cdb932d9-7e58-4d94-93a9-e7b232ef17da" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/databaseAccess/CustomAttribute.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/databaseAccess/CustomAttribute.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/databaseAccess/QueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/databaseAccess/QueryHandler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/dialog/FXMLItemModifyDialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/FXMLItemModifyDialog.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLItemModifyDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/FXMLItemModifyDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/mainWindow/FXMLMainWindow.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/mainWindow/FXMLMainWindow.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/mainWindow/FXMLMainWindowController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/mainWindow/FXMLMainWindowController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,6 +93,7 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="DatabaseDriversLRU" value="mariadb" />
     <property name="Downloaded.Files.Path.Enabled" value="true" />
     <property name="GoToClass.includeLibraries" value="false" />
@@ -226,7 +222,7 @@
       <workItem from="1584173475800" duration="40299000" />
       <workItem from="1584307163669" duration="27000" />
       <workItem from="1589184106577" duration="492000" />
-      <workItem from="1589184896263" duration="19501000" />
+      <workItem from="1589184896263" duration="22879000" />
     </task>
     <servers />
   </component>
@@ -298,9 +294,9 @@
       <screen x="0" y="0" width="1600" height="870" />
     </state>
     <state x="504" y="327" key="com.intellij.jarRepository.RepositoryAttachDialog-DOWNLOAD/0.0.1600.870@0.0.1600.870" timestamp="1584106361920" />
-    <state x="456" y="192" key="run.anything.popup" timestamp="1589224421137">
+    <state x="456" y="192" key="run.anything.popup" timestamp="1589228081884">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state x="456" y="192" key="run.anything.popup/0.0.1600.870@0.0.1600.870" timestamp="1589224421137" />
+    <state x="456" y="192" key="run.anything.popup/0.0.1600.870@0.0.1600.870" timestamp="1589228081884" />
   </component>
 </project>

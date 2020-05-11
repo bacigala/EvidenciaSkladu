@@ -65,8 +65,9 @@
                      </children></VBox>
                   <HBox alignment="CENTER" layoutX="4.0" layoutY="337.0" prefHeight="51.0" prefWidth="187.0" spacing="30.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="337.0">
                      <children>
-                        <Button mnemonicParsing="false" onAction="#cancelButton" text="Zrušiť" />
-                        <Button mnemonicParsing="false" onAction="#saveButton" text="Uložiť" />
+                        <Button mnemonicParsing="false" text="Pridať údaj" />
+                        <Button cancelButton="true" mnemonicParsing="false" onAction="#cancelButton" text="Zrušiť" textFill="#f50606" />
+                        <Button defaultButton="true" mnemonicParsing="false" onAction="#saveButton" text="Uložiť" textFill="#119737" />
                      </children>
                   </HBox>
                </children>
