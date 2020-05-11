@@ -372,5 +372,47 @@ public class QueryHandler {
         }
         return true;       
     }
+
+    /**
+     * Retrieves all custom attributes of item with 'itemId'.
+     * @param itemId ID of the supplied item.
+     * @return list of custom attributes.
+     */
+    public ArrayList<CustomAttribute> getItemCustomAttributes(int itemId) {
+        if (!hasConnectionDetails() || !hasUser()) return null;
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet result = null;
+
+        // READ ATTRIBUTES FROM DB
+        ArrayList<CustomAttribute> customAttributes = new ArrayList<>();
+        try {
+            conn = getConnection();
+            assert conn != null;
+            statement = conn.prepareStatement(
+                    "SELECT * FROM attribute WHERE id = ?");
+            statement.setInt(1, itemId);
+            result = statement.executeQuery();
+            while (result.next()) {
+                CustomAttribute customAttribute =  new CustomAttribute(
+                        result.getString("name"),
+                        result.getString("content")
+                );
+                customAttributes.add(customAttribute);
+            }
+        } catch (SQLException e) {
+            return null;
+        } finally {
+            try {
+                if (result != null) result.close();
+                if (statement != null) statement.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                return null;
+            }
+        }
+       return customAttributes;
+    }
     
 }
