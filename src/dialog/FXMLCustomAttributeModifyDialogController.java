@@ -6,6 +6,7 @@ package dialog;
  */
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import databaseAccess.CustomAttribute;
@@ -23,25 +24,27 @@ public class FXMLCustomAttributeModifyDialogController implements Initializable 
     @FXML private javafx.scene.control.Button deleteButton;
 
     private CustomAttribute customAttribute;
-    private Boolean modify, delete;
+    private ArrayList<CustomAttribute> attributesToAdd, attributesToDelete;
 
     /**
-     * BUTTON "Ulozit" Changes FLAGS to signalize desired CHANGE.
+     * BUTTON "Ulozit" Adds attribute to desired list.
      */
     @FXML
     private void saveButtonAction(ActionEvent e) {
+        disableInput();
         DialogFactory df = DialogFactory.getInstance();
         String newName = nameTextField.getText();
         String newValue = valueTextField.getText();
         if (!newName.equals("") && !newValue.equals("")) {
             disableInput();
-            this.modify = Boolean.TRUE;
-            this.customAttribute = new CustomAttribute(newName, newValue);
+            this.attributesToDelete.add(customAttribute);
+            this.attributesToAdd.add(new CustomAttribute(newName, newValue));
             close();
         } else {
             // error - wrong input
             df.showAlert(Alert.AlertType.ERROR, "Zadané údaje sú neplatné.");
         }
+        enableInput();
     }
 
     /**
@@ -50,27 +53,27 @@ public class FXMLCustomAttributeModifyDialogController implements Initializable 
     @FXML
     private void deleteButtonAction(ActionEvent e) {
         disableInput();
-        this.delete = Boolean.TRUE;
+        this.attributesToDelete.add(customAttribute);
         close();
     }
 
-    /**
-     * Populates input fields with current values.
-     */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        nameTextField.setText(customAttribute.getName());
-        valueTextField.setText(customAttribute.getValue());
+
     }
 
     /**
-     * Saves provided pointers (FLAGS) showing desired change / delete action.
+     * Saves provided lists of change / delete attributes.
+     * Populates input fields with current values.
      */
-    public void initData(CustomAttribute customAttribute, Boolean modify, Boolean delete) {
-        if (customAttribute != null && modify != null && delete != null) {
+    public void initData(CustomAttribute customAttribute, ArrayList<CustomAttribute> attributesToAdd,
+                         ArrayList<CustomAttribute> attributesToDelete) {
+        if (customAttribute != null && attributesToAdd != null && attributesToDelete != null) {
             this.customAttribute = customAttribute;
-            this.modify = modify;
-            this.delete =  delete;
+            this.attributesToAdd = attributesToAdd;
+            this.attributesToDelete =  attributesToDelete;
+            nameTextField.setText(customAttribute.getName());
+            valueTextField.setText(customAttribute.getValue());
         } else {
             // error - invalid init data received
             DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Dáta sa nepodarilo načítať.");

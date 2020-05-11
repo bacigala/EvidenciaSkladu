@@ -21,6 +21,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+/**
+ * Dialog for Item modification.
+ */
+
 public class FXMLItemModifyDialogController implements Initializable {
 
     @FXML private javafx.scene.control.TextField nameTextField;
@@ -32,6 +36,8 @@ public class FXMLItemModifyDialogController implements Initializable {
     @FXML private javafx.scene.control.TableView<CustomAttribute> tableCustomAttributes;
     
     private Item item;
+    private ArrayList<CustomAttribute> attributesToAdd = new ArrayList<>();
+    private ArrayList<CustomAttribute> attributesToDelete = new ArrayList<>();
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -71,7 +77,8 @@ public class FXMLItemModifyDialogController implements Initializable {
     // button "Ulozit"
     @FXML
     private void saveButton() throws IOException {
-        // todo implement the save button
+        // todo: optimalizacia zmien v DB
+        // todo: implement the save button
 //        QueryHandler qh = QueryHandler.getInstance();
 //        DialogFactory df = DialogFactory.getInstance();
 //        try {
@@ -85,12 +92,38 @@ public class FXMLItemModifyDialogController implements Initializable {
 //            df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");
 //        }
     }
-    
-    // button "Zrušiť"
+
+    /**
+     * Cancels sll planed changes.
+     */
     @FXML
     private void cancelButton() {
         Stage stage = (Stage) nameTextField.getScene().getWindow();
         stage.close();
+    }
+
+    /**
+     * CustomAttributeChange dialog popup on attribute clicked.
+     * @throws IOException
+     */
+    @FXML
+    private void showCustomAttibuteChangeDialog() throws IOException {
+        // todo: disable input
+        CustomAttribute selected = tableCustomAttributes.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            CustomAttribute newAttribute = selected.copy();
+
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLCustomAttributeModifyDialog.fxml"));
+            Parent root1 = (Parent) fxmlLoader.load();
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root1));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            FXMLCustomAttributeModifyDialogController controller = fxmlLoader.getController();
+            controller.initData(selected, attributesToAdd, attributesToDelete);
+            stage.showAndWait();
+        }
+        // todo: Vyhodnotenie zmien, aktualizacia aktualnych detailov v zobrazeni
+        // todo: Enable input
     }
     
 }

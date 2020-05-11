@@ -19,4 +19,14 @@ public class CustomAttribute {
     public String getValue() {
         return value;
     }
+
+    public CustomAttribute copy() { return new CustomAttribute(name, value); }
+
+    @Override
+    public String toString() {
+        return "CustomAttribute{" +
+                "name='" + name + '\'' +
+                ", value='" + value + '\'' +
+                '}';
+    }
 }

@@ -61,12 +61,13 @@
                   <VBox alignment="TOP_CENTER" layoutX="90.0" layoutY="91.0" prefHeight="293.0" prefWidth="276.0" spacing="10.0" AnchorPane.bottomAnchor="70.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
                      <children>
                         <Label text="Rozširujúce údaje" />
-                        <TableView fx:id="tableCustomAttributes" prefHeight="155.0" prefWidth="276.0" VBox.vgrow="ALWAYS" />
+                        <TableView fx:id="tableCustomAttributes" onMouseClicked="#showCustomAttibuteChangeDialog" prefHeight="155.0" prefWidth="276.0" VBox.vgrow="ALWAYS" />
                      </children></VBox>
                   <HBox alignment="CENTER" layoutX="4.0" layoutY="337.0" prefHeight="51.0" prefWidth="187.0" spacing="30.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="337.0">
                      <children>
-                        <Button mnemonicParsing="false" onAction="#cancelButton" text="Zrušiť" />
-                        <Button mnemonicParsing="false" onAction="#saveButton" text="Uložiť" />
+                        <Button mnemonicParsing="false" text="Pridať údaj" />
+                        <Button cancelButton="true" mnemonicParsing="false" onAction="#cancelButton" text="Zrušiť" textFill="#f50606" />
+                        <Button defaultButton="true" mnemonicParsing="false" onAction="#saveButton" text="Uložiť" textFill="#119737" />
                      </children>
                   </HBox>
                </children>
