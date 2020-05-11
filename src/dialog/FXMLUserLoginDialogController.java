@@ -71,10 +71,12 @@ public class FXMLUserLoginDialogController implements Initializable {
                 disableInput();
                 usernameTextField.setText(qh.getLoggedUserUsername());
                 loginButton.setText("Odhlásiť");
+                loginButton.requestFocus();
             } else {
                 // nobody logged in - offer login
                 loginButton.setText("Prihlásiť sa");
                 enableInput();
+                usernameTextField.requestFocus();
             }                        
         } else {
             // error - no server connection

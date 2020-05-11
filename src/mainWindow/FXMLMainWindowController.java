@@ -69,6 +69,15 @@ public class FXMLMainWindowController implements Initializable {
         mainTable.getColumns().addAll(catColumn, idColumn, nameColumn,
                 barcodeColumn, curAmountColumn, unitColumn);
 
+        // aside item details table
+        TableColumn attributeName = new TableColumn("Atribút");
+        attributeName.setCellValueFactory(new PropertyValueFactory<>("attributeName"));
+
+        TableColumn attributeValue = new TableColumn("Hodnota");
+        attributeValue.setCellValueFactory(new PropertyValueFactory<>("attributeValue"));
+
+        selectedItemPropertiesTable.getColumns().addAll(attributeName, attributeValue);
+
         // test default connection settings, require login information
         QueryHandler queryHandler = QueryHandler.getInstance();
         if (queryHandler.setBasicUserConnectionDetails()) {
@@ -111,8 +120,10 @@ public class FXMLMainWindowController implements Initializable {
             //enable buttons for item manipulation
             itemSupplyButton.setDisable(false);
             itemWithdrawalButton.setDisable(false);
-            itemDetailsChangeButton.setDisable(false);
-            itemMoveHistoryButton.setDisable(false);
+            if (QueryHandler.getInstance().hasAdmin()) {
+                itemDetailsChangeButton.setDisable(false);
+                itemMoveHistoryButton.setDisable(false);
+            }
         }
     }
 
@@ -157,6 +168,25 @@ public class FXMLMainWindowController implements Initializable {
         if (selectedItem != null) {
             // todo zobraz historiu polozky
             System.out.println("Pohyby polozky...");
+        }
+    }
+
+    /**
+     * BUTTON "Uprava" (item modify)
+     */
+    @FXML
+    private void itemModify() throws IOException {
+        Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLItemModifyDialog.fxml"));
+            Parent root1 = (Parent) fxmlLoader.load();
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root1));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            FXMLItemModifyDialogController controller = fxmlLoader.<FXMLItemModifyDialogController>getController();
+            controller.initData(selectedItem);
+            stage.showAndWait();
+            reloadMainTable();
         }
     }
          
@@ -208,6 +238,8 @@ public class FXMLMainWindowController implements Initializable {
         databaseRefreshButton.setDisable(false);
         if (QueryHandler.getInstance().hasAdmin()) {
             adminMenu.setDisable(false);
+        } else {
+            adminMenu.setDisable(true);
         }
     }
 

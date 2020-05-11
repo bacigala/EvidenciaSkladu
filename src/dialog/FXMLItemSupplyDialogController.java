@@ -52,11 +52,16 @@ public class FXMLItemSupplyDialogController implements Initializable {
     @FXML
     private void supplyButton() throws IOException {
         QueryHandler qh = QueryHandler.getInstance();
-        if (qh.itemSupply(item.getId(), Integer.parseInt(newAmountTextField.getText()), newExpirationDatePicker.getValue())) {
-            DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Vklad položky prebehol úspešne.");
-            cancelButton();
-        } else {
-            newAmountLabel.setText("FAIL MY DEAR");
+        DialogFactory df = DialogFactory.getInstance();
+        try {
+            if (qh.itemSupply(item.getId(), Integer.parseInt(newAmountTextField.getText()), newExpirationDatePicker.getValue())) {
+                DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Vklad položky prebehol úspešne.");
+                cancelButton();
+            } else {
+                df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");
+            }
+        } catch (Exception e) {
+            df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");
         }
     }
     

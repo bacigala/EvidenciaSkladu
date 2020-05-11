@@ -24,7 +24,7 @@ public class QueryHandler {
     private int loggedUserId = 0;
 
     // connection details
-    private String databaseIp = "192.168.1.15";
+    private String databaseIp = "192.168.0.10";
     private String databasePort = "3306";
     private String databaseName = "zubardb";
     private String databaseUsername;
@@ -200,7 +200,7 @@ public class QueryHandler {
 
     // returns true if verified admin is logged in
     public boolean hasAdmin() {
-        return loggedUserAdmin;
+        return hasUser() && loggedUserAdmin;
     }
 
     // reloads list of Items from database

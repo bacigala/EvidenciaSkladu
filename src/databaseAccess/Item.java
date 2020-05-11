@@ -6,14 +6,14 @@ package databaseAccess;
  */
 
 public class Item {
-    private int id;
-    private String name;
-    private String barcode;
-    private int minAmount;
-    private int curAmount;
-    private String unit;
-    private String note;
-    private int category;
+    private final int id;
+    private final String name;
+    private final String barcode;
+    private final int minAmount;
+    private final int curAmount;
+    private final String unit;
+    private final String note;
+    private final int category;
 
     public Item(int id, String name, String barcode, int minAmount,
             int curAmount, String unit, String note, int category) {

@@ -8,12 +8,12 @@ import java.awt.Color;
  */
 
 public class Category {
-    private int id;
-    private int subCatOf;
-    private String name;
-    private Color colorJava;
-    private String color;
-    private String note;
+    private final int id;
+    private final int subCatOf;
+    private final String name;
+    private final Color colorJava;
+    private final String color;
+    private final String note;
     
     public Category(int id, int subCatOf, String name, String color, String note) {
         this.id = id;
@@ -48,4 +48,5 @@ public class Category {
         return note;
     }
 
+    public String toString() {return getName(); }
 }

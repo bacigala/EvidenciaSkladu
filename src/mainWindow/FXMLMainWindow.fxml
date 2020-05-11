@@ -56,8 +56,11 @@
                      <children>
                         <HBox alignment="TOP_CENTER" prefWidth="200.0" spacing="10.0" AnchorPane.topAnchor="45.0">
                            <children>
-                              <Button fx:id="itemSupplyButton" mnemonicParsing="false" onAction="#itemSupply" text="Vklad" />
-                              <Button fx:id="itemWithdrawalButton" mnemonicParsing="false" onAction="#itemRequest" text="Výber" />
+                              <Button fx:id="itemSupplyButton" mnemonicParsing="false" onAction="#itemSupply" text="Vklad" textFill="#15a138" />
+                              <Button fx:id="itemWithdrawalButton" mnemonicParsing="false" onAction="#itemRequest" text="Výber" textFill="#ee0808">
+                                 <HBox.margin>
+                                    <Insets />
+                                 </HBox.margin></Button>
                            </children>
                            <padding>
                               <Insets top="10.0" />
@@ -66,7 +69,7 @@
                         <HBox alignment="TOP_CENTER" layoutX="10.0" layoutY="10.0" prefWidth="200.0" spacing="10.0">
                            <children>
                               <Button fx:id="itemMoveHistoryButton" mnemonicParsing="false" onAction="#itemTransactions" text="Pohyby" />
-                              <Button fx:id="itemDetailsChangeButton" layoutX="149.0" layoutY="20.0" mnemonicParsing="false" text="Úprava" />
+                              <Button fx:id="itemDetailsChangeButton" layoutX="149.0" layoutY="20.0" mnemonicParsing="false" onAction="#itemModify" text="Úprava" />
                            </children>
                            <padding>
                               <Insets top="10.0" />

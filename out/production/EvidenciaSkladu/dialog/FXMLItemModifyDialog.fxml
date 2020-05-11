@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dialog.FXMLItemModifyDialogController">
+   <children>
+      <SplitPane dividerPositions="0.4" layoutX="6.0" prefHeight="400.0" prefWidth="544.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <items>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="398.0" prefWidth="168.0">
+               <children>
+                    <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+                       <children>
+                          <Label alignment="TOP_CENTER" contentDisplay="TOP" text="Základné údaje" textAlignment="CENTER" />
+                          <VBox prefHeight="200.0" prefWidth="100.0">
+                             <children>
+                                <Label text="Názov" />
+                                <TextField fx:id="nameTextField" disable="true" editable="false" />
+                             </children>
+                          </VBox>
+                          <VBox layoutX="10.0" layoutY="10.0" prefHeight="200.0" prefWidth="100.0">
+                             <children>
+                                <Label text="Kód" />
+                                <TextField fx:id="codeTextField" disable="true" editable="false" />
+                             </children>
+                          </VBox>
+                          <VBox layoutX="10.0" layoutY="10.0" prefHeight="200.0" prefWidth="100.0">
+                             <children>
+                                <Label text="Aktuálny počet" />
+                                <TextField fx:id="curAmountTextField" disable="true" editable="false" />
+                             </children>
+                          </VBox>
+                          <VBox layoutX="10.0" layoutY="144.0" prefHeight="200.0" prefWidth="100.0">
+                             <children>
+                                <Label text="Minimálny počet" />
+                                <TextField fx:id="minAmountTextField" disable="true" editable="false" />
+                             </children>
+                          </VBox>
+                          <VBox layoutX="10.0" layoutY="160.0" prefHeight="200.0" prefWidth="100.0">
+                             <children>
+                                <Label text="Jednotka" />
+                                <TextField fx:id="unitTextField" disable="true" editable="false" />
+                             </children>
+                          </VBox>
+                          <VBox layoutX="10.0" layoutY="178.0" prefHeight="200.0" prefWidth="100.0">
+                             <children>
+                                <Label text="Kategória" />
+                                <ChoiceBox fx:id="categoryChoiceBox" disable="true" prefHeight="25.0" prefWidth="243.0">
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin></ChoiceBox>
+                             </children>
+                          </VBox>
+                       </children>
+                    </VBox>
+               </children>
+            </AnchorPane>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="398.0" prefWidth="350.0">
+               <children>
+                  <VBox alignment="TOP_CENTER" layoutX="90.0" layoutY="91.0" prefHeight="129.0" prefWidth="187.0" spacing="10.0" AnchorPane.bottomAnchor="259.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+                     <children>
+                        <Label text="Rozširujúce údaje" />
+                        <TableView fx:id="itemCustomAttributes" prefHeight="200.0" prefWidth="200.0">
+                          <columns>
+                            <TableColumn minWidth="0.0" prefWidth="135.0" text="Atribút" />
+                            <TableColumn prefWidth="135.0" text="Hodnota" />
+                          </columns>
+                        </TableView>
+                     </children></VBox>
+                  <HBox alignment="CENTER" layoutX="4.0" layoutY="337.0" prefHeight="51.0" prefWidth="187.0" spacing="30.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="337.0">
+                     <children>
+                        <Button mnemonicParsing="false" onAction="#cancelButton" text="Zrušiť" />
+                        <Button mnemonicParsing="false" onAction="#supplyButton" text="Vložiť" />
+                     </children>
+                  </HBox>
+               </children>
+            </AnchorPane>
+        </items>
+      </SplitPane>
+   </children>
+</AnchorPane>
