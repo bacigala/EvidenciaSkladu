@@ -93,17 +93,17 @@ public class FXMLItemModifyDialogController implements Initializable {
         }
         if (!codeTextField.getText().equals(item.getBarcode())) {
             // code was changed
-            newBasicValues.put("code", codeTextField.getText());
+            newBasicValues.put("barcode", codeTextField.getText());
         }
         if (!minAmountTextField.getText().equals(item.getMinAmount())) {
             // min-amount was changed
-            newBasicValues.put("minAmount", minAmountTextField.getText());
+            newBasicValues.put("min_amount", minAmountTextField.getText());
         }
         if (!unitTextField.getText().equals(item.getUnit())) {
             // unit was changed
             newBasicValues.put("unit", unitTextField.getText());
         }
-        if (categoryChoiceBox.getValue().getName().equals(item.getCategoryName())) {
+        if (!categoryChoiceBox.getValue().getName().equals(item.getCategoryName())) {
             // category was changed
             newBasicValues.put("category", Integer.toString(categoryChoiceBox.getValue().getId()));
         }
@@ -111,8 +111,8 @@ public class FXMLItemModifyDialogController implements Initializable {
         QueryHandler qh = QueryHandler.getInstance();
         DialogFactory df = DialogFactory.getInstance();
         try {
-            if (qh.itemUpdate(item.getId(), newBasicValues, attributesToAdd, attributesToDelete)) {
-                DialogFactory.getInstance().showAlert(Alert.AlertType.CONFIRMATION, "Úprava položky prebehla úspešne.");
+            if (qh.itemUpdate(item, newBasicValues, attributesToAdd, attributesToDelete)) {
+                DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Úprava položky prebehla úspešne.");
                 cancelButton();
             } else {
                 df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");

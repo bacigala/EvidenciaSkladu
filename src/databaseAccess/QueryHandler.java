@@ -415,5 +415,103 @@ public class QueryHandler {
         }
        return customAttributes;
     }
+
+    /**
+     * Updates item details and inserts / deletes custom attributes.
+     * @param originalItem               original item.
+     * @param newBasicValues     new compulsory values for the item
+     * @param attributesToAdd    new custom attributes (to be inserted)
+     * @param attributesToDelete custom attributes to be deleted
+     *
+     * @return true on success.
+     */
+    public boolean itemUpdate(Item originalItem, HashMap<String, String> newBasicValues,
+                              HashSet<CustomAttribute> attributesToAdd, HashSet<CustomAttribute> attributesToDelete) {
+        if (!hasConnectionDetails() || !hasUser()) return false;
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet result = null;
+        Savepoint savepoint1 = null;
+
+        try {
+            conn = getConnection();
+            assert conn != null;
+            conn.setAutoCommit(false);
+            savepoint1 = conn.setSavepoint("Savepoint1");
+
+            // update basic info about the item
+            statement = conn.prepareStatement(
+                    "UPDATE item SET name = ?, barcode = ?, min_amount = ?, unit = ?, category = ? WHERE id = ?");
+            if (newBasicValues.containsKey("name")) {
+                statement.setString(1, newBasicValues.get("name"));
+            } else {
+                statement.setString(1, originalItem.getName());
+            }
+            if (newBasicValues.containsKey("barcode")) {
+                statement.setString(2, newBasicValues.get("barcode"));
+            } else {
+                statement.setString(2, originalItem.getBarcode());
+            }
+            if (newBasicValues.containsKey("min_amount")) {
+                statement.setInt(3, Integer.parseInt(newBasicValues.get("min_amount")));
+            } else {
+                statement.setInt(3, originalItem.getMinAmount());
+            }
+            if (newBasicValues.containsKey("unit")) {
+                statement.setString(4, newBasicValues.get("unit"));
+            } else {
+                statement.setString(4, originalItem.getUnit());
+            }
+            if (newBasicValues.containsKey("category")) {
+                statement.setInt(5, Integer.parseInt(newBasicValues.get("category")));
+            } else {
+                statement.setInt(5, originalItem.getCategory());
+            }
+            statement.setInt(6, originalItem.getId());
+
+            if (statement.executeUpdate() != 1) throw new SQLException();
+
+            // create custom attributes records
+            for (CustomAttribute newAttribute : attributesToAdd) {
+                statement = conn.prepareStatement(
+                        "INSERT INTO attribute SET item_id = ?, name = ?, content = ?");
+                statement.setInt(1, originalItem.getId());
+                statement.setString(2, newAttribute.getName());
+                statement.setString(3, newAttribute.getValue());
+                if (statement.executeUpdate() != 1) throw new SQLException();
+            }
+
+            // remove custom attributes records
+            for (CustomAttribute newAttribute : attributesToDelete) {
+                statement = conn.prepareStatement(
+                        "DELETE FROM attribute WHERE item_id = ? AND name = ? AND content = ?");
+                statement.setInt(1, originalItem.getId());
+                statement.setString(2, newAttribute.getName());
+                statement.setString(3, newAttribute.getValue());
+                if (statement.executeUpdate() != 1) throw new SQLException();
+            }
+
+            conn.commit();
+
+        } catch (Throwable e) {
+            e.printStackTrace();
+            try {
+                assert conn != null;
+                conn.rollback(savepoint1);
+            } catch (SQLException ex) {
+                Logger.getLogger(QueryHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return false;
+        } finally {
+            try {
+                if (result != null) result.close();
+                if (statement != null) statement.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
+    }
     
 }
