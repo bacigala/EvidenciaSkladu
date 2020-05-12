@@ -42,9 +42,8 @@ public class FXMLCustomAttributeModifyDialogController implements Initializable 
         }
         if (!newName.equals("") && !newValue.equals("")) {
             // values changed -> update sets
-            this.attributesToDelete.add(originalAttribute);
             this.attributesToAdd.add(new CustomAttribute(newName, newValue));
-            close();
+            deleteButtonAction(new ActionEvent());
         } else {
             // error - wrong input
             df.showAlert(Alert.AlertType.ERROR, "Zadané údaje sú neplatné.");

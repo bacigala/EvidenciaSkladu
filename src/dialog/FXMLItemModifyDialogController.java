@@ -14,6 +14,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -82,18 +83,43 @@ public class FXMLItemModifyDialogController implements Initializable {
     private void saveButton() throws IOException {
         // todo: optimalizacia planovanych zmien v databaze
         // todo: implement the save button
-//        QueryHandler qh = QueryHandler.getInstance();
-//        DialogFactory df = DialogFactory.getInstance();
-//        try {
-//            if (qh.itemSupply(item.getId(), Integer.parseInt(newAmountTextField.getText()), newExpirationDatePicker.getValue())) {
-//                DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Vklad položky prebehol úspešne.");
-//                cancelButton();
-//            } else {
-//                df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");
-//            }
-//        } catch (Exception e) {
-//            df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");
-//        }
+
+        // contains all basic values (item) properties which need to be updated
+        HashMap<String, String> newBasicValues = new HashMap<>();
+
+        if (!nameTextField.getText().equals(item.getName())) {
+            // name was changed
+            newBasicValues.put("name", nameTextField.getText());
+        }
+        if (!codeTextField.getText().equals(item.getBarcode())) {
+            // code was changed
+            newBasicValues.put("code", codeTextField.getText());
+        }
+        if (!minAmountTextField.getText().equals(item.getMinAmount())) {
+            // min-amount was changed
+            newBasicValues.put("minAmount", minAmountTextField.getText());
+        }
+        if (!unitTextField.getText().equals(item.getUnit())) {
+            // unit was changed
+            newBasicValues.put("unit", unitTextField.getText());
+        }
+        if (categoryChoiceBox.getValue().getName().equals(item.getCategoryName())) {
+            // category was changed
+            newBasicValues.put("category", Integer.toString(categoryChoiceBox.getValue().getId()));
+        }
+
+        QueryHandler qh = QueryHandler.getInstance();
+        DialogFactory df = DialogFactory.getInstance();
+        try {
+            if (qh.itemUpdate(item.getId(), newBasicValues, attributesToAdd, attributesToDelete)) {
+                DialogFactory.getInstance().showAlert(Alert.AlertType.CONFIRMATION, "Úprava položky prebehla úspešne.");
+                cancelButton();
+            } else {
+                df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");
+            }
+        } catch (Exception e) {
+            df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");
+        }
     }
 
     /**
@@ -103,7 +129,7 @@ public class FXMLItemModifyDialogController implements Initializable {
     private void newCustomAttributeButton() throws IOException {
         mainAnchorPane.setDisable(true);
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLCustomAttributeCreateDialog.fxml"));
-        Parent root1 = (Parent) fxmlLoader.load();
+        Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));
         stage.initModality(Modality.APPLICATION_MODAL);
@@ -128,18 +154,14 @@ public class FXMLItemModifyDialogController implements Initializable {
 
     /**
      * CustomAttributeChange dialog popup on custom attribute clicked.
-     *
-     * @throws IOException
      */
     @FXML
     private void showCustomAttributeChangeDialog() throws IOException {
         mainAnchorPane.setDisable(true);
         CustomAttribute selected = tableCustomAttributes.getSelectionModel().getSelectedItem();
         if (selected != null) {
-            CustomAttribute newAttribute = selected.copy();
-
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLCustomAttributeModifyDialog.fxml"));
-            Parent root1 = (Parent) fxmlLoader.load();
+            Parent root1 = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root1));
             stage.initModality(Modality.APPLICATION_MODAL);
@@ -160,8 +182,16 @@ public class FXMLItemModifyDialogController implements Initializable {
     private void populateCustomAttributesTable() {
         // todo: add also elements from 2 special dedicated sets of to-delete and to-add
         tableCustomAttributes.getItems().clear();
-        if (originalAttributes !=null) {
-            for (CustomAttribute ca : originalAttributes) {
+        HashSet<CustomAttribute> newAttributes;
+        if (originalAttributes != null) {
+            newAttributes = (HashSet) originalAttributes.clone();
+        } else {
+            newAttributes = new HashSet<>();
+        }
+        newAttributes.removeAll(attributesToDelete);
+        newAttributes.addAll(attributesToAdd);
+        if (!newAttributes.isEmpty()) {
+            for (CustomAttribute ca : newAttributes) {
                 tableCustomAttributes.getItems().add(ca);
             }
         } else {
