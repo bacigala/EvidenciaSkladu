@@ -27,7 +27,7 @@ public class FXMLCustomAttributeModifyDialogController implements Initializable 
     private HashSet<CustomAttribute> attributesToAdd, attributesToDelete;
 
     /**
-     * BUTTON "Ulozit" Adds attribute to desired list.
+     * BUTTON "Ulozit" Assigns CustomAttribute to corresponding set.
      */
     @FXML
     private void saveButtonAction(ActionEvent e) {
@@ -53,7 +53,7 @@ public class FXMLCustomAttributeModifyDialogController implements Initializable 
     }
 
     /**
-     * BUTTON "Odstranit" Changes flags to signalize desired DELETION.
+     * BUTTON "Odstranit" Assigns CustomAttribute to corresponding set.
      */
     @FXML
     private void deleteButtonAction(ActionEvent e) {
@@ -72,7 +72,7 @@ public class FXMLCustomAttributeModifyDialogController implements Initializable 
     }
 
     /**
-     * Saves provided lists of change / delete attributes.
+     * Saves pointers to provided sets of change / delete attributes.
      * Populates input fields with current values.
      */
     public void initData(CustomAttribute customAttribute, HashSet<CustomAttribute> attributesToAdd,

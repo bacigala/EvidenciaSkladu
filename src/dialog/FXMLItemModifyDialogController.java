@@ -26,26 +26,19 @@ import javafx.stage.Stage;
 
 public class FXMLItemModifyDialogController implements Initializable {
 
-    @FXML
-    private javafx.scene.layout.AnchorPane mainAnchorPane;
-    @FXML
-    private javafx.scene.control.TextField nameTextField;
-    @FXML
-    private javafx.scene.control.TextField codeTextField;
-    @FXML
-    private javafx.scene.control.TextField curAmountTextField;
-    @FXML
-    private javafx.scene.control.TextField minAmountTextField;
-    @FXML
-    private javafx.scene.control.TextField unitTextField;
-    @FXML
-    private javafx.scene.control.ChoiceBox<Category> categoryChoiceBox;
-    @FXML
-    private javafx.scene.control.TableView<CustomAttribute> tableCustomAttributes;
+    @FXML private javafx.scene.layout.AnchorPane mainAnchorPane;
+    @FXML private javafx.scene.control.TextField nameTextField;
+    @FXML private javafx.scene.control.TextField codeTextField;
+    @FXML private javafx.scene.control.TextField curAmountTextField;
+    @FXML private javafx.scene.control.TextField minAmountTextField;
+    @FXML private javafx.scene.control.TextField unitTextField;
+    @FXML private javafx.scene.control.ChoiceBox<Category> categoryChoiceBox;
+    @FXML private javafx.scene.control.TableView<CustomAttribute> tableCustomAttributes;
 
     private Item item;
     private HashSet<CustomAttribute> attributesToAdd = new HashSet<>();
     private HashSet<CustomAttribute> attributesToDelete = new HashSet<>();
+    private HashSet<CustomAttribute> originalAttributes;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -77,12 +70,8 @@ public class FXMLItemModifyDialogController implements Initializable {
 
             tableCustomAttributes.getColumns().addAll(attributeName, attributeValue);
 
-            populateCustomAttributesTable(customAttributes);
-            if (customAttributes != null) {
-                for (CustomAttribute ca : customAttributes) {
-                    tableCustomAttributes.getItems().add(ca);
-                }
-            }
+            originalAttributes = customAttributes;
+            populateCustomAttributesTable();
         }
     }
 
@@ -111,8 +100,21 @@ public class FXMLItemModifyDialogController implements Initializable {
      * Button 'Pridat udaj' Creates dialog for new CustomAttribute input.
      */
     @FXML
-    private void newCustomAttributeButton() {
-        // todo: popup new ADD CUSTOM ATTRIBUTE WINDOW
+    private void newCustomAttributeButton() throws IOException {
+        mainAnchorPane.setDisable(true);
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLCustomAttributeCreateDialog.fxml"));
+        Parent root1 = (Parent) fxmlLoader.load();
+        Stage stage = new Stage();
+        stage.setScene(new Scene(root1));
+        stage.initModality(Modality.APPLICATION_MODAL);
+        FXMLCustomAttributeCreateDialogController controller = fxmlLoader.getController();
+        controller.initData(attributesToAdd);
+        stage.setTitle("Nový atribút");
+        stage.showAndWait();
+        System.out.println(attributesToAdd);
+        System.out.println(attributesToDelete);
+        populateCustomAttributesTable();
+        mainAnchorPane.setDisable(false);
     }
 
     /**
@@ -143,21 +145,23 @@ public class FXMLItemModifyDialogController implements Initializable {
             stage.initModality(Modality.APPLICATION_MODAL);
             FXMLCustomAttributeModifyDialogController controller = fxmlLoader.getController();
             controller.initData(selected, attributesToAdd, attributesToDelete);
+            stage.setTitle("Upraviť atribút");
             stage.showAndWait();
         }
         System.out.println(attributesToAdd);
         System.out.println(attributesToDelete);
-        // todo: Vyhodnotenie zmien, aktualizacia aktualnych detailov v zobrazeni
+        populateCustomAttributesTable();
         mainAnchorPane.setDisable(false);
     }
 
     /**
      * Populates table with provided CustomAttributes HashSet.
      */
-    private void populateCustomAttributesTable(HashSet<CustomAttribute> customAttributes) {
+    private void populateCustomAttributesTable() {
+        // todo: add also elements from 2 special dedicated sets of to-delete and to-add
         tableCustomAttributes.getItems().clear();
-        if (customAttributes !=null) {
-            for (CustomAttribute ca : customAttributes) {
+        if (originalAttributes !=null) {
+            for (CustomAttribute ca : originalAttributes) {
                 tableCustomAttributes.getItems().add(ca);
             }
         } else {
