@@ -38,6 +38,7 @@ public class FXMLCustomAttributeModifyDialogController implements Initializable 
         if (!nameOrValueChanged()) {
             // nothing changed -> close window
             close();
+            return;
         }
         if (!newName.equals("") && !newValue.equals("")) {
             // values changed -> update sets

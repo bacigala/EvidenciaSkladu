@@ -4,6 +4,7 @@ package mainWindow;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.ResourceBundle;
 
 import databaseAccess.CustomAttribute;
@@ -39,7 +40,7 @@ public class FXMLMainWindowController implements Initializable {
     @FXML private javafx.scene.control.Menu adminMenu;
 
     //stores currently selected item custom attributes
-    private ArrayList<CustomAttribute> selectedItemCustomAttributes = null;
+    private HashSet<CustomAttribute> selectedItemCustomAttributes = null;
 
     @FXML
     private void openLogInSettings() throws IOException {
@@ -128,7 +129,7 @@ public class FXMLMainWindowController implements Initializable {
         QueryHandler qh = QueryHandler.getInstance();
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
-            ArrayList<CustomAttribute> newCustomAttributes = qh.getItemCustomAttributes(selectedItem.getId());
+            HashSet<CustomAttribute> newCustomAttributes = qh.getItemCustomAttributes(selectedItem.getId());
             if (newCustomAttributes != null) {
                 for (CustomAttribute ca : newCustomAttributes) {
                     selectedItemPropertiesTable.getItems().add(ca);

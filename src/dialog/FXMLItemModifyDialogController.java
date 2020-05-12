@@ -14,7 +14,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
@@ -26,24 +26,37 @@ import javafx.stage.Stage;
 
 public class FXMLItemModifyDialogController implements Initializable {
 
-    @FXML private javafx.scene.control.TextField nameTextField;
-    @FXML private javafx.scene.control.TextField codeTextField;
-    @FXML private javafx.scene.control.TextField curAmountTextField;
-    @FXML private javafx.scene.control.TextField minAmountTextField;
-    @FXML private javafx.scene.control.TextField unitTextField;
-    @FXML private javafx.scene.control.ChoiceBox<Category> categoryChoiceBox;
-    @FXML private javafx.scene.control.TableView<CustomAttribute> tableCustomAttributes;
-    
+    @FXML
+    private javafx.scene.layout.AnchorPane mainAnchorPane;
+    @FXML
+    private javafx.scene.control.TextField nameTextField;
+    @FXML
+    private javafx.scene.control.TextField codeTextField;
+    @FXML
+    private javafx.scene.control.TextField curAmountTextField;
+    @FXML
+    private javafx.scene.control.TextField minAmountTextField;
+    @FXML
+    private javafx.scene.control.TextField unitTextField;
+    @FXML
+    private javafx.scene.control.ChoiceBox<Category> categoryChoiceBox;
+    @FXML
+    private javafx.scene.control.TableView<CustomAttribute> tableCustomAttributes;
+
     private Item item;
     private HashSet<CustomAttribute> attributesToAdd = new HashSet<>();
     private HashSet<CustomAttribute> attributesToDelete = new HashSet<>();
-    
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
 
-    }  
-    
-    public void initData(Item item, ArrayList<CustomAttribute> customAttributes) {
+    }
+
+    /**
+     * Receives initialization data after dialog is shown.
+     * Setups default values.
+     */
+    public void initData(Item item, HashSet<CustomAttribute> customAttributes) {
         if (item != null) {
             QueryHandler qh = QueryHandler.getInstance();
             this.item = item;
@@ -64,7 +77,7 @@ public class FXMLItemModifyDialogController implements Initializable {
 
             tableCustomAttributes.getColumns().addAll(attributeName, attributeValue);
 
-            // populate custom attributes table
+            populateCustomAttributesTable(customAttributes);
             if (customAttributes != null) {
                 for (CustomAttribute ca : customAttributes) {
                     tableCustomAttributes.getItems().add(ca);
@@ -72,11 +85,13 @@ public class FXMLItemModifyDialogController implements Initializable {
             }
         }
     }
-    
-    // button "Ulozit"
+
+    /**
+     * Button 'Ulozit' sends desired changes to QueryHandler.
+     */
     @FXML
     private void saveButton() throws IOException {
-        // todo: optimalizacia zmien v DB
+        // todo: optimalizacia planovanych zmien v databaze
         // todo: implement the save button
 //        QueryHandler qh = QueryHandler.getInstance();
 //        DialogFactory df = DialogFactory.getInstance();
@@ -93,7 +108,15 @@ public class FXMLItemModifyDialogController implements Initializable {
     }
 
     /**
-     * Cancels sll planed changes.
+     * Button 'Pridat udaj' Creates dialog for new CustomAttribute input.
+     */
+    @FXML
+    private void newCustomAttributeButton() {
+        // todo: popup new ADD CUSTOM ATTRIBUTE WINDOW
+    }
+
+    /**
+     * Button 'Zrusit' Cancels planed changes.
      */
     @FXML
     private void cancelButton() {
@@ -102,12 +125,13 @@ public class FXMLItemModifyDialogController implements Initializable {
     }
 
     /**
-     * CustomAttributeChange dialog popup on attribute clicked.
+     * CustomAttributeChange dialog popup on custom attribute clicked.
+     *
      * @throws IOException
      */
     @FXML
-    private void showCustomAttibuteChangeDialog() throws IOException {
-        // todo: disable input
+    private void showCustomAttributeChangeDialog() throws IOException {
+        mainAnchorPane.setDisable(true);
         CustomAttribute selected = tableCustomAttributes.getSelectionModel().getSelectedItem();
         if (selected != null) {
             CustomAttribute newAttribute = selected.copy();
@@ -124,7 +148,21 @@ public class FXMLItemModifyDialogController implements Initializable {
         System.out.println(attributesToAdd);
         System.out.println(attributesToDelete);
         // todo: Vyhodnotenie zmien, aktualizacia aktualnych detailov v zobrazeni
-        // todo: Enable input
+        mainAnchorPane.setDisable(false);
     }
-    
+
+    /**
+     * Populates table with provided CustomAttributes HashSet.
+     */
+    private void populateCustomAttributesTable(HashSet<CustomAttribute> customAttributes) {
+        tableCustomAttributes.getItems().clear();
+        if (customAttributes !=null) {
+            for (CustomAttribute ca : customAttributes) {
+                tableCustomAttributes.getItems().add(ca);
+            }
+        } else {
+            tableCustomAttributes.setPlaceholder(new Label("Bez ďalších atribútov."));
+        }
+    }
+
 }

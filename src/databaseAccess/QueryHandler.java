@@ -5,6 +5,7 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -378,7 +379,7 @@ public class QueryHandler {
      * @param itemId ID of the supplied item.
      * @return list of custom attributes.
      */
-    public ArrayList<CustomAttribute> getItemCustomAttributes(int itemId) {
+    public HashSet<CustomAttribute> getItemCustomAttributes(int itemId) {
         if (!hasConnectionDetails() || !hasUser()) return null;
 
         Connection conn = null;
@@ -386,7 +387,7 @@ public class QueryHandler {
         ResultSet result = null;
 
         // READ ATTRIBUTES FROM DB
-        ArrayList<CustomAttribute> customAttributes = new ArrayList<>();
+        HashSet<CustomAttribute> customAttributes = new HashSet<>();
         try {
             conn = getConnection();
             assert conn != null;
