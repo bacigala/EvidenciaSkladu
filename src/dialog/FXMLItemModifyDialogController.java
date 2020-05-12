@@ -81,9 +81,6 @@ public class FXMLItemModifyDialogController implements Initializable {
      */
     @FXML
     private void saveButton() throws IOException {
-        // todo: optimalizacia planovanych zmien v databaze
-        // todo: implement the save button
-
         // contains all basic values (item) properties which need to be updated
         HashMap<String, String> newBasicValues = new HashMap<>();
 
