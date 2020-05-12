@@ -29,4 +29,8 @@ public class CustomAttribute {
                 ", value='" + value + '\'' +
                 '}';
     }
+
+    public boolean equals(CustomAttribute other) {
+        return name.equals(other.getName()) && value.equals(other.getValue());
+    }
 }

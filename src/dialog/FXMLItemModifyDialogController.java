@@ -3,8 +3,7 @@ package dialog;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.ResourceBundle;
+import java.util.*;
 
 import databaseAccess.Category;
 import databaseAccess.CustomAttribute;
@@ -36,8 +35,8 @@ public class FXMLItemModifyDialogController implements Initializable {
     @FXML private javafx.scene.control.TableView<CustomAttribute> tableCustomAttributes;
     
     private Item item;
-    private ArrayList<CustomAttribute> attributesToAdd = new ArrayList<>();
-    private ArrayList<CustomAttribute> attributesToDelete = new ArrayList<>();
+    private HashSet<CustomAttribute> attributesToAdd = new HashSet<>();
+    private HashSet<CustomAttribute> attributesToDelete = new HashSet<>();
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -122,6 +121,8 @@ public class FXMLItemModifyDialogController implements Initializable {
             controller.initData(selected, attributesToAdd, attributesToDelete);
             stage.showAndWait();
         }
+        System.out.println(attributesToAdd);
+        System.out.println(attributesToDelete);
         // todo: Vyhodnotenie zmien, aktualizacia aktualnych detailov v zobrazeni
         // todo: Enable input
     }
