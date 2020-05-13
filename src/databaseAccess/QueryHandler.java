@@ -1,6 +1,7 @@
 
 package databaseAccess;
 
+import java.awt.image.AreaAveragingScaleFilter;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -512,6 +513,52 @@ public class QueryHandler {
             }
         }
         return true;
+    }
+
+    /**
+     * Retrieves transaction log for specified item in format of ArrayList<ItemMoveLogRecord>.
+     * @param itemId ID of the requested Item log.
+     * @return list of log records.
+     */
+    public ArrayList<ItemMoveLogRecord> getItemTransactions(int itemId) {
+        if (!hasConnectionDetails() || !hasUser()) return null;
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet result = null;
+
+        // READ LOG FROM DB
+        ArrayList<ItemMoveLogRecord> logRecords = new ArrayList<>();
+        try {
+            conn = getConnection();
+            assert conn != null;
+            statement = conn.prepareStatement(
+                    "SELECT account.name, account.surname, move_item.amount, move.time " +
+                            "FROM (move_item JOIN move ON (move_item.move_id = move.id)) " +
+                            "JOIN account ON (move.account_id = account.id) WHERE move_item.item_id = ? " +
+                            "ORDER BY move.time DESC");
+            statement.setInt(1, itemId);
+            result = statement.executeQuery();
+            while (result.next()) {
+                ItemMoveLogRecord logRecord =  new ItemMoveLogRecord(
+                        result.getDate("time").toString(),
+                        ((Integer)result.getInt("amount")).toString(),
+                        result.getString("name") + " " + result.getString("surname")
+                );
+                logRecords.add(logRecord);
+            }
+        } catch (SQLException e) {
+            return null;
+        } finally {
+            try {
+                if (result != null) result.close();
+                if (statement != null) statement.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                logRecords = null;
+            }
+        }
+        return logRecords;
     }
     
 }

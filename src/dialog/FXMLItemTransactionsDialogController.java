@@ -5,7 +5,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
+import databaseAccess.Item;
 import databaseAccess.ItemMoveLogRecord;
+import databaseAccess.QueryHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
@@ -28,8 +30,12 @@ public class FXMLItemTransactionsDialogController implements Initializable {
     /**
      * Populates TableView with provided list of transactions.
      */
-    public void initData(ArrayList<ItemMoveLogRecord> logRecords) {
-        if (logRecords != null) {
+    public void initData(Item item) {
+        if (item != null) {
+
+            ArrayList<ItemMoveLogRecord> logRecords = QueryHandler.getInstance().getItemTransactions(item.getId());
+
+
             TableColumn transDate = new TableColumn("Dátum");
             transDate.setCellValueFactory(new PropertyValueFactory<>("date"));
 
@@ -41,7 +47,7 @@ public class FXMLItemTransactionsDialogController implements Initializable {
 
             mainTable.getColumns().addAll(transDate, transAmount, transUsername);
 
-            if (!logRecords.isEmpty()) {
+            if (logRecords != null && !logRecords.isEmpty()) {
                 for (ItemMoveLogRecord itemLogRecord : logRecords) {
                     mainTable.getItems().add(itemLogRecord);
                 }

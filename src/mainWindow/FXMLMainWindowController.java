@@ -183,11 +183,18 @@ public class FXMLMainWindowController implements Initializable {
      * BUTTON "Pohyby" (item move history)
      */
     @FXML
-    private void itemTransactions() {
+    private void itemTransactions() throws IOException {
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
-            // todo zobraz historiu polozky
-            System.out.println("Pohyby polozky...");
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLItemTransactionsDialog.fxml"));
+            Parent root1 = fxmlLoader.load();
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root1));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            FXMLItemTransactionsDialogController controller = fxmlLoader.getController();
+            controller.initData(selectedItem);
+            stage.showAndWait();
+            reloadMainTable();
         }
     }
 
@@ -199,7 +206,7 @@ public class FXMLMainWindowController implements Initializable {
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLItemModifyDialog.fxml"));
-            Parent root1 = (Parent) fxmlLoader.load();
+            Parent root1 = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root1));
             stage.initModality(Modality.APPLICATION_MODAL);
