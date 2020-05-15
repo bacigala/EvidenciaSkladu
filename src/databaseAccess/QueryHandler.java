@@ -737,5 +737,54 @@ public class QueryHandler {
         }
         return true;
     }
+
+    /**
+     * Retrieves all expiry warnings according to set date horizont.
+     * @param scope days from now to be considered as soon expiry date.
+     * @return list of warnings.
+     */
+    public ArrayList<ExpiryDateWarningRecord> getExpiryDateWarnings() {
+        // todo: implement this method
+        return null;
+
+//        if (!hasConnectionDetails() || !hasUser()) return null;
+//
+//        Connection conn = null;
+//        PreparedStatement statement = null;
+//        ResultSet result = null;
+//
+//        // READ WARNINGS FROM DB
+//        ArrayList<ExpiryDateWarningRecord> records = new ArrayList<>();
+//        try {
+//            conn = getConnection();
+//            assert conn != null;
+//            statement = conn.prepareStatement(
+//                    "SELECT account.name, account.surname, move_item.amount, move.time " +
+//                            "FROM (move_item JOIN move ON (move_item.move_id = move.id)) " +
+//                            "JOIN account ON (move.account_id = account.id) WHERE move_item.item_id = ? " +
+//                            "ORDER BY move.time DESC");
+//            statement.setInt(1, itemId);
+//            result = statement.executeQuery();
+//            while (result.next()) {
+//                ExpiryDateWarningRecord logRecord =  new ExpiryDateWarningRecord(
+//                        result.getDate("time").toString(),
+//                        ((Integer)result.getInt("amount")).toString(),
+//                        result.getString("name") + " " + result.getString("surname")
+//                );
+//                records.add(logRecord);
+//            }
+//        } catch (SQLException e) {
+//            return null;
+//        } finally {
+//            try {
+//                if (result != null) result.close();
+//                if (statement != null) statement.close();
+//                if (conn != null) conn.close();
+//            } catch (SQLException e) {
+//                records = null;
+//            }
+//        }
+//        return records;
+    }
     
 }
