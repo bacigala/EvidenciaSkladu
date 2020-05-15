@@ -1,28 +1,26 @@
 
 package mainWindow;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.ResourceBundle;
-
 import databaseAccess.CustomAttribute;
 import databaseAccess.Item;
 import databaseAccess.QueryHandler;
+import dialog.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.scene.control.TableColumn;
-import dialog.*;
-import dialog.DialogFactory;
-import javafx.scene.control.Alert;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.ResourceBundle;
 
 /**
  * The main window of the application.
@@ -43,7 +41,7 @@ public class FXMLMainWindowController implements Initializable {
     private HashSet<CustomAttribute> selectedItemCustomAttributes = null;
 
     @FXML
-    private void openLogInSettings() throws IOException {
+    private void openLogInSettings() {
         if (DialogFactory.getInstance().showUserLoginDialog()) {
             userLoginState();
         } else {
@@ -92,11 +90,7 @@ public class FXMLMainWindowController implements Initializable {
         QueryHandler queryHandler = QueryHandler.getInstance();
         if (queryHandler.setBasicUserConnectionDetails()) {
             // successfully established database connection
-            try {
-                openLogInSettings();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            openLogInSettings();
         } else {
             String message = "Nepodarilo sa pripojiť na server s použitím prednastavných hodnôt, upravte ich prosím " +
                     "v nastaveniach.";
@@ -223,6 +217,22 @@ public class FXMLMainWindowController implements Initializable {
             reloadMainTable();
         }
     }
+
+    /**
+     * MENU ITEM "Kontrola" -> "Expiracia" Opens ExpiryCheckDialog.
+     */
+    @FXML
+    private void expiryDateCheckAction() {
+        // todo: implement this
+    }
+
+    /**
+     * MENU ITEM "Kontrola" -> "Nizky stav" Opens StockCheckDialog.
+     */
+    @FXML
+    private void StockCheckAction() {
+        // todo: implement this too :)
+    }
          
     // todo ensures that all columns are wide enough to show full content
     /*
@@ -270,11 +280,7 @@ public class FXMLMainWindowController implements Initializable {
      */
     private void userLoginState() {
         databaseRefreshButton.setDisable(false);
-        if (QueryHandler.getInstance().hasAdmin()) {
-            adminMenu.setDisable(false);
-        } else {
-            adminMenu.setDisable(true);
-        }
+        adminMenu.setDisable(!QueryHandler.getInstance().hasAdmin());
     }
 
     /**
