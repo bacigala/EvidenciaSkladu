@@ -171,11 +171,18 @@ public class FXMLMainWindowController implements Initializable {
      * BUTTON "Vyber" (item withdrawal)
      */
     @FXML
-    private void itemRequest() {
+    private void itemRequest() throws IOException {
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
-            // todo  dialog na vyber polozky
-            System.out.println("Vyber polozky...");
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLItemOfftakeDialog.fxml"));
+            Parent root1 = fxmlLoader.load();
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root1));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            FXMLItemOfftakeDialogController controller = fxmlLoader.getController();
+            controller.initData(selectedItem);
+            stage.showAndWait();
+            reloadMainTable();
         }
     }
 

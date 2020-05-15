@@ -1,9 +1,13 @@
 
 package databaseAccess;
 
+import javafx.collections.ObservableList;
+
 import java.awt.image.AreaAveragingScaleFilter;
+import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -559,6 +563,179 @@ public class QueryHandler {
             }
         }
         return logRecords;
+    }
+
+    /**
+     * Request all currently stored varieties of specified item.
+     * @param itemId ID of the requested item.
+     * @return true on success.
+     */
+    public boolean getItemOfftakeRecords(int itemId, ObservableList<ItemOfftakeRecord> records) {
+        if (!hasConnectionDetails() || !hasUser()) return false;
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet result = null;
+        Savepoint savepoint1 = null;
+        int moveId;
+
+        try {
+            conn = getConnection();
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            assert conn != null;
+            conn.setAutoCommit(false);
+            savepoint1 = conn.setSavepoint("Savepoint1");
+
+            // load current amount of items present
+            statement = conn.prepareStatement(
+                    "SELECT SUM(amount) AS sum, expiration FROM `move_item` WHERE item_id = ? GROUP BY expiration HAVING sum > 0");
+            statement.setInt(1, itemId);
+            result = statement.executeQuery();
+            while (result.next()) {
+                ItemOfftakeRecord record =  new ItemOfftakeRecord(
+                        result.getDate("expiration").toLocalDate(),
+                        result.getInt("sum")
+                );
+                records.add(record);
+            }
+            conn.commit();
+
+        } catch (Throwable e) {
+            e.printStackTrace();
+            try {
+                assert conn != null;
+                conn.rollback(savepoint1);
+            } catch (SQLException ex) {
+                Logger.getLogger(QueryHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return false;
+        } finally {
+            try {
+                if (result != null) result.close();
+                if (statement != null) statement.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Tries 'take off' stated Items.
+     * @param item         item to be taken.
+     * @param requestList  list of desired expiry dates.
+     *
+     * @return true on success.
+     */
+    public boolean itemOfftake (Item item, ObservableList<ItemOfftakeRecord> requestList) {
+        if (!hasConnectionDetails() || !hasUser()) return false;
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet result = null;
+        Savepoint savepoint1 = null;
+
+        try {
+            conn = getConnection();
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            assert conn != null;
+            conn.setAutoCommit(false);
+            savepoint1 = conn.setSavepoint("Savepoint1");
+
+            int noOfRequestedItems = 0;
+
+            // load current amount of items present
+            statement = conn.prepareStatement(
+                    "SELECT * FROM item WHERE id = ?");
+            statement.setInt(1, item.getId());
+            int curAmount;
+            result = statement.executeQuery();
+            if (result.next()) {
+                curAmount = result.getInt("cur_amount");
+            } else {
+                throw new SQLException();
+            }
+
+            // load content of DB once again
+            HashMap<LocalDate, Integer> currentRecords = new HashMap<>();
+            statement = conn.prepareStatement(
+                    "SELECT SUM(amount) AS sum, expiration FROM `move_item` WHERE item_id = ? GROUP BY expiration HAVING sum > 0");
+            statement.setInt(1, item.getId());
+            result = statement.executeQuery();
+            while (result.next()) {
+                ItemOfftakeRecord record =  new ItemOfftakeRecord(
+                        result.getDate("expiration").toLocalDate(),
+                        result.getInt("sum")
+                );
+                currentRecords.put(record.getExpiration(), record.getCurrentAmount());
+            }
+
+            // check whether all of requested takeoffs can be fulfilled
+            for (ItemOfftakeRecord request : requestList) {
+                if (!currentRecords.containsKey(request.getExpiration())
+                        || currentRecords.get(request.getExpiration()) < Integer.parseInt(request.getRequestedAmount())) {
+                    throw new IOException(); // todo: special FAIL exception
+                }
+                noOfRequestedItems += Integer.parseInt(request.getRequestedAmount());
+            }
+
+            // vsetko OK -> vytvorime zaznamy pre vyber
+
+
+            // decrement no. of items present
+            statement = conn.prepareStatement(
+                    "UPDATE item SET cur_amount = ? WHERE id = ?");
+            statement.setInt(1, curAmount - noOfRequestedItems);
+            statement.setInt(2, item.getId());
+            if (statement.executeUpdate() != 1) throw new SQLException();
+
+            // create move record
+            int moveId = 0;
+            statement = conn.prepareStatement(
+                    "INSERT INTO move SET account_id = ?, time = ?", Statement.RETURN_GENERATED_KEYS);
+            statement.setInt(1, getLoggedUserId());
+            statement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+            if (statement.executeUpdate() != 1) throw new SQLException();
+            ResultSet rs = statement.getGeneratedKeys();
+            if (rs != null && rs.next()) {
+                moveId = rs.getInt(1);
+            } else {
+                throw new SQLException();
+            }
+
+            // link supplied items to move
+            for (ItemOfftakeRecord request : requestList) {
+                if (Integer.parseInt(request.getRequestedAmount()) <= 0) continue;
+                statement = conn.prepareStatement(
+                        "INSERT INTO move_item SET move_id = ?, item_id = ?, amount = ?, expiration = ?");
+                statement.setInt(1, moveId);
+                statement.setInt(2, item.getId());
+                statement.setInt(3, -Integer.parseInt(request.getRequestedAmount()));
+                statement.setDate(4, java.sql.Date.valueOf(request.getExpiration()));
+                if (statement.executeUpdate() != 1) throw new SQLException();
+            }
+
+            conn.commit();
+
+        } catch (Throwable e) {
+            e.printStackTrace();
+            try {
+                assert conn != null;
+                conn.rollback(savepoint1);
+            } catch (SQLException ex) {
+                Logger.getLogger(QueryHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return false;
+        } finally {
+            try {
+                if (result != null) result.close();
+                if (statement != null) statement.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
     }
     
 }
