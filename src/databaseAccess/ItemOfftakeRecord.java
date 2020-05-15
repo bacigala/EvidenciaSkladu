@@ -1,7 +1,5 @@
 package databaseAccess;
 
-import javafx.scene.control.SplitMenuButton;
-
 import java.time.LocalDate;
 
 /**
@@ -9,7 +7,6 @@ import java.time.LocalDate;
  */
 
 public class ItemOfftakeRecord implements Comparable<ItemOfftakeRecord> {
-
     private final LocalDate expiration;
     private final Integer currentAmount;
     private int requestedAmount;
@@ -28,7 +25,5 @@ public class ItemOfftakeRecord implements Comparable<ItemOfftakeRecord> {
 
     public void setRequestedAmount(int requestedAmount) { this.requestedAmount = requestedAmount; }
 
-    public int compareTo(ItemOfftakeRecord other) {
-        return expiration.compareTo(other.getExpiration());
-    }
+    public int compareTo(ItemOfftakeRecord other) { return expiration.compareTo(other.getExpiration()); }
 }
