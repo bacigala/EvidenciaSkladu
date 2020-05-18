@@ -16,12 +16,18 @@
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Zobrazenie" />
-            <Menu fx:id="adminMenu" mnemonicParsing="false" text="Správa">
+            <Menu fx:id="adminMenu" mnemonicParsing="false" text="Správa databázy">
                <items>
                   <MenuItem mnemonicParsing="false" text="Položky" />
                   <MenuItem mnemonicParsing="false" text="Kategórie" />
-                  <MenuItem mnemonicParsing="false" text="Používatelia" />
+                  <MenuItem mnemonicParsing="false" onAction="#openAccountManagement" text="Používatelia" />
                </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Kontrola">
+              <items>
+                <MenuItem mnemonicParsing="false" onAction="#expiryDateCheckAction" text="Expirácia" />
+                  <MenuItem mnemonicParsing="false" onAction="#StockCheckAction" text="Nízky stav" />
+              </items>
             </Menu>
         </menus>
       </MenuBar>

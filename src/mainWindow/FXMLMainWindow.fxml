@@ -20,7 +20,7 @@
                <items>
                   <MenuItem mnemonicParsing="false" text="Položky" />
                   <MenuItem mnemonicParsing="false" text="Kategórie" />
-                  <MenuItem mnemonicParsing="false" text="Používatelia" />
+                  <MenuItem mnemonicParsing="false" onAction="#openAccountManagement" text="Používatelia" />
                </items>
             </Menu>
             <Menu mnemonicParsing="false" text="Kontrola">

@@ -740,7 +740,7 @@ public class QueryHandler {
 
     /**
      * Retrieves all expiry warnings according to set date horizont.
-     * @param scope days from now to be considered as soon expiry date.
+     * @param
      * @return list of warnings.
      */
     public ArrayList<ExpiryDateWarningRecord> getExpiryDateWarnings() {
@@ -785,6 +785,58 @@ public class QueryHandler {
 //            }
 //        }
 //        return records;
+    }
+
+    /**
+     * Return current records in DB table 'account'.
+     * @param accounts - list to be filled with retrieved records.
+     * @return true in success.
+     */
+    public boolean getAccounts(ObservableList<Account> accounts) {
+        if (!hasConnectionDetails() || !hasUser()) return false;
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet result = null;
+        Savepoint savepoint1 = null;
+
+        try {
+            conn = getConnection();
+            assert conn != null;
+            // load current records of accounts
+            statement = conn.prepareStatement(
+                    "SELECT id, name, surname, login, admin FROM `account` ORDER BY admin DESC, surname ASC");
+            result = statement.executeQuery();
+            while (result.next()) {
+                Account account =  new Account(
+                        result.getInt("id"),
+                        result.getString("name"),
+                        result.getString("surname"),
+                        result.getString("login"),
+                        "", // password in not retrieved from DB.
+                        result.getBoolean("admin")
+                );
+                accounts.add(account);
+            }
+
+        } catch (Throwable e) {
+            e.printStackTrace();
+            try {
+                assert conn != null;
+                conn.rollback(savepoint1);
+            } catch (SQLException ex) {
+                Logger.getLogger(QueryHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return false;
+        } finally {
+            try {
+                if (result != null) result.close();
+                if (statement != null) statement.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
     }
     
 }
