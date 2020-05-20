@@ -9,6 +9,7 @@ import databaseAccess.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Dialog;
 import javafx.stage.Stage;
 import supportStructures.EditableBoolean;
 
@@ -28,7 +29,6 @@ public class FXMLAccountModifyDialogController implements Initializable {
 
     private Account account = null;
     private EditableBoolean saveRequest = null;
-    private EditableBoolean deleteRequest = null;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -39,15 +39,12 @@ public class FXMLAccountModifyDialogController implements Initializable {
      * Receives initialization data - account to be edited.
      * Setups default values.
      */
-    public void initData(Account account, EditableBoolean saveRequest, EditableBoolean deleteRequest) {
-        if (account != null && saveRequest != null && deleteRequest != null) {
+    public void initData(Account account, EditableBoolean saveRequest) {
+        if (account != null && saveRequest != null) {
             // store received pointers
             this.account = account;
             this.saveRequest = saveRequest;
-            this.deleteRequest = deleteRequest;
-
             this.saveRequest.set(false);
-            this.deleteRequest.set(false);
 
             // fill default values
             nameTextField.setText(account.getName());
@@ -57,7 +54,6 @@ public class FXMLAccountModifyDialogController implements Initializable {
         } else {
             DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Nepodarilo sa načítať.");
             closeStage();
-            throw new NullPointerException();
         }
     }
 
@@ -66,25 +62,48 @@ public class FXMLAccountModifyDialogController implements Initializable {
      */
     @FXML
     private void saveButtonAction() {
-        if (!changesMade()) {
-            deleteRequest.set(false);
+        if (changesMade()) {
+            DialogFactory df = DialogFactory.getInstance();
+            if (nameTextField.getText().equals("")) {
+                df.showAlert(Alert.AlertType.WARNING, "Prosím, vyplňte meno.");
+                return;
+            }
+            if (surnameTextField.getText().equals("")) {
+                df.showAlert(Alert.AlertType.WARNING, "Prosím, vyplňte priezvisko.");
+                return;
+            }
+            if (loginTextField.getText().equals("")) {
+                df.showAlert(Alert.AlertType.WARNING, "Prosím, vyplňte prihlasovacie meno.");
+                return;
+            }
+            // check password fields
+            if (!psw1PasswordField.getText().equals(psw2PasswordField.getText())) {
+                df.showAlert(Alert.AlertType.WARNING, "Heslo a overenie hesla sa nezhodujú.");
+                return;
+            }
+
+            // no errors -> close and save
+            account.setName(nameTextField.getText());
+            account.setSurname(surnameTextField.getText());
+            account.setLogin(loginTextField.getText());
+            account.setPassword(psw1PasswordField.getText());
+            account.setAdmin(adminCheckBox.isSelected());
+
+            saveRequest.set(true);
+            closeStage();
+        } else {
+            // nenastali zmeny -> zatvor dialog
+            saveRequest.set(false);
             closeStage();
         }
-
-
-
-
     }
 
     /**
      * Button 'Odstranit' Verifies input and setups return values.
      */
     @FXML
-    private void deleteButtonAction() throws IOException {
-        if (changesMade()) {
-
-        }
-        deleteRequest.set(!changesMade());
+    private void cancelButtonAction() {
+        saveRequest.set(false);
         closeStage();
     }
 

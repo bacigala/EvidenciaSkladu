@@ -23,7 +23,7 @@
               <VBox layoutX="10.0" layoutY="10.0" prefHeight="200.0" prefWidth="100.0">
                  <children>
                     <Label text="Prihlasovacie meno" />
-                    <TextField fx:id="loginTextField" editable="false" />
+                    <TextField fx:id="loginTextField" />
                    </children>
               </VBox>
               <VBox layoutX="10.0" layoutY="144.0" prefHeight="200.0" prefWidth="100.0">
@@ -40,12 +40,12 @@
               </VBox>
               <VBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="178.0" prefHeight="200.0" prefWidth="100.0">
                  <children>
-                  <CheckBox mnemonicParsing="false" text="Administrátor" />
+                  <CheckBox fx:id="adminCheckBox" mnemonicParsing="false" text="Administrátor" />
                  </children>
               </VBox>
             <HBox alignment="CENTER" prefHeight="43.0" prefWidth="480.0" spacing="10.0">
                <children>
-                  <Button cancelButton="true" mnemonicParsing="false" onAction="#deleteButtonAction" text="Odstrániť" textFill="#f50606" />
+                  <Button cancelButton="true" mnemonicParsing="false" onAction="#cancelButtonAction" text="Zrušiť" textFill="#f50606" />
                   <Button defaultButton="true" mnemonicParsing="false" onAction="#saveButtonAction" text="Uložiť" textFill="#119737" />
                </children>
             </HBox>

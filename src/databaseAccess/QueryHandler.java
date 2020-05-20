@@ -134,7 +134,7 @@ public class QueryHandler {
         try {   
             conn = getConnection();
             assert conn != null;
-            statement = conn.prepareStatement("SELECT * FROM account WHERE login = ? AND password = ?");
+            statement = conn.prepareStatement("SELECT * FROM account WHERE login = ? AND password = sha2(?,256)");
             statement.setString(1, username);
             statement.setString(2, password);
             result = statement.executeQuery();
@@ -838,5 +838,151 @@ public class QueryHandler {
         }
         return true;
     }
-    
+
+    /**
+     * Tries to add a new user account.
+     * @param newAccount - account to be added.
+     * @return true in success.
+     */
+    public boolean createAccount(Account newAccount) {
+        if (!hasConnectionDetails() || !hasUser()) return false;
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet result = null;
+        Savepoint savepoint1 = null;
+
+        try {
+            conn = getConnection();
+            assert conn != null;
+            conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            savepoint1 = conn.setSavepoint("Savepoint1");
+
+            // verify whether username is not occupied
+            statement = conn.prepareStatement(
+                    "SELECT * FROM account WHERE login = ?");
+            statement.setString(1, newAccount.getLogin());
+            result = statement.executeQuery();
+            if (result.next()) {
+                // todo: login je obsadeny
+                System.out.println("login je obsadeny");
+                throw new SQLException();
+            }
+
+            // create new account
+            statement = conn.prepareStatement(
+                    "INSERT INTO account SET name = ?, surname = ?, login = ?, password = sha2(?,256), admin = ?");
+            statement.setString(1, newAccount.getName());
+            statement.setString(2, newAccount.getSurname());
+            statement.setString(3, newAccount.getLogin());
+            statement.setString(4, newAccount.getPassword());
+            statement.setBoolean(5, newAccount.isAdmin());
+
+            if (statement.executeUpdate() != 1) {
+                // todo: nepodarilo sa vytvorit konto
+                System.out.println("nepodarilo sa vytvorit nove konto");
+                throw new SQLException();
+            }
+
+            conn.commit();
+
+        } catch (Throwable e) {
+            e.printStackTrace();
+            try {
+                assert conn != null;
+                conn.rollback(savepoint1);
+            } catch (SQLException ex) {
+                Logger.getLogger(QueryHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return false;
+        } finally {
+            try {
+                if (result != null) result.close();
+                if (statement != null) statement.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Tries to modify a user account.
+     * @param targetAccount - account to be modified.
+     * @return true in success.
+     */
+    public boolean modifyAccount(Account targetAccount) {
+        if (!hasConnectionDetails() || !hasUser()) return false;
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet result = null;
+        Savepoint savepoint1 = null;
+
+        try {
+            conn = getConnection();
+            assert conn != null;
+            conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            savepoint1 = conn.setSavepoint("Savepoint1");
+
+            // verify whether account still exists is not occupied
+            statement = conn.prepareStatement(
+                    "SELECT * FROM account WHERE id = ?");
+            statement.setInt(1, targetAccount.getId());
+            result = statement.executeQuery();
+            if (!result.next()) {
+                // todo: error - konto neexistuje
+                System.out.println("konto neexistuje");
+                throw new SQLException();
+            }
+
+            // modify account
+            if (targetAccount.getPassword().equals("")) {
+                // no password -> do not modify password
+                statement = conn.prepareStatement(
+                        "UPDATE account SET name = ?, surname = ?, login = ?, admin = ? WHERE id = ?");
+                statement.setInt(5, targetAccount.getId());
+            } else {
+                statement = conn.prepareStatement(
+                        "UPDATE account SET name = ?, surname = ?, login = ?, admin = ?, password = sha2(?,256), WHERE id = ?");
+                statement.setString(5, targetAccount.getPassword());
+                statement.setInt(6, targetAccount.getId());
+            }
+            statement.setString(1, targetAccount.getName());
+            statement.setString(2, targetAccount.getSurname());
+            statement.setString(3, targetAccount.getLogin());
+            statement.setBoolean(4, targetAccount.isAdmin());
+
+
+            if (statement.executeUpdate() != 1) {
+                // todo: nepodarilo sa vytvorit konto
+                System.out.println("nepodarilo sa vytvorit nove konto");
+                throw new SQLException();
+            }
+
+            conn.commit();
+
+        } catch (Throwable e) {
+            e.printStackTrace();
+            try {
+                assert conn != null;
+                conn.rollback(savepoint1);
+            } catch (SQLException ex) {
+                Logger.getLogger(QueryHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return false;
+        } finally {
+            try {
+                if (result != null) result.close();
+                if (statement != null) statement.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
+    }
 }

@@ -1,25 +1,28 @@
 
 package dialog;
 
+import java.io.IOException;
 import java.net.URL;
-import java.time.LocalDate;
 import java.util.*;
 import databaseAccess.*;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.HBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
-import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.util.Callback;
+import supportStructures.EditableBoolean;
 
 /**
  * Dialog for account management.
@@ -47,68 +50,64 @@ public class FXMLAccountManagementDialogController implements Initializable {
         TableColumn isAdminTextColumn = new TableColumn<Account, String>("administrátor");
         isAdminTextColumn.setCellValueFactory(new PropertyValueFactory<>("isAdminText"));
 
-        TableColumn accountModifyButtonColumn = new TableColumn<>("úprava");
-
-        // todo: Insert Button
+        TableColumn accountModifyButtonColumn = new TableColumn<>("akcie");
         accountModifyButtonColumn.setSortable(false);
 
         accountModifyButtonColumn.setCellValueFactory(
-                new Callback<TableColumn.CellDataFeatures<Account, Boolean>,
-                        ObservableValue<Boolean>>() {
-
-                    @Override
-                    public ObservableValue<Boolean> call(TableColumn.CellDataFeatures<Account, Boolean> p) {
-                        return new SimpleBooleanProperty(p.getValue() != null);
-                    }
-                });
+                (Callback<TableColumn.CellDataFeatures<Account, Boolean>, ObservableValue<Boolean>>)
+                        p -> new SimpleBooleanProperty(p.getValue() != null));
 
         accountModifyButtonColumn.setCellFactory(
-                new Callback<TableColumn<Account, Boolean>, TableCell<Account, Boolean>>() {
-
-                    @Override
-                    public TableCell<Account, Boolean> call(TableColumn<Account, Boolean> p) {
-                        return new ButtonCell();
-                    }
-
-                });
+                (Callback<TableColumn<Account, Boolean>, TableCell<Account, Boolean>>) p -> new ButtonCell());
 
         mainTable.getColumns().addAll(fullNameColumn, loginColumn, isAdminTextColumn, accountModifyButtonColumn);
-        QueryHandler.getInstance().getAccounts(accountList);
         populateTable();
     }
 
-    // todo: Define the button cell
+    // cell in action column
     private class ButtonCell extends TableCell<Account, Boolean> {
-        final Button cellButton = new Button("Action");
+        final Button modifyButton = new Button("Upraviť");
+        final Button deleteButton = new Button("Odstrániť");
 
-        final Button cellButton2 = new Button("Action2");
+        ButtonCell() {
+            modifyButton.setOnAction(t -> {
+                // todo: modify button clicked -> open dialog for modification
+                Account targetAccount = getTableView().getItems().get(getIndex());
 
-        ButtonCell(){
+                EditableBoolean saveRequest = new EditableBoolean(false);
 
-
-
-            cellButton.setOnAction(new EventHandler<ActionEvent>(){
-
-                @Override
-                public void handle(ActionEvent t) {
-                    // do something when button clicked
-                    Account data = getTableView().getItems().get(getIndex());
-                    System.out.println("selected user: " + data.getFullName());
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLAccountModifyDialog.fxml"));
+                Parent root1 = null;
+                try {
+                    root1 = fxmlLoader.load();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    // todo: nepodarilo sa otvorit dialog ?
                 }
+                Stage stage = new Stage();
+                stage.setScene(new Scene(root1));
+                stage.initModality(Modality.APPLICATION_MODAL);
+                FXMLAccountModifyDialogController controller = fxmlLoader.getController();
+                controller.initData(targetAccount, saveRequest);
+                stage.setTitle("Upraviť konto");
+                stage.showAndWait();
+
+                if (saveRequest.get()) {
+                    QueryHandler.getInstance().modifyAccount(targetAccount);
+                }
+
+                populateTable();
             });
 
-            cellButton2.setOnAction(new EventHandler<ActionEvent>(){
-
-                @Override
-                public void handle(ActionEvent t) {
-                    // do something when button clicked
-                    Account data = getTableView().getItems().get(getIndex());
-                    System.out.println("selected user: @@@ " + data.getFullName());
-                }
+            deleteButton.setOnAction(t -> {
+                // todo: delete button clicked -> check and delete
+                Account targetAccount = getTableView().getItems().get(getIndex());
+                System.out.println("Account to be deleted: name = " + targetAccount.getFullName());
+                populateTable();
             });
         }
 
-        HBox pane = new HBox(cellButton, cellButton2);
+        HBox pane = new HBox(modifyButton, deleteButton);
 
         //Display button if the row is not empty
         @Override
@@ -137,22 +136,40 @@ public class FXMLAccountManagementDialogController implements Initializable {
      * Button 'Vytvorit konto' Opens dialog for new account creation.
      */
     @FXML
-    private void newAccountButtonAction() {
-        //todo: open dialog for new user creation...
-        System.out.println("Opening dialog for new user add action...");
+    private void newAccountButtonAction() throws IOException {
+        Account newAccount = new Account(0, "", "", "", "", false);
+        EditableBoolean saveRequest = new EditableBoolean(false);
+
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLAccountModifyDialog.fxml"));
+        Parent root1 = fxmlLoader.load();
+        Stage stage = new Stage();
+        stage.setScene(new Scene(root1));
+        stage.initModality(Modality.APPLICATION_MODAL);
+        FXMLAccountModifyDialogController controller = fxmlLoader.getController();
+        controller.initData(newAccount, saveRequest);
+        stage.setTitle("Nové konto");
+        stage.showAndWait();
+
+        if (saveRequest.get()) {
+            QueryHandler.getInstance().createAccount(newAccount);
+        }
+
+        populateTable();
     }
 
     /**
      * Populates table with provided UserAccounts.
      */
     private void populateTable() {
+        accountList.clear();
+        QueryHandler.getInstance().getAccounts(accountList);
         mainTable.getItems().clear();
         if (!accountList.isEmpty()) {
             for (Account account : accountList) {
                 mainTable.getItems().add(account);
             }
         } else {
-            mainTable.setPlaceholder(new Label("Žiadne pouŽívateľské kontá."));
+            mainTable.setPlaceholder(new Label("Žiadne používateľské kontá."));
         }
     }
 

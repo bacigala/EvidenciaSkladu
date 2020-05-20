@@ -49,4 +49,22 @@ public class Account {
     public String getIsAdminText() {
         return admin ? "áno" : "nie";
     }
+
+    public void setName(String name) { this.name = name; }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
+    }
 }
