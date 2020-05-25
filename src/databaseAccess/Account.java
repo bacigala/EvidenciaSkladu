@@ -67,4 +67,6 @@ public class Account {
     public void setAdmin(boolean admin) {
         this.admin = admin;
     }
+
+    public String toString() { return getFullName(); }
 }

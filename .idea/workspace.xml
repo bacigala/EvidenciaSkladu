@@ -6,8 +6,6 @@
       <change beforePath="$PROJECT_DIR$/src/databaseAccess/Account.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/databaseAccess/Account.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/databaseAccess/QueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/databaseAccess/QueryHandler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/dialog/FXMLAccountManagementDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/FXMLAccountManagementDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLAccountModifyDialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/FXMLAccountModifyDialog.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLAccountModifyDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/FXMLAccountModifyDialogController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -237,7 +235,8 @@
       <workItem from="1589359428113" duration="1874000" />
       <workItem from="1589383509923" duration="1991000" />
       <workItem from="1589804970932" duration="18488000" />
-      <workItem from="1589967411627" duration="5692000" />
+      <workItem from="1589967411627" duration="7230000" />
+      <workItem from="1590418210359" duration="14973000" />
     </task>
     <task id="LOCAL-00001" summary="&quot;completed 'customAttributeModifyDialog', now it modifies Sets to signalise desired changes&quot;">
       <created>1589276133406</created>
@@ -299,22 +298,22 @@
       <screen x="0" y="0" width="1600" height="870" />
     </state>
     <state x="506" y="175" key="FileChooserDialogImpl/0.0.1600.870@0.0.1600.870" timestamp="1589550238162" />
-    <state width="1540" height="247" key="GridCell.Tab.0.bottom" timestamp="1589972901196">
+    <state width="1556" height="252" key="GridCell.Tab.0.bottom" timestamp="1590437726513">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state width="1540" height="247" key="GridCell.Tab.0.bottom/0.0.1600.870@0.0.1600.870" timestamp="1589972901196" />
-    <state width="1540" height="247" key="GridCell.Tab.0.center" timestamp="1589972901196">
+    <state width="1556" height="252" key="GridCell.Tab.0.bottom/0.0.1600.870@0.0.1600.870" timestamp="1590437726513" />
+    <state width="1556" height="252" key="GridCell.Tab.0.center" timestamp="1590437726513">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state width="1540" height="247" key="GridCell.Tab.0.center/0.0.1600.870@0.0.1600.870" timestamp="1589972901196" />
-    <state width="1540" height="247" key="GridCell.Tab.0.left" timestamp="1589972901196">
+    <state width="1556" height="252" key="GridCell.Tab.0.center/0.0.1600.870@0.0.1600.870" timestamp="1590437726513" />
+    <state width="1556" height="252" key="GridCell.Tab.0.left" timestamp="1590437726513">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state width="1540" height="247" key="GridCell.Tab.0.left/0.0.1600.870@0.0.1600.870" timestamp="1589972901196" />
-    <state width="1540" height="247" key="GridCell.Tab.0.right" timestamp="1589972901196">
+    <state width="1556" height="252" key="GridCell.Tab.0.left/0.0.1600.870@0.0.1600.870" timestamp="1590437726513" />
+    <state width="1556" height="252" key="GridCell.Tab.0.right" timestamp="1590437726513">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state width="1540" height="247" key="GridCell.Tab.0.right/0.0.1600.870@0.0.1600.870" timestamp="1589972901196" />
+    <state width="1556" height="252" key="GridCell.Tab.0.right/0.0.1600.870@0.0.1600.870" timestamp="1590437726513" />
     <state width="1540" height="268" key="GridCell.Tab.1.bottom" timestamp="1589273637783">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
@@ -351,13 +350,13 @@
       <screen x="0" y="0" width="1600" height="870" />
     </state>
     <state x="504" y="327" key="com.intellij.jarRepository.RepositoryAttachDialog-DOWNLOAD/0.0.1600.870@0.0.1600.870" timestamp="1584106361920" />
-    <state x="456" y="192" key="run.anything.popup" timestamp="1589973096955">
+    <state x="456" y="192" key="run.anything.popup" timestamp="1590437453389">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state x="456" y="192" key="run.anything.popup/0.0.1600.870@0.0.1600.870" timestamp="1589973096955" />
-    <state x="463" y="186" width="672" height="678" key="search.everywhere.popup" timestamp="1589570391430">
+    <state x="456" y="192" key="run.anything.popup/0.0.1600.870@0.0.1600.870" timestamp="1590437453389" />
+    <state x="463" y="186" width="672" height="678" key="search.everywhere.popup" timestamp="1590425295076">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state x="463" y="186" width="672" height="678" key="search.everywhere.popup/0.0.1600.870@0.0.1600.870" timestamp="1589570391430" />
+    <state x="463" y="186" width="672" height="678" key="search.everywhere.popup/0.0.1600.870@0.0.1600.870" timestamp="1590425295076" />
   </component>
 </project>

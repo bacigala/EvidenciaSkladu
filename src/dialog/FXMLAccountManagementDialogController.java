@@ -7,7 +7,6 @@ import java.util.*;
 import databaseAccess.*;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -20,7 +19,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.util.Callback;
 import supportStructures.EditableBoolean;
 
@@ -102,7 +100,46 @@ public class FXMLAccountManagementDialogController implements Initializable {
             deleteButton.setOnAction(t -> {
                 // todo: delete button clicked -> check and delete
                 Account targetAccount = getTableView().getItems().get(getIndex());
-                System.out.println("Account to be deleted: name = " + targetAccount.getFullName());
+
+                DialogFactory df = DialogFactory.getInstance();
+                QueryHandler qh = QueryHandler.getInstance();
+
+                Account selectedAccount = null;
+
+                if (qh.hasTransactions(targetAccount.getId())) {
+                    // na pouzivatela su napisane nejake transakcie
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLSimpleChoiceDialog.fxml"));
+                    Parent root1 = null;
+                    try {
+                        root1 = fxmlLoader.load();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    Stage stage = new Stage();
+                    stage.setScene(new Scene(root1));
+                    stage.initModality(Modality.APPLICATION_MODAL);
+                    FXMLSimpleChoiceDialogController<Account> controller = fxmlLoader.getController();
+                    stage.setTitle("Prevod transakcii");
+
+                    ObservableList<Account> accounts = FXCollections.observableArrayList();
+                    QueryHandler.getInstance().getAccounts(accounts);
+
+                    controller.setChoiceList(accounts);
+                    controller.setLabelText("Vyberte konto pod ktoré budú prevedené transakcie odstráneného konta.");
+
+                    stage.showAndWait();
+
+                    selectedAccount = (Account) controller.getChoice();
+                    if (selectedAccount == null) return;
+                }
+
+                // pokusime sa odstranit vybrany ucet
+                if(qh.deleteAccount(targetAccount, selectedAccount)) {
+                    df.showAlert(Alert.AlertType.INFORMATION, "Konto bolo úspešne odstránené.");
+                } else {
+                    df.showAlert(Alert.AlertType.ERROR, "Konto sa nepodarilo odstrániť");
+                }
+
                 populateTable();
             });
         }

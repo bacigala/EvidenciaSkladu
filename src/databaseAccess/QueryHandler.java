@@ -985,4 +985,120 @@ public class QueryHandler {
         }
         return true;
     }
+
+    /**
+     * Verifies if transactions assigned to the accountId exist.
+     * @param accountId - account to be checked.
+     * @return true if there are transactions assigned to the accountId.
+     */
+    public boolean hasTransactions(int accountId) {
+        if (!hasConnectionDetails() || !hasUser()) return false;
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet result = null;
+
+        boolean answer = true;
+
+        try {
+            conn = getConnection();
+            assert conn != null;
+
+            // verify whether transactions with given userId exist
+            statement = conn.prepareStatement(
+                    "SELECT 1 FROM move WHERE account_id = ?");
+            statement.setInt(1, accountId);
+            result = statement.executeQuery();
+            if (!result.next()) {
+                // na pouzivatela nie su napisane transakcie
+                answer = false;
+            }
+
+        } catch (Throwable e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (result != null) result.close();
+                if (statement != null) statement.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return answer;
+    }
+
+    /**
+     * Tries to delete the user account.
+     * @param accountToDelete - account to be deleted.
+     * @param accountToTakeOver - account that takes all transactions from deleted one.
+     * @return true on success.
+     */
+    public boolean deleteAccount(Account accountToDelete, Account accountToTakeOver) {
+        if (!hasConnectionDetails() || !hasUser()) return false;
+        if (accountToDelete == null) return false;
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet result = null;
+        Savepoint savepoint1 = null;
+        boolean ans = false;
+
+        try {
+            conn = getConnection();
+            assert conn != null;
+            conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            savepoint1 = conn.setSavepoint("Savepoint1");
+
+            // verify whether transactions with given userId exist
+            statement = conn.prepareStatement(
+                    "SELECT 1 FROM move WHERE account_id = ?");
+            statement.setInt(1, accountToDelete.getId());
+            result = statement.executeQuery();
+            if (result.next()) {
+                // na pouzivatela su napisane transakcie
+                if (accountToTakeOver == null) throw new IllegalArgumentException();
+
+                // nahradime 'majitela transakcii'
+                statement = conn.prepareStatement(
+                        "UPDATE move SET account_id = ? WHERE account_id = ?");
+                statement.setInt(1, accountToTakeOver.getId());
+                statement.setInt(2, accountToDelete.getId());
+                if (statement.executeUpdate() < 1) {
+                    // todo error
+                    System.out.println("nepodarilo previest transakcie...");
+                    throw new SQLException();
+                }
+
+            }
+
+            // odstranime zaznam o pouzivatelovi
+            statement = conn.prepareStatement("DELETE FROM account WHERE id = ?");
+            statement.setInt(1, accountToDelete.getId());
+            if (statement.executeUpdate() != 1) throw new SQLException();
+
+            conn.commit();
+            ans = true;
+
+        } catch (Throwable e) {
+            e.printStackTrace();
+            try {
+                assert conn != null;
+                conn.rollback(savepoint1);
+            } catch (SQLException ex) {
+                Logger.getLogger(QueryHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return false;
+        } finally {
+            try {
+                if (result != null) result.close();
+                if (statement != null) statement.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return ans;
+    }
 }
