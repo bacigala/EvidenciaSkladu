@@ -236,6 +236,23 @@ public class FXMLMainWindowController implements Initializable {
     }
 
     /**
+     * MENU-ITEM "Sprava DB -> kategorie" (category management)
+     * Opens dialog for category management. (only for administrators)
+     */
+    @FXML
+    private void openCategoryManagement() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLCategoryManagementDialog.fxml"));
+        Parent root1 = fxmlLoader.load();
+        Stage stage = new Stage();
+        stage.setScene(new Scene(root1));
+        stage.initModality(Modality.APPLICATION_MODAL);
+        FXMLCategoryManagementDialogController controller = fxmlLoader.getController();
+        controller.initData();
+        stage.showAndWait();
+        reloadMainTable();
+    }
+
+    /**
      * MENU ITEM "Kontrola" -> "Expiracia" Opens ExpiryCheckDialog.
      */
     @FXML

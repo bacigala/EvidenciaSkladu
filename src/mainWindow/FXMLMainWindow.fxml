@@ -19,7 +19,7 @@
             <Menu fx:id="adminMenu" mnemonicParsing="false" text="Správa databázy">
                <items>
                   <MenuItem mnemonicParsing="false" text="Položky" />
-                  <MenuItem mnemonicParsing="false" text="Kategórie" />
+                  <MenuItem mnemonicParsing="false" onAction="#openCategoryManagement" text="Kategórie" />
                   <MenuItem mnemonicParsing="false" onAction="#openAccountManagement" text="Používatelia" />
                </items>
             </Menu>
