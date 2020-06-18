@@ -1101,4 +1101,69 @@ public class QueryHandler {
         }
         return ans;
     }
+
+    /**
+     * Tries to modify a category record.
+     * @param targetCategory - category to be modified.
+     */
+    public boolean modifyCategory(Category targetCategory) {
+        if (!hasConnectionDetails() || !hasUser()) return false;
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet result = null;
+        Savepoint savepoint1 = null;
+
+        try {
+            conn = getConnection();
+            assert conn != null;
+            conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            savepoint1 = conn.setSavepoint("Savepoint1");
+
+            // verify whether catogory still exists / is not occupied
+            statement = conn.prepareStatement(
+                    "SELECT * FROM category WHERE id=?");
+            statement.setInt(1, targetCategory.getId());
+            result = statement.executeQuery();
+            if (!result.next()) {
+                // todo: error - kategoria neexistuje
+                System.out.println("kategoria neexistuje");
+                throw new SQLException();
+            }
+
+            // modify the category
+            statement = conn.prepareStatement("UPDATE category SET name=?, note=? WHERE id=?");
+            statement.setString(1, targetCategory.getName());
+            statement.setString(2, targetCategory.getNote());
+            statement.setInt(3, targetCategory.getId());
+
+            if (statement.executeUpdate() != 1) {
+                // todo: nepodarilo sa vytvorit konto
+                System.out.println("nepodarilo sa modifikovat kategoriu");
+                throw new SQLException();
+            }
+
+            conn.commit();
+
+        } catch (Throwable e) {
+            e.printStackTrace();
+            try {
+                assert conn != null;
+                conn.rollback(savepoint1);
+            } catch (SQLException ex) {
+                Logger.getLogger(QueryHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return false;
+        } finally {
+            try {
+                if (result != null) result.close();
+                if (statement != null) statement.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
+    }
 }

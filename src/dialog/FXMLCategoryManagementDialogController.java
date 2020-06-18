@@ -62,30 +62,30 @@ public class FXMLCategoryManagementDialogController implements Initializable {
         ButtonCell() {
             modifyButton.setOnAction(t -> {
                 // todo: modify button clicked -> open dialog for modification
-//                Account targetAccount = getTableView().getItems().get(getIndex());
-//
-//                EditableBoolean saveRequest = new EditableBoolean(false);
-//
-//                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLAccountModifyDialog.fxml"));
-//                Parent root1 = null;
-//                try {
-//                    root1 = fxmlLoader.load();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//                Stage stage = new Stage();
-//                stage.setScene(new Scene(root1));
-//                stage.initModality(Modality.APPLICATION_MODAL);
-//                FXMLAccountModifyDialogController controller = fxmlLoader.getController();
-//                controller.initData(targetAccount, saveRequest);
-//                stage.setTitle("Upraviť konto");
-//                stage.showAndWait();
-//
-//                if (saveRequest.get()) {
-//                    QueryHandler.getInstance().modifyAccount(targetAccount);
-//                }
-//
-//                populateTable();
+                Category targetCategory = getTableView().getItems().get(getIndex());
+
+                EditableBoolean saveRequest = new EditableBoolean(false);
+
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLCategoryModifyDialog.fxml"));
+                Parent root1 = null;
+                try {
+                    root1 = fxmlLoader.load();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                Stage stage = new Stage();
+                stage.setScene(new Scene(root1));
+                stage.initModality(Modality.APPLICATION_MODAL);
+                FXMLCategoryModifyDialogController controller = fxmlLoader.getController();
+                controller.initData(targetCategory, saveRequest);
+                stage.setTitle("Upraviť kategóriu");
+                stage.showAndWait();
+
+                if (saveRequest.get()) {
+                    QueryHandler.getInstance().modifyCategory(targetCategory);
+                }
+
+                populateTable();
             });
 
             deleteButton.setOnAction(t -> {

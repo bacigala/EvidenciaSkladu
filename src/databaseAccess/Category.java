@@ -10,10 +10,10 @@ import java.awt.Color;
 public class Category {
     private final int id;
     private final int subCatOf;
-    private final String name;
+    private String name;
     private final Color colorJava;
     private final String color;
-    private final String note;
+    private String note;
     
     public Category(int id, int subCatOf, String name, String color, String note) {
         this.id = id;
@@ -47,6 +47,10 @@ public class Category {
     public String getNote() {
         return note;
     }
+
+    public void setName(String name) { this.name = name; }
+
+    public void setNote(String note) { this.note = note; }
 
     public String toString() {return getName(); }
 }
