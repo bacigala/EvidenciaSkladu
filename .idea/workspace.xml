@@ -236,7 +236,7 @@
       <workItem from="1589804970932" duration="18488000" />
       <workItem from="1589967411627" duration="7230000" />
       <workItem from="1590418210359" duration="17140000" />
-      <workItem from="1592476493348" duration="5914000" />
+      <workItem from="1592476493348" duration="7944000" />
     </task>
     <task id="LOCAL-00001" summary="&quot;completed 'customAttributeModifyDialog', now it modifies Sets to signalise desired changes&quot;">
       <created>1589276133406</created>
@@ -302,22 +302,22 @@
       <screen x="0" y="0" width="1600" height="870" />
     </state>
     <state x="506" y="175" key="FileChooserDialogImpl/0.0.1600.870@0.0.1600.870" timestamp="1589550238162" />
-    <state width="1540" height="201" key="GridCell.Tab.0.bottom" timestamp="1592482356759">
+    <state width="1540" height="201" key="GridCell.Tab.0.bottom" timestamp="1592485237422">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state width="1540" height="201" key="GridCell.Tab.0.bottom/0.0.1600.870@0.0.1600.870" timestamp="1592482356759" />
-    <state width="1540" height="201" key="GridCell.Tab.0.center" timestamp="1592482356759">
+    <state width="1540" height="201" key="GridCell.Tab.0.bottom/0.0.1600.870@0.0.1600.870" timestamp="1592485237422" />
+    <state width="1540" height="201" key="GridCell.Tab.0.center" timestamp="1592485237422">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state width="1540" height="201" key="GridCell.Tab.0.center/0.0.1600.870@0.0.1600.870" timestamp="1592482356759" />
-    <state width="1540" height="201" key="GridCell.Tab.0.left" timestamp="1592482356759">
+    <state width="1540" height="201" key="GridCell.Tab.0.center/0.0.1600.870@0.0.1600.870" timestamp="1592485237422" />
+    <state width="1540" height="201" key="GridCell.Tab.0.left" timestamp="1592485237422">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state width="1540" height="201" key="GridCell.Tab.0.left/0.0.1600.870@0.0.1600.870" timestamp="1592482356759" />
-    <state width="1540" height="201" key="GridCell.Tab.0.right" timestamp="1592482356759">
+    <state width="1540" height="201" key="GridCell.Tab.0.left/0.0.1600.870@0.0.1600.870" timestamp="1592485237422" />
+    <state width="1540" height="201" key="GridCell.Tab.0.right" timestamp="1592485237422">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state width="1540" height="201" key="GridCell.Tab.0.right/0.0.1600.870@0.0.1600.870" timestamp="1592482356759" />
+    <state width="1540" height="201" key="GridCell.Tab.0.right/0.0.1600.870@0.0.1600.870" timestamp="1592485237422" />
     <state width="1540" height="268" key="GridCell.Tab.1.bottom" timestamp="1589273637783">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
@@ -354,10 +354,10 @@
       <screen x="0" y="0" width="1600" height="870" />
     </state>
     <state x="504" y="327" key="com.intellij.jarRepository.RepositoryAttachDialog-DOWNLOAD/0.0.1600.870@0.0.1600.870" timestamp="1584106361920" />
-    <state x="456" y="192" key="run.anything.popup" timestamp="1592482388736">
+    <state x="456" y="192" key="run.anything.popup" timestamp="1592484481731">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state x="456" y="192" key="run.anything.popup/0.0.1600.870@0.0.1600.870" timestamp="1592482388736" />
+    <state x="456" y="192" key="run.anything.popup/0.0.1600.870@0.0.1600.870" timestamp="1592484481731" />
     <state x="463" y="186" width="672" height="678" key="search.everywhere.popup" timestamp="1592481905255">
       <screen x="0" y="0" width="1600" height="870" />
     </state>

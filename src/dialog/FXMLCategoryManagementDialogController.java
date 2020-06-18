@@ -159,23 +159,24 @@ public class FXMLCategoryManagementDialogController implements Initializable {
     @FXML
     private void newCategoryButtonAction() throws IOException {
         // todo new category dialo open -> check -> QUERY
-        Account newAccount = new Account(0, "", "", "", "", false);
+        Category newCategory = new Category(0, 0, "", "", "");
         EditableBoolean saveRequest = new EditableBoolean(false);
 
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLAccountModifyDialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLCategoryModifyDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));
         stage.initModality(Modality.APPLICATION_MODAL);
-        FXMLAccountModifyDialogController controller = fxmlLoader.getController();
-        controller.initData(newAccount, saveRequest);
-        stage.setTitle("Nové konto");
+        FXMLCategoryModifyDialogController controller = fxmlLoader.getController();
+        controller.initData(newCategory, saveRequest);
+        stage.setTitle("Nová kategória");
         stage.showAndWait();
 
         if (saveRequest.get()) {
-            QueryHandler.getInstance().createAccount(newAccount);
+            QueryHandler.getInstance().createCategory(newCategory);
         }
 
+        QueryHandler.getInstance().reloadItemList();
         populateTable();
     }
 

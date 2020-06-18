@@ -1282,4 +1282,72 @@ public class QueryHandler {
         }
         return ans;
     }
+
+    /**
+     * Tries to add a new category.
+     * @param newCategory - category to be added.
+     * @return true in success.
+     */
+    public boolean createCategory(Category newCategory) {
+        if (!hasConnectionDetails() || !hasUser()) return false;
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet result = null;
+        Savepoint savepoint1 = null;
+
+        try {
+            conn = getConnection();
+            assert conn != null;
+            conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            savepoint1 = conn.setSavepoint("Savepoint1");
+
+            // verify whether username is not occupied
+            statement = conn.prepareStatement(
+                    "SELECT * FROM category WHERE name=?");
+            statement.setString(1, newCategory.getName());
+            result = statement.executeQuery();
+            if (result.next()) {
+                // todo: login je obsadeny
+                System.out.println("category name je obsadene");
+                throw new SQLException();
+            }
+
+            // create new category
+            statement = conn.prepareStatement(
+                    "INSERT INTO category SET name=?, note=?, color=?, subcat_of=?");
+            statement.setString(1, newCategory.getName());
+            statement.setString(2, newCategory.getNote());
+            statement.setString(3, newCategory.getColor());
+            statement.setInt(4, newCategory.getSubCatOf());
+
+            if (statement.executeUpdate() != 1) {
+                // todo: nepodarilo sa vytvorit kategoriu
+                System.out.println("nepodarilo sa vytvorit novu kategoriu");
+                throw new SQLException();
+            }
+
+            conn.commit();
+
+        } catch (Throwable e) {
+            e.printStackTrace();
+            try {
+                assert conn != null;
+                conn.rollback(savepoint1);
+            } catch (SQLException ex) {
+                Logger.getLogger(QueryHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return false;
+        } finally {
+            try {
+                if (result != null) result.close();
+                if (statement != null) statement.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
+    }
 }
