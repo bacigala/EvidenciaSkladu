@@ -1139,7 +1139,7 @@ public class QueryHandler {
             statement.setInt(3, targetCategory.getId());
 
             if (statement.executeUpdate() != 1) {
-                // todo: nepodarilo sa vytvorit konto
+                // todo: errror
                 System.out.println("nepodarilo sa modifikovat kategoriu");
                 throw new SQLException();
             }
@@ -1165,5 +1165,121 @@ public class QueryHandler {
             }
         }
         return true;
+    }
+
+    /**
+     * Verifies if category has some items.
+     * @param categoryId - category to be checked.
+     * @return true if there are items assigned to the category.
+     */
+    public boolean hasItems(int categoryId) {
+        if (!hasConnectionDetails() || !hasUser()) return false;
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet result = null;
+
+        boolean answer = true;
+
+        try {
+            conn = getConnection();
+            assert conn != null;
+
+            // verify whether transactions with given userId exist
+            statement = conn.prepareStatement(
+                    "SELECT 1 FROM item WHERE category=?");
+            statement.setInt(1, categoryId);
+            result = statement.executeQuery();
+            if (!result.next()) {
+                // na kategoriu nie je napisana ziadna polozka
+                answer = false;
+            }
+
+        } catch (Throwable e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (result != null) result.close();
+                if (statement != null) statement.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return answer;
+    }
+
+    /**
+     * Tries to delete the category.
+     * @param categoryToDelete - category to be deleted.
+     * @param categoryToTakeOver - category that takes all items from deleted one.
+     * @return true on success.
+     */
+    public boolean deleteCategory(Category categoryToDelete, Category categoryToTakeOver) {
+        if (!hasConnectionDetails() || !hasUser()) return false;
+        if (categoryToDelete == null) return false;
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet result = null;
+        Savepoint savepoint1 = null;
+        boolean ans;
+
+        try {
+            conn = getConnection();
+            assert conn != null;
+            conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            savepoint1 = conn.setSavepoint("Savepoint1");
+
+            // verify whether items with given category exist
+            statement = conn.prepareStatement(
+                    "SELECT 1 FROM item WHERE category=?");
+            statement.setInt(1, categoryToDelete.getId());
+            result = statement.executeQuery();
+            if (result.next()) {
+                // na kategoriu su napisane polozky
+                if (categoryToTakeOver == null) throw new IllegalArgumentException();
+
+                // nahradime 'majitela transakcii'
+                statement = conn.prepareStatement(
+                        "UPDATE item SET category=? WHERE category=?");
+                statement.setInt(1, categoryToTakeOver.getId());
+                statement.setInt(2, categoryToDelete.getId());
+                if (statement.executeUpdate() < 1) {
+                    // todo error
+                    System.out.println("nepodarilo previest polozky...");
+                    throw new SQLException();
+                }
+
+            }
+
+            // odstranime zaznam o kategorii
+            statement = conn.prepareStatement("DELETE FROM category WHERE id=?");
+            statement.setInt(1, categoryToDelete.getId());
+            if (statement.executeUpdate() != 1) throw new SQLException();
+
+            conn.commit();
+            ans = true;
+
+        } catch (Throwable e) {
+            e.printStackTrace();
+            try {
+                assert conn != null;
+                conn.rollback(savepoint1);
+            } catch (SQLException ex) {
+                Logger.getLogger(QueryHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return false;
+        } finally {
+            try {
+                if (result != null) result.close();
+                if (statement != null) statement.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return ans;
     }
 }

@@ -61,7 +61,6 @@ public class FXMLCategoryManagementDialogController implements Initializable {
 
         ButtonCell() {
             modifyButton.setOnAction(t -> {
-                // todo: modify button clicked -> open dialog for modification
                 Category targetCategory = getTableView().getItems().get(getIndex());
 
                 EditableBoolean saveRequest = new EditableBoolean(false);
@@ -89,49 +88,50 @@ public class FXMLCategoryManagementDialogController implements Initializable {
             });
 
             deleteButton.setOnAction(t -> {
-                // todo: delete button clicked -> check and delete
-//                Account targetAccount = getTableView().getItems().get(getIndex());
-//
-//                DialogFactory df = DialogFactory.getInstance();
-//                QueryHandler qh = QueryHandler.getInstance();
-//
-//                Account selectedAccount = null;
-//
-//                if (qh.hasTransactions(targetAccount.getId())) {
-//                    // na pouzivatela su napisane nejake transakcie
-//                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLSimpleChoiceDialog.fxml"));
-//                    Parent root1 = null;
-//                    try {
-//                        root1 = fxmlLoader.load();
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                    Stage stage = new Stage();
-//                    stage.setScene(new Scene(root1));
-//                    stage.initModality(Modality.APPLICATION_MODAL);
-//                    FXMLSimpleChoiceDialogController<Account> controller = fxmlLoader.getController();
-//                    stage.setTitle("Prevod transakcii");
-//
-//                    ObservableList<Account> accounts = FXCollections.observableArrayList();
-//                    QueryHandler.getInstance().getAccounts(accounts);
-//
-//                    controller.setChoiceList(accounts);
-//                    controller.setLabelText("Vyberte konto pod ktoré budú prevedené transakcie odstráneného konta.");
-//
-//                    stage.showAndWait();
-//
-//                    selectedAccount = (Account) controller.getChoice();
-//                    if (selectedAccount == null) return;
-//                }
-//
-//                // pokusime sa odstranit vybrany ucet
-//                if(qh.deleteAccount(targetAccount, selectedAccount)) {
-//                    df.showAlert(Alert.AlertType.INFORMATION, "Konto bolo úspešne odstránené.");
-//                } else {
-//                    df.showAlert(Alert.AlertType.ERROR, "Konto sa nepodarilo odstrániť");
-//                }
-//
-//                populateTable();
+                // delete button clicked -> check and delete
+                Category targetCategory = getTableView().getItems().get(getIndex());
+
+                DialogFactory df = DialogFactory.getInstance();
+                QueryHandler qh = QueryHandler.getInstance();
+
+                Category selectedCategory = null;
+
+                if (qh.hasItems(targetCategory.getId())) {
+                    // v kategorii su nejake polozky
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLSimpleChoiceDialog.fxml"));
+                    Parent root1 = null;
+                    try {
+                        root1 = fxmlLoader.load();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    Stage stage = new Stage();
+                    stage.setScene(new Scene(root1));
+                    stage.initModality(Modality.APPLICATION_MODAL);
+                    FXMLSimpleChoiceDialogController<Category> controller = fxmlLoader.getController();
+                    stage.setTitle("Prevod položiek");
+
+                    ObservableList<Category> categoreis = FXCollections.observableArrayList();
+                    categoreis.addAll(QueryHandler.getInstance().getCategoryMap().values());
+
+                    controller.setChoiceList(categoreis);
+                    controller.setLabelText("Vyberte kategóriu pod ktorú budú prevedené položky odstránenej kategoórie.");
+
+                    stage.showAndWait();
+
+                    selectedCategory = (Category) controller.getChoice();
+                    if (selectedCategory == null) return;
+                    if (selectedCategory.getId() == targetCategory.getId()) return;
+                }
+
+                // pokusime sa odstranit vybranu kategoriu
+                if(qh.deleteCategory(targetCategory, selectedCategory)) {
+                    df.showAlert(Alert.AlertType.INFORMATION, "Kategória bola úspešne odstránená");
+                } else {
+                    df.showAlert(Alert.AlertType.ERROR, "Kategóriu sa nepodarilo odstrániť");
+                }
+
+                populateTable();
             });
         }
 
@@ -159,24 +159,24 @@ public class FXMLCategoryManagementDialogController implements Initializable {
     @FXML
     private void newCategoryButtonAction() throws IOException {
         // todo new category dialo open -> check -> QUERY
-//        Account newAccount = new Account(0, "", "", "", "", false);
-//        EditableBoolean saveRequest = new EditableBoolean(false);
-//
-//        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLAccountModifyDialog.fxml"));
-//        Parent root1 = fxmlLoader.load();
-//        Stage stage = new Stage();
-//        stage.setScene(new Scene(root1));
-//        stage.initModality(Modality.APPLICATION_MODAL);
-//        FXMLAccountModifyDialogController controller = fxmlLoader.getController();
-//        controller.initData(newAccount, saveRequest);
-//        stage.setTitle("Nové konto");
-//        stage.showAndWait();
-//
-//        if (saveRequest.get()) {
-//            QueryHandler.getInstance().createAccount(newAccount);
-//        }
-//
-//        populateTable();
+        Account newAccount = new Account(0, "", "", "", "", false);
+        EditableBoolean saveRequest = new EditableBoolean(false);
+
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLAccountModifyDialog.fxml"));
+        Parent root1 = fxmlLoader.load();
+        Stage stage = new Stage();
+        stage.setScene(new Scene(root1));
+        stage.initModality(Modality.APPLICATION_MODAL);
+        FXMLAccountModifyDialogController controller = fxmlLoader.getController();
+        controller.initData(newAccount, saveRequest);
+        stage.setTitle("Nové konto");
+        stage.showAndWait();
+
+        if (saveRequest.get()) {
+            QueryHandler.getInstance().createAccount(newAccount);
+        }
+
+        populateTable();
     }
 
     /**
