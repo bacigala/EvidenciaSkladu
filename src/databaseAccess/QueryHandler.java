@@ -3,11 +3,9 @@ package databaseAccess;
 
 import javafx.collections.ObservableList;
 
-import java.awt.image.AreaAveragingScaleFilter;
 import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1488,6 +1486,52 @@ public class QueryHandler {
                 if (conn != null) conn.close();
             } catch (SQLException e) {
                 e.printStackTrace();
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Retrives all soon expiry Items from DB.
+     * @param logRecords list to store retrieved data in.
+     * @return true on success.
+     */
+    public boolean getSoonExpiryItems(ObservableList<ExpiryDateWarningRecord> logRecords) {
+        if (!hasConnectionDetails() || !hasUser()) return false;
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet result = null;
+
+        try {
+            conn = getConnection();
+            assert conn != null;
+            statement = conn.prepareStatement(
+                    "SELECT item.id, item.name, SUM(move_item.amount) AS expiry_amount, move_item.expiration " +
+                            "FROM (move_item JOIN item ON (move_item.item_id = item.id)) " +
+                            "WHERE move_item.expiration < NOW() - 10 " +
+                            "GROUP BY move_item.expiration, item.id " +
+                            "HAVING expiry_amount > 0 " +
+                            "ORDER BY item.name ASC, move_item.expiration ASC");
+            result = statement.executeQuery();
+            while (result.next()) {
+                ExpiryDateWarningRecord logRecord =  new ExpiryDateWarningRecord(
+                        result.getInt("id"),
+                        result.getString("name"),
+                        result.getDate("expiration"),
+                        result.getInt("expiry_amount")
+                );
+                logRecords.add(logRecord);
+            }
+        } catch (SQLException e) {
+            return false;
+        } finally {
+            try {
+                if (result != null) result.close();
+                if (statement != null) statement.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                logRecords = null;
             }
         }
         return true;

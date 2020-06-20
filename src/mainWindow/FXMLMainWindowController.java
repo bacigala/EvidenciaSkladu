@@ -5,6 +5,7 @@ import databaseAccess.CustomAttribute;
 import databaseAccess.Item;
 import databaseAccess.QueryHandler;
 import dialog.*;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -19,15 +20,14 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashSet;
-import java.util.ResourceBundle;
+import java.util.*;
 
 /**
  * The main window of the application.
  */
 
 public class FXMLMainWindowController implements Initializable {
-     
+
     @FXML private javafx.scene.control.TableView<Item> mainTable;
     @FXML private javafx.scene.control.TableView<CustomAttribute> selectedItemPropertiesTable;
     @FXML private javafx.scene.control.Button itemSupplyButton;
@@ -38,7 +38,7 @@ public class FXMLMainWindowController implements Initializable {
     @FXML private javafx.scene.control.Menu adminMenu;
 
     //stores currently selected item custom attributes
-    private HashSet<CustomAttribute> selectedItemCustomAttributes = null;
+    private HashSet<CustomAttribute> selectedItemCustomAttributes;
 
     @FXML
     private void openLogInSettings() {
@@ -52,7 +52,7 @@ public class FXMLMainWindowController implements Initializable {
         
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        //table adjust
+        //set of columns for default view
         TableColumn catColumn = new TableColumn("Kategória");
         catColumn.setCellValueFactory(new PropertyValueFactory<>("categoryName"));
         
@@ -70,9 +70,8 @@ public class FXMLMainWindowController implements Initializable {
         
         TableColumn unitColumn = new TableColumn("Jednotka");
         unitColumn.setCellValueFactory(new PropertyValueFactory<>("unit"));
-              
-        mainTable.getColumns().addAll(catColumn, idColumn, nameColumn,
-                barcodeColumn, curAmountColumn, unitColumn);
+
+        mainTable.getColumns().addAll(catColumn, idColumn, nameColumn, barcodeColumn, curAmountColumn, unitColumn);
 
         mainTable.setPlaceholder(new Label("Niet čo zobraziť :("));
 
@@ -143,7 +142,7 @@ public class FXMLMainWindowController implements Initializable {
 
     /**
      * BUTTON "Vklad" (item supply)
-     * @throws IOException
+     * @throws IOException on error
      */
     @FXML
     private void itemSupply() throws IOException {
@@ -275,8 +274,16 @@ public class FXMLMainWindowController implements Initializable {
      * MENU ITEM "Kontrola" -> "Expiracia" Opens ExpiryCheckDialog.
      */
     @FXML
-    private void expiryDateCheckAction() {
-        // todo: implement this
+    private void expiryDateCheckAction() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLCheckExpirationDialog.fxml"));
+        Parent root1 = fxmlLoader.load();
+        Stage stage = new Stage();
+        stage.setScene(new Scene(root1));
+        stage.initModality(Modality.APPLICATION_MODAL);
+        FXMLCheckExpirationDialogController controller = fxmlLoader.getController();
+        controller.initData();
+        stage.showAndWait();
+        reloadMainTable();
     }
 
     /**
@@ -286,37 +293,6 @@ public class FXMLMainWindowController implements Initializable {
     private void StockCheckAction() {
         // todo: implement this too :)
     }
-         
-    // todo ensures that all columns are wide enough to show full content
-    /*
-    private static Method columnToFitMethod;
-
-    static {
-        try {
-            columnToFitMethod = TableViewSkin.class.getDeclaredMethod("resizeColumnToFitContent", TableColumn.class, int.class);
-            columnToFitMethod.setAccessible(true);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void autoFitTable(TableView tableView) {
-        tableView.getItems().addListener(new ListChangeListener<Object>() {
-            @Override
-            public void onChanged(Change<?> c) {
-                for (Object column : tableView.getColumns()) {
-                    try {
-                        columnToFitMethod.invoke(tableView.getSkin(), column, -1);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }
-        });
-    }
-    
-     */
 
     /**
      * Disables GUI functions and hides all visible information which require login to be viewed.

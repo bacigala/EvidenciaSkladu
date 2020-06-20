@@ -1,15 +1,13 @@
 
 package dialog;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
-import databaseAccess.*;
+import databaseAccess.Account;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Dialog;
 import javafx.stage.Stage;
 import supportStructures.EditableBoolean;
 
