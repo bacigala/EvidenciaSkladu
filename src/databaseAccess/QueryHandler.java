@@ -1445,4 +1445,51 @@ public class QueryHandler {
         }
         return true;
     }
+
+    /**
+     * Deletes item  from DB.
+     * @param item  item to be deleted.
+     * @return true on success.
+     */
+    public boolean itemDelete(Item item) {
+        if (!hasAdmin() || !hasConnectionDetails() || !hasUser()) return false;
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet result = null;
+        Savepoint savepoint1 = null;
+
+        try {
+            conn = getConnection();
+            assert conn != null;
+
+            savepoint1 = conn.setSavepoint("Savepoint1");
+
+            // update basic info about the item
+            statement = conn.prepareStatement("DELETE FROM item WHERE id=?");
+            statement.setInt(1, item. getId());
+
+            if (statement.executeUpdate() != 1) throw new SQLException();
+
+            // todo: v tabulke 'move' mozno zostal redundantny zaznam ak to bol prave zmazany posledny 'move_item' zaznam...
+
+        } catch (Throwable e) {
+            e.printStackTrace();
+            try {
+                assert conn != null;
+                conn.rollback(savepoint1);
+            } catch (SQLException ex) {
+                Logger.getLogger(QueryHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return false;
+        } finally {
+            try {
+                if (result != null) result.close();
+                if (statement != null) statement.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
+    }
 }

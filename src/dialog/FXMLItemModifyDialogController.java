@@ -35,6 +35,7 @@ public class FXMLItemModifyDialogController implements Initializable {
     @FXML private javafx.scene.control.TextField unitTextField;
     @FXML private javafx.scene.control.ChoiceBox<Category> categoryChoiceBox;
     @FXML private javafx.scene.control.TableView<CustomAttribute> tableCustomAttributes;
+    @FXML private javafx.scene.control.Button permanentDeletionButton;
 
     private Item item;
     private HashSet<CustomAttribute> attributesToAdd = new HashSet<>();
@@ -52,14 +53,17 @@ public class FXMLItemModifyDialogController implements Initializable {
      * Setups default values.
      */
     public void initData(Item item, HashSet<CustomAttribute> customAttributes, boolean isNewItem) {
-        initData(item, customAttributes);
         this.isNewItem = isNewItem;
+        initData(item, customAttributes);
     }
 
     public void initData(Item item, HashSet<CustomAttribute> customAttributes) {
-        this.isNewItem = false;
+
         if (item != null) {
             QueryHandler qh = QueryHandler.getInstance();
+
+            permanentDeletionButton.setDisable(isNewItem && qh.hasAdmin());
+
             this.item = item;
             nameTextField.setText(item.getName());
             codeTextField.setText(item.getBarcode());
@@ -132,6 +136,26 @@ public class FXMLItemModifyDialogController implements Initializable {
             }
         } catch (Exception e) {
             df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");
+        }
+    }
+
+    /**
+     * Button 'Trvalo odstrániť' requests item deleto from DB - admin only.
+     */
+    @FXML
+    private void permanentDeleteButtonAction() throws IOException {
+        QueryHandler qh = QueryHandler.getInstance();
+        DialogFactory df = DialogFactory.getInstance();
+        // todo: extra warning before delete
+        try {
+            if (qh.itemDelete(item)) {
+                DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Položka bola úspešne odstránená z databázy.");
+                cancelButton();
+            } else {
+                df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať.");
+            }
+        } catch (Exception e) {
+            df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať.");
         }
     }
 
