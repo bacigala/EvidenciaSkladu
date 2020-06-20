@@ -40,6 +40,7 @@ public class FXMLItemModifyDialogController implements Initializable {
     private HashSet<CustomAttribute> attributesToAdd = new HashSet<>();
     private HashSet<CustomAttribute> attributesToDelete = new HashSet<>();
     private HashSet<CustomAttribute> originalAttributes;
+    private boolean isNewItem = false;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -50,7 +51,13 @@ public class FXMLItemModifyDialogController implements Initializable {
      * Receives initialization data after dialog is shown.
      * Setups default values.
      */
+    public void initData(Item item, HashSet<CustomAttribute> customAttributes, boolean isNewItem) {
+        initData(item, customAttributes);
+        this.isNewItem = isNewItem;
+    }
+
     public void initData(Item item, HashSet<CustomAttribute> customAttributes) {
+        this.isNewItem = false;
         if (item != null) {
             QueryHandler qh = QueryHandler.getInstance();
             this.item = item;
@@ -108,11 +115,20 @@ public class FXMLItemModifyDialogController implements Initializable {
         QueryHandler qh = QueryHandler.getInstance();
         DialogFactory df = DialogFactory.getInstance();
         try {
-            if (qh.itemUpdate(item, newBasicValues, attributesToAdd, attributesToDelete)) {
-                DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Úprava položky prebehla úspešne.");
-                cancelButton();
+            if (isNewItem) {
+                if (qh.itemInsert(item, newBasicValues, attributesToAdd)) {
+                    DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Nová položka bola úspešne vytvorená.");
+                    cancelButton();
+                } else {
+                    df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");
+                }
             } else {
-                df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");
+                if (qh.itemUpdate(item, newBasicValues, attributesToAdd, attributesToDelete)) {
+                    DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Úprava položky prebehla úspešne.");
+                    cancelButton();
+                } else {
+                    df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");
+                }
             }
         } catch (Exception e) {
             df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");

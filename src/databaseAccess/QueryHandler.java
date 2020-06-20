@@ -1350,4 +1350,99 @@ public class QueryHandler {
         }
         return true;
     }
+
+    /**
+     * Inserts new item with custom attributes.
+     * @param newItem            original item.
+     * @param newBasicValues     new compulsory values for the item
+     * @param attributesToAdd    new custom attributes (to be inserted)
+     *
+     * @return true on success.
+     */
+    public boolean itemInsert(Item newItem, HashMap<String, String> newBasicValues,
+                              HashSet<CustomAttribute> attributesToAdd) {
+        if (!hasConnectionDetails() || !hasUser()) return false;
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet result = null;
+        Savepoint savepoint1 = null;
+
+        try {
+            conn = getConnection();
+            assert conn != null;
+            conn.setAutoCommit(false);
+            savepoint1 = conn.setSavepoint("Savepoint1");
+
+            // update basic info about the item
+            statement = conn.prepareStatement(
+                    "INSERT INTO item SET name = ?, barcode = ?, min_amount = ?, unit = ?, category = ?", Statement.RETURN_GENERATED_KEYS);
+            if (newBasicValues.containsKey("name")) {
+                statement.setString(1, newBasicValues.get("name"));
+            } else {
+                statement.setString(1, newItem.getName());
+            }
+            if (newBasicValues.containsKey("barcode")) {
+                statement.setString(2, newBasicValues.get("barcode"));
+            } else {
+                statement.setString(2, newItem.getBarcode());
+            }
+            if (newBasicValues.containsKey("min_amount")) {
+                statement.setInt(3, Integer.parseInt(newBasicValues.get("min_amount")));
+            } else {
+                statement.setInt(3, newItem.getMinAmount());
+            }
+            if (newBasicValues.containsKey("unit")) {
+                statement.setString(4, newBasicValues.get("unit"));
+            } else {
+                statement.setString(4, newItem.getUnit());
+            }
+            if (newBasicValues.containsKey("category")) {
+                statement.setInt(5, Integer.parseInt(newBasicValues.get("category")));
+            } else {
+                statement.setInt(5, newItem.getCategory());
+            }
+
+            if (statement.executeUpdate() != 1) throw new SQLException();
+
+            // get ID of the new Item
+            int itemId;
+            ResultSet rs = statement.getGeneratedKeys();
+            if (rs != null && rs.next()) {
+                itemId = rs.getInt(1);
+            } else {
+                throw new SQLException();
+            }
+
+            // create custom attributes records
+            for (CustomAttribute newAttribute : attributesToAdd) {
+                statement = conn.prepareStatement(
+                        "INSERT INTO attribute SET item_id = ?, name = ?, content = ?");
+                statement.setInt(1, itemId);
+                statement.setString(2, newAttribute.getName());
+                statement.setString(3, newAttribute.getValue());
+                if (statement.executeUpdate() != 1) throw new SQLException();
+            }
+
+            conn.commit();
+
+        } catch (Throwable e) {
+            e.printStackTrace();
+            try {
+                assert conn != null;
+                conn.rollback(savepoint1);
+            } catch (SQLException ex) {
+                Logger.getLogger(QueryHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return false;
+        } finally {
+            try {
+                if (result != null) result.close();
+                if (statement != null) statement.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
+    }
 }

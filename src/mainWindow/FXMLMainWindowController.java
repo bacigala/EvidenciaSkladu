@@ -219,6 +219,25 @@ public class FXMLMainWindowController implements Initializable {
     }
 
     /**
+     * MENU-ITEM "Sprava DB -> nova polozka" (new item)
+     * Opens dialog for new item creation. (only for administrators)
+     */
+    @FXML
+    private void openNewItemDialog() throws IOException {
+        Item newItem = new Item(0, "", "", 0, 0, "", "", 1);
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLItemModifyDialog.fxml"));
+        Parent root1 = fxmlLoader.load();
+        Stage stage = new Stage();
+        stage.setScene(new Scene(root1));
+        stage.initModality(Modality.APPLICATION_MODAL);
+        FXMLItemModifyDialogController controller = fxmlLoader.getController();
+        controller.initData(newItem, selectedItemCustomAttributes, true);
+        stage.showAndWait();
+
+        reloadMainTable();
+    }
+
+    /**
      * MENU-ITEM "Sprava DB -> pouzivatelia" (account management)
      * Opens dialog for account management. (only for administrators)
      */
