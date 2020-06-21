@@ -2,8 +2,10 @@
 package dialog.controller;
 
 import java.net.URL;
+import java.sql.Connection;
 import java.util.ResourceBundle;
 
+import databaseAccess.ConnectionFactory;
 import databaseAccess.QueryHandler;
 import dialog.DialogFactory;
 import javafx.event.ActionEvent;
@@ -20,13 +22,13 @@ public class FXMLConnectionDetailsDialogController implements Initializable {
 
     @FXML
     private void connectButtonAction(ActionEvent e) {
-        QueryHandler qh = QueryHandler.getInstance();
-        if (qh.hasConnectionDetails()) {
+        ConnectionFactory cf = ConnectionFactory.getInstance();
+        if (cf.hasValidConnectionDetails()) {
 
         } else {
             String ip = ipAddressTextField.getText();
             String port = portTextField.getText();
-            if (qh.setBasicUserConnectionDetails(ip, port)) {
+            if (ConnectionFactory.getInstance().setConnectionDetails(ip, port)) {
                 disableInput();
                 DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Pripojené.");
                 Stage stage = (Stage) connectButton.getScene().getWindow();
@@ -39,10 +41,10 @@ public class FXMLConnectionDetailsDialogController implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        QueryHandler qh = QueryHandler.getInstance();
-        if (qh.hasConnectionDetails()) {
-            ipAddressTextField.setText(qh.getDatabaseIp());
-            portTextField.setText(qh.getDatabasePort());
+        ConnectionFactory cf = ConnectionFactory.getInstance();
+        if (cf.hasValidConnectionDetails()) {
+            ipAddressTextField.setText(cf.getDatabaseIp());
+            portTextField.setText(cf.getDatabasePort());
             disableInput();
         } else {
             enableInput();

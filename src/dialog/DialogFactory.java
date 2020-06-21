@@ -1,5 +1,7 @@
 package dialog;
 
+import databaseAccess.ConnectionFactory;
+import databaseAccess.Login;
 import databaseAccess.QueryHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -73,7 +75,7 @@ public class DialogFactory {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return QueryHandler.getInstance().hasConnectionDetails();
+        return ConnectionFactory.getInstance().hasValidConnectionDetails();
     }
 
     /**
@@ -83,7 +85,7 @@ public class DialogFactory {
     public boolean showUserLoginDialog() {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("fxml/FXMLUserLoginDialog.fxml"));
-            Parent root1 = (Parent) fxmlLoader.load();
+            Parent root1 = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root1));
             stage.initModality(Modality.APPLICATION_MODAL);
@@ -92,7 +94,7 @@ public class DialogFactory {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return QueryHandler.getInstance().hasUser();
+        return Login.getInstance().hasUser();
     }
 
 }

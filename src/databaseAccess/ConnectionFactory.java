@@ -8,11 +8,11 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 /**
  * Creates, manages and closes all connections to DB server.
- * Manages user login and password verification.
  * Singleton. Connection pool.
  */
 
@@ -32,7 +32,7 @@ public class ConnectionFactory {
     // singleton
     private ConnectionFactory() {}
     private static final ConnectionFactory connectionFactory = new ConnectionFactory();
-    static ConnectionFactory getInstance() { return connectionFactory; }
+    public static ConnectionFactory getInstance() { return connectionFactory; }
 
     /**
      * @return connection from the pool or a new if the pool is empty
@@ -52,7 +52,9 @@ public class ConnectionFactory {
         } catch (SQLException e) {
             e.printStackTrace();
             DialogFactory.getInstance().showAlert(Alert.AlertType.WARNING, "Server je nedostupný.");
+            return null;
         }
+        usedConnections.add(connection);
         return connection;
     }
 
@@ -63,6 +65,7 @@ public class ConnectionFactory {
     // todo: V aktualnej implementacii sa nepredpoklada vytvorenie viac ako 2 Connection za behu programu
     // todo: Pri rozsirovani treba zabezpecit otvaranie a zatvaranie Connection ako 'rast dynamickeho pola'
     void releaseConnection(Connection connection) {
+        if (connection == null) return;
         usedConnections.remove(connection);
         if (connectionPool.size() < MAX_POOL_SIZE) {
             connectionPool.add(connection);
@@ -78,7 +81,7 @@ public class ConnectionFactory {
     /**
      * @return true if valid connection details are present and connection can be established.
      */
-    boolean hasValidConnectionDetails() {
+    public boolean hasValidConnectionDetails() {
         Connection connection = getConnection();
         boolean result = connection != null;
         releaseConnection(connection);
@@ -90,13 +93,15 @@ public class ConnectionFactory {
      */
     private void closeAllConnections() {
         try {
-            for (Connection connection : usedConnections) {
-                connection.close();
-                usedConnections.remove(connection);
+            Iterator<Connection> iterator = usedConnections.iterator();
+            while (iterator.hasNext()) {
+                iterator.next();
+                iterator.remove();
             }
-            for (Connection connection : connectionPool) {
-                connection.close();
-                usedConnections.remove(connection);
+            iterator = connectionPool.iterator();
+            while (iterator.hasNext()) {
+                iterator.next();
+                iterator.remove();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -107,7 +112,7 @@ public class ConnectionFactory {
      * Setups connection with basic database privileges. (additional protection)
      * @return true if logged in.
      */
-    boolean setBasicUserConnectionDetails() {
+    public boolean setBasicUserConnectionDetails() {
         closeAllConnections();
         databaseUsername = "basic-user";
         databasePassword = "CwJNF7zJciaxMY3v";

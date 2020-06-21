@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
+import databaseAccess.Login;
 import dialog.DialogFactory;
 import domain.Category;
 import domain.CustomAttribute;
@@ -63,7 +64,7 @@ public class FXMLItemModifyDialogController implements Initializable {
         if (item != null) {
             QueryHandler qh = QueryHandler.getInstance();
 
-            permanentDeletionButton.setDisable(isNewItem && qh.hasAdmin());
+            permanentDeletionButton.setDisable(isNewItem && Login.getInstance().hasAdmin());
 
             this.item = item;
             nameTextField.setText(item.getName());

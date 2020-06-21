@@ -1,6 +1,8 @@
 
 package mainWindow;
 
+import databaseAccess.ConnectionFactory;
+import databaseAccess.Login;
 import dialog.controller.*;
 import domain.CustomAttribute;
 import domain.Item;
@@ -87,7 +89,7 @@ public class FXMLMainWindowController implements Initializable {
 
         // test default connection settings, require login information
         QueryHandler queryHandler = QueryHandler.getInstance();
-        if (queryHandler.setBasicUserConnectionDetails()) {
+        if (ConnectionFactory.getInstance().setBasicUserConnectionDetails()) {
             // successfully established database connection
             openLogInSettings();
         } else {
@@ -133,7 +135,7 @@ public class FXMLMainWindowController implements Initializable {
             //enable buttons for item manipulation
             itemSupplyButton.setDisable(false);
             itemWithdrawalButton.setDisable(false);
-            if (QueryHandler.getInstance().hasAdmin()) {
+            if (Login.getInstance().hasAdmin()) {
                 itemDetailsChangeButton.setDisable(false);
                 itemMoveHistoryButton.setDisable(false);
             }
@@ -330,7 +332,7 @@ public class FXMLMainWindowController implements Initializable {
      */
     private void userLoginState() {
         databaseRefreshButton.setDisable(false);
-        adminMenu.setDisable(!QueryHandler.getInstance().hasAdmin());
+        adminMenu.setDisable(!Login.getInstance().hasAdmin());
     }
 
     /**
@@ -350,8 +352,7 @@ public class FXMLMainWindowController implements Initializable {
      */
     @FXML
     private void closeApplicationAction(){
-        QueryHandler queryHandler = QueryHandler.getInstance();
-        queryHandler.logOut();
+        Login.getInstance().logOut();
         Stage stage = (Stage) mainTable.getScene().getWindow();
         stage.close();
     }

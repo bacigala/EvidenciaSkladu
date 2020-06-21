@@ -19,12 +19,6 @@ import java.util.logging.Logger;
  */
 
 public class QueryHandler {
-    // logged in user info
-    private boolean loggedUserAdmin = false;
-    private String loggedUserUsername = "";
-    private String loggedUserName = "";
-    private int loggedUserId = 0;
-
     // last retrieved list of items and map of categories
     private ArrayList<Item> itemList = new ArrayList<>();
     private HashMap<Integer, Category> categoryMap = new HashMap<>();
@@ -37,134 +31,19 @@ public class QueryHandler {
     }
 
 
-    // todo: move this out
-    private Connection getConnection() {
-        return ConnectionFactory.getInstance().getConnection();
-    }
-    public boolean hasConnectionDetails() {
-        return ConnectionFactory.getInstance().hasValidConnectionDetails();
-    }
-    public boolean setBasicUserConnectionDetails() {
-        return ConnectionFactory.getInstance().setBasicUserConnectionDetails();
-    }
-    public boolean setBasicUserConnectionDetails(String ip, String port) {
-        return ConnectionFactory.getInstance().setConnectionDetails(ip, port);
-    }
-    private boolean setAdminUserConnectionDetails() {
-        return ConnectionFactory.getInstance().setAdminUserConnectionDetails();
-    }
-    public String getDatabaseIp() {
-        return ConnectionFactory.getInstance().getDatabaseIp();
-    }
-    public String getDatabasePort() {
-        return ConnectionFactory.getInstance().getDatabasePort();
-    }
-    // todo: END OF move out
-
-
-    /**
-     * Verifies username and password.
-     * @param username Username to be tested.
-     * @param password Password to be tested.
-     * @return true if username and password are valid.
-     */
-    public boolean logIn(String username, String password) {
-        if (loggedUserId > 0) return false;       
-        
-        Connection conn = null;
-        PreparedStatement statement = null;
-        ResultSet result = null;       
-        
-        try {   
-            conn = getConnection();
-            assert conn != null;
-            statement = conn.prepareStatement("SELECT * FROM account WHERE login = ? AND password = sha2(?,256)");
-            statement.setString(1, username);
-            statement.setString(2, password);
-            result = statement.executeQuery();
-            if (result.next()) {
-                loggedUserName = result.getString("name") + " "
-                        + result.getString("surname");
-                loggedUserId = result.getInt("id");
-                loggedUserAdmin = result.getBoolean("admin");
-                loggedUserUsername = username;
-            } else {
-                return false;
-            }            
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        } finally {
-            try {
-                if (result != null) result.close();
-                if (statement != null) statement.close();
-                if (conn != null) conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        // if logged in user is an admin, switch to ADMIN database access
-        if (loggedUserAdmin) {
-            return setAdminUserConnectionDetails();
-        } else {
-            return setBasicUserConnectionDetails();
-        }
-    }
-
-    /**
-     * Removes information about currently logged user + sets BASIC database user for further database access.
-     */
-    public void logOut() {
-        setBasicUserConnectionDetails();
-        loggedUserAdmin = false;
-        loggedUserUsername = "";
-        loggedUserName = "";
-        loggedUserId = 0;
-
-        // delete login-required access content
-        itemList.clear();
-        categoryMap.clear();
-    }
-
-    /**
-     * @return currently logged user ID, 0 if no user is present.
-     */
-    public int getLoggedUserId() {
-        return loggedUserId;
-    }
-
-    // returns full name of currently logged user
-    public String getLoggedUserName() {
-        return loggedUserName;
-    }
-
-    // returns username of currently logged in uer
-    public String getLoggedUserUsername() {
-        return loggedUserUsername;
-    }
-    
-    // returns true if verified user is logged in
-    public boolean hasUser() {
-        return loggedUserId > 0;
-    }
-
-    // returns true if verified admin is logged in
-    public boolean hasAdmin() {
-        return hasUser() && loggedUserAdmin;
-    }
 
     // reloads list of Items from database
-    public boolean reloadItemList() {      
-        if (!hasConnectionDetails() || !hasUser()) return false;
-                 
+    public boolean reloadItemList() {
+        if (!ConnectionFactory.getInstance().hasValidConnectionDetails() || !Login.getInstance().hasUser()) return false;
+
         Connection conn = null;
         PreparedStatement statement = null;
-        ResultSet result = null;      
+        ResultSet result = null;
 
         // RELOAD OF ITEMS
         ArrayList<Item> newItemList = new ArrayList<>();
-        try {   
-            conn = getConnection();
+        try {
+            conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
             statement = conn.prepareStatement(
                     "SELECT * FROM item");
@@ -178,10 +57,10 @@ public class QueryHandler {
                         result.getInt("cur_amount"),
                         result.getString("unit"),
                         result.getString("note"),
-                        result.getInt("category")                  
-                        );                                       
-                newItemList.add(item);                   
-            }             
+                        result.getInt("category")
+                        );
+                newItemList.add(item);
+            }
         } catch (SQLException e) {
             return false;
         } finally {
@@ -194,11 +73,11 @@ public class QueryHandler {
             }
         }
         itemList = newItemList;
-                
+
         // RELOAD OF CATEGORIES
         HashMap<Integer,Category> newCategoryMap = new HashMap<>();
-        try {   
-            conn = getConnection();            
+        try {
+            conn = ConnectionFactory.getInstance().getConnection();
             statement = conn.prepareStatement(
                     "SELECT * FROM category");
             result = statement.executeQuery();
@@ -208,10 +87,10 @@ public class QueryHandler {
                         result.getInt("subcat_of"),
                         result.getString("name"),
                         result.getString("color"),
-                        result.getString("note")                                         
-                        );                                       
-                newCategoryMap.put(cat.getId(),cat);                   
-            }             
+                        result.getString("note")
+                        );
+                newCategoryMap.put(cat.getId(),cat);
+            }
         } catch (SQLException e) {
             return false;
         } finally {
@@ -223,16 +102,16 @@ public class QueryHandler {
                 return false;
             }
         }
-        categoryMap = newCategoryMap;     
-                
-        return true;        
+        categoryMap = newCategoryMap;
+
+        return true;
     }
-    
+
     // returns lastly retrieved list of Items form database
     public ArrayList<Item> getItemList() {
         return itemList;
     }
-    
+
     // returns lastly retrieved list of Categories form database
     public HashMap<Integer,Category> getCategoryMap() {
         return categoryMap;
@@ -246,21 +125,21 @@ public class QueryHandler {
      * @return true if supply was successful.
      */
     public boolean itemSupply(int itemId, int supplyAmount, LocalDate expiration) {
-        if (!hasConnectionDetails() || !hasUser()) return false;
-                 
+        if (!ConnectionFactory.getInstance().hasValidConnectionDetails() || !Login.getInstance().hasUser()) return false;
+
         Connection conn = null;
         PreparedStatement statement = null;
-        ResultSet result = null; 
+        ResultSet result = null;
         Savepoint savepoint1 = null;
         int curAmount;
         int moveId;
-        
-        try {   
-            conn = getConnection();
+
+        try {
+            conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
             conn.setAutoCommit(false);
-            savepoint1 = conn.setSavepoint("Savepoint1");            
-            
+            savepoint1 = conn.setSavepoint("Savepoint1");
+
             // load current amount of items present
             statement = conn.prepareStatement(
                     "SELECT * FROM item WHERE id = ?");
@@ -271,18 +150,18 @@ public class QueryHandler {
             } else {
                 throw new SQLException();
             }
-            
+
             // increment no. of items present
             statement = conn.prepareStatement(
                     "UPDATE item SET cur_amount = ? WHERE id = ?");
             statement.setInt(1, curAmount + supplyAmount);
-            statement.setInt(2, itemId);           
-            if (statement.executeUpdate() != 1) throw new SQLException(); 
+            statement.setInt(2, itemId);
+            if (statement.executeUpdate() != 1) throw new SQLException();
 
             // create move record
             statement = conn.prepareStatement(
                     "INSERT INTO move SET account_id = ?, time = ?", Statement.RETURN_GENERATED_KEYS);
-            statement.setInt(1, getLoggedUserId());
+            statement.setInt(1, Login.getInstance().getLoggedUserId());
             statement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
             if (statement.executeUpdate() != 1) throw new SQLException();
             ResultSet rs = statement.getGeneratedKeys();
@@ -291,7 +170,7 @@ public class QueryHandler {
             } else {
                 throw new SQLException();
             }
-            
+
             // link supplied items to move
             statement = conn.prepareStatement(
                     "INSERT INTO move_item SET move_id = ?, item_id = ?, amount = ?, expiration = ?");
@@ -301,7 +180,7 @@ public class QueryHandler {
             statement.setDate(4, java.sql.Date.valueOf(expiration));
             if (statement.executeUpdate() != 1) throw new SQLException();
             conn.commit();
-        
+
         } catch (Throwable e) {
             e.printStackTrace();
             try {
@@ -320,7 +199,7 @@ public class QueryHandler {
                 e.printStackTrace();
             }
         }
-        return true;       
+        return true;
     }
 
     /**
@@ -329,7 +208,7 @@ public class QueryHandler {
      * @return list of custom attributes.
      */
     public HashSet<CustomAttribute> getItemCustomAttributes(int itemId) {
-        if (!hasConnectionDetails() || !hasUser()) return null;
+        if (!ConnectionFactory.getInstance().hasValidConnectionDetails() || !Login.getInstance().hasUser()) return null;
 
         Connection conn = null;
         PreparedStatement statement = null;
@@ -338,7 +217,7 @@ public class QueryHandler {
         // READ ATTRIBUTES FROM DB
         HashSet<CustomAttribute> customAttributes = new HashSet<>();
         try {
-            conn = getConnection();
+            conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
             statement = conn.prepareStatement(
                     "SELECT * FROM attribute WHERE item_id = ?");
@@ -376,14 +255,14 @@ public class QueryHandler {
      */
     public boolean itemUpdate(Item originalItem, HashMap<String, String> newBasicValues,
                               HashSet<CustomAttribute> attributesToAdd, HashSet<CustomAttribute> attributesToDelete) {
-        if (!hasConnectionDetails() || !hasUser()) return false;
+        if (!ConnectionFactory.getInstance().hasValidConnectionDetails() || !Login.getInstance().hasUser()) return false;
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
         Savepoint savepoint1 = null;
 
         try {
-            conn = getConnection();
+            conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
             conn.setAutoCommit(false);
             savepoint1 = conn.setSavepoint("Savepoint1");
@@ -469,7 +348,7 @@ public class QueryHandler {
      * @return list of log records.
      */
     public ArrayList<ItemMoveLogRecord> getItemTransactions(int itemId) {
-        if (!hasConnectionDetails() || !hasUser()) return null;
+        if (!ConnectionFactory.getInstance().hasValidConnectionDetails() || !Login.getInstance().hasUser()) return null;
 
         Connection conn = null;
         PreparedStatement statement = null;
@@ -478,7 +357,7 @@ public class QueryHandler {
         // READ LOG FROM DB
         ArrayList<ItemMoveLogRecord> logRecords = new ArrayList<>();
         try {
-            conn = getConnection();
+            conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
             statement = conn.prepareStatement(
                     "SELECT account.name, account.surname, move_item.amount, move.time " +
@@ -515,7 +394,7 @@ public class QueryHandler {
      * @return true on success.
      */
     public boolean getItemOfftakeRecords(int itemId, ObservableList<ItemOfftakeRecord> records) {
-        if (!hasConnectionDetails() || !hasUser()) return false;
+        if (!ConnectionFactory.getInstance().hasValidConnectionDetails() || !Login.getInstance().hasUser()) return false;
 
         Connection conn = null;
         PreparedStatement statement = null;
@@ -524,7 +403,7 @@ public class QueryHandler {
         int moveId;
 
         try {
-            conn = getConnection();
+            conn = ConnectionFactory.getInstance().getConnection();
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             assert conn != null;
             conn.setAutoCommit(false);
@@ -573,14 +452,14 @@ public class QueryHandler {
      * @return true on success.
      */
     public boolean itemOfftake (Item item, ObservableList<ItemOfftakeRecord> requestList) {
-        if (!hasConnectionDetails() || !hasUser()) return false;
+        if (!ConnectionFactory.getInstance().hasValidConnectionDetails() || !Login.getInstance().hasUser()) return false;
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
         Savepoint savepoint1 = null;
 
         try {
-            conn = getConnection();
+            conn = ConnectionFactory.getInstance().getConnection();
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             assert conn != null;
             conn.setAutoCommit(false);
@@ -637,7 +516,7 @@ public class QueryHandler {
             int moveId = 0;
             statement = conn.prepareStatement(
                     "INSERT INTO move SET account_id = ?, time = ?", Statement.RETURN_GENERATED_KEYS);
-            statement.setInt(1, getLoggedUserId());
+            statement.setInt(1, Login.getInstance().getLoggedUserId());
             statement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
             if (statement.executeUpdate() != 1) throw new SQLException();
             ResultSet rs = statement.getGeneratedKeys();
@@ -683,68 +562,19 @@ public class QueryHandler {
     }
 
     /**
-     * Retrieves all expiry warnings according to set date horizont.
-     * @param
-     * @return list of warnings.
-     */
-    public ArrayList<ExpiryDateWarningRecord> getExpiryDateWarnings() {
-        // todo: implement this method
-        return null;
-
-//        if (!hasConnectionDetails() || !hasUser()) return null;
-//
-//        Connection conn = null;
-//        PreparedStatement statement = null;
-//        ResultSet result = null;
-//
-//        // READ WARNINGS FROM DB
-//        ArrayList<ExpiryDateWarningRecord> records = new ArrayList<>();
-//        try {
-//            conn = getConnection();
-//            assert conn != null;
-//            statement = conn.prepareStatement(
-//                    "SELECT account.name, account.surname, move_item.amount, move.time " +
-//                            "FROM (move_item JOIN move ON (move_item.move_id = move.id)) " +
-//                            "JOIN account ON (move.account_id = account.id) WHERE move_item.item_id = ? " +
-//                            "ORDER BY move.time DESC");
-//            statement.setInt(1, itemId);
-//            result = statement.executeQuery();
-//            while (result.next()) {
-//                ExpiryDateWarningRecord logRecord =  new ExpiryDateWarningRecord(
-//                        result.getDate("time").toString(),
-//                        ((Integer)result.getInt("amount")).toString(),
-//                        result.getString("name") + " " + result.getString("surname")
-//                );
-//                records.add(logRecord);
-//            }
-//        } catch (SQLException e) {
-//            return null;
-//        } finally {
-//            try {
-//                if (result != null) result.close();
-//                if (statement != null) statement.close();
-//                if (conn != null) conn.close();
-//            } catch (SQLException e) {
-//                records = null;
-//            }
-//        }
-//        return records;
-    }
-
-    /**
      * Return current records in DB table 'account'.
      * @param accounts - list to be filled with retrieved records.
      * @return true in success.
      */
     public boolean getAccounts(ObservableList<Account> accounts) {
-        if (!hasConnectionDetails() || !hasUser()) return false;
+        if (!ConnectionFactory.getInstance().hasValidConnectionDetails() || !Login.getInstance().hasUser()) return false;
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
         Savepoint savepoint1 = null;
 
         try {
-            conn = getConnection();
+            conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
             // load current records of accounts
             statement = conn.prepareStatement(
@@ -789,7 +619,7 @@ public class QueryHandler {
      * @return true in success.
      */
     public boolean createAccount(Account newAccount) {
-        if (!hasConnectionDetails() || !hasUser()) return false;
+        if (!ConnectionFactory.getInstance().hasValidConnectionDetails() || !Login.getInstance().hasUser()) return false;
 
         Connection conn = null;
         PreparedStatement statement = null;
@@ -797,7 +627,7 @@ public class QueryHandler {
         Savepoint savepoint1 = null;
 
         try {
-            conn = getConnection();
+            conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
@@ -858,7 +688,7 @@ public class QueryHandler {
      * @return true in success.
      */
     public boolean modifyAccount(Account targetAccount) {
-        if (!hasConnectionDetails() || !hasUser()) return false;
+        if (!ConnectionFactory.getInstance().hasValidConnectionDetails() || !Login.getInstance().hasUser()) return false;
 
         Connection conn = null;
         PreparedStatement statement = null;
@@ -866,7 +696,7 @@ public class QueryHandler {
         Savepoint savepoint1 = null;
 
         try {
-            conn = getConnection();
+            conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
@@ -936,7 +766,7 @@ public class QueryHandler {
      * @return true if there are transactions assigned to the accountId.
      */
     public boolean hasTransactions(int accountId) {
-        if (!hasConnectionDetails() || !hasUser()) return false;
+        if (!ConnectionFactory.getInstance().hasValidConnectionDetails() || !Login.getInstance().hasUser()) return false;
 
         Connection conn = null;
         PreparedStatement statement = null;
@@ -945,7 +775,7 @@ public class QueryHandler {
         boolean answer = true;
 
         try {
-            conn = getConnection();
+            conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
 
             // verify whether transactions with given userId exist
@@ -979,7 +809,7 @@ public class QueryHandler {
      * @return true on success.
      */
     public boolean deleteAccount(Account accountToDelete, Account accountToTakeOver) {
-        if (!hasConnectionDetails() || !hasUser()) return false;
+        if (!ConnectionFactory.getInstance().hasValidConnectionDetails() || !Login.getInstance().hasUser()) return false;
         if (accountToDelete == null) return false;
 
         Connection conn = null;
@@ -989,7 +819,7 @@ public class QueryHandler {
         boolean ans = false;
 
         try {
-            conn = getConnection();
+            conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
@@ -1051,7 +881,7 @@ public class QueryHandler {
      * @param targetCategory - category to be modified.
      */
     public boolean modifyCategory(Category targetCategory) {
-        if (!hasConnectionDetails() || !hasUser()) return false;
+        if (!ConnectionFactory.getInstance().hasValidConnectionDetails() || !Login.getInstance().hasUser()) return false;
 
         Connection conn = null;
         PreparedStatement statement = null;
@@ -1059,7 +889,7 @@ public class QueryHandler {
         Savepoint savepoint1 = null;
 
         try {
-            conn = getConnection();
+            conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
@@ -1117,7 +947,7 @@ public class QueryHandler {
      * @return true if there are items assigned to the category.
      */
     public boolean hasItems(int categoryId) {
-        if (!hasConnectionDetails() || !hasUser()) return false;
+        if (!ConnectionFactory.getInstance().hasValidConnectionDetails() || !Login.getInstance().hasUser()) return false;
 
         Connection conn = null;
         PreparedStatement statement = null;
@@ -1126,7 +956,7 @@ public class QueryHandler {
         boolean answer = true;
 
         try {
-            conn = getConnection();
+            conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
 
             // verify whether transactions with given userId exist
@@ -1160,7 +990,7 @@ public class QueryHandler {
      * @return true on success.
      */
     public boolean deleteCategory(Category categoryToDelete, Category categoryToTakeOver) {
-        if (!hasConnectionDetails() || !hasUser()) return false;
+        if (!ConnectionFactory.getInstance().hasValidConnectionDetails() || !Login.getInstance().hasUser()) return false;
         if (categoryToDelete == null) return false;
 
         Connection conn = null;
@@ -1170,7 +1000,7 @@ public class QueryHandler {
         boolean ans;
 
         try {
-            conn = getConnection();
+            conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
@@ -1233,7 +1063,7 @@ public class QueryHandler {
      * @return true in success.
      */
     public boolean createCategory(Category newCategory) {
-        if (!hasConnectionDetails() || !hasUser()) return false;
+        if (!ConnectionFactory.getInstance().hasValidConnectionDetails() || !Login.getInstance().hasUser()) return false;
 
         Connection conn = null;
         PreparedStatement statement = null;
@@ -1241,7 +1071,7 @@ public class QueryHandler {
         Savepoint savepoint1 = null;
 
         try {
-            conn = getConnection();
+            conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
@@ -1305,14 +1135,14 @@ public class QueryHandler {
      */
     public boolean itemInsert(Item newItem, HashMap<String, String> newBasicValues,
                               HashSet<CustomAttribute> attributesToAdd) {
-        if (!hasConnectionDetails() || !hasUser()) return false;
+        if (!ConnectionFactory.getInstance().hasValidConnectionDetails() || !Login.getInstance().hasUser()) return false;
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
         Savepoint savepoint1 = null;
 
         try {
-            conn = getConnection();
+            conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
             conn.setAutoCommit(false);
             savepoint1 = conn.setSavepoint("Savepoint1");
@@ -1396,14 +1226,14 @@ public class QueryHandler {
      * @return true on success.
      */
     public boolean itemDelete(Item item) {
-        if (!hasAdmin() || !hasConnectionDetails() || !hasUser()) return false;
+        if (!Login.getInstance().hasAdmin() || !ConnectionFactory.getInstance().hasValidConnectionDetails() || !Login.getInstance().hasUser()) return false;
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
         Savepoint savepoint1 = null;
 
         try {
-            conn = getConnection();
+            conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
 
             savepoint1 = conn.setSavepoint("Savepoint1");
@@ -1443,14 +1273,14 @@ public class QueryHandler {
      * @return true on success.
      */
     public boolean getSoonExpiryItems(ObservableList<ExpiryDateWarningRecord> logRecords) {
-        if (!hasConnectionDetails() || !hasUser()) return false;
+        if (!ConnectionFactory.getInstance().hasValidConnectionDetails() || !Login.getInstance().hasUser()) return false;
 
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
 
         try {
-            conn = getConnection();
+            conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
             statement = conn.prepareStatement(
                     "SELECT item.id, item.name, SUM(move_item.amount) AS expiry_amount, move_item.expiration " +
@@ -1489,14 +1319,14 @@ public class QueryHandler {
      * @return true on success.
      */
     public boolean getLowStockItems(ObservableList<Item> items) {
-        if (!hasConnectionDetails() || !hasUser()) return false;
+        if (!ConnectionFactory.getInstance().hasValidConnectionDetails() || !Login.getInstance().hasUser()) return false;
 
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
 
         try {
-            conn = getConnection();
+            conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
 
             statement = conn.prepareStatement(
@@ -1535,14 +1365,14 @@ public class QueryHandler {
      * @return true on success.
      */
     public boolean getConsumptionOverviewRecords(ObservableList<ConsumptionOverviewRecord> items) {
-        if (!hasConnectionDetails() || !hasUser()) return false;
+        if (!ConnectionFactory.getInstance().hasValidConnectionDetails() || !Login.getInstance().hasUser()) return false;
 
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
 
         try {
-            conn = getConnection();
+            conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
 
             statement = conn.prepareStatement(

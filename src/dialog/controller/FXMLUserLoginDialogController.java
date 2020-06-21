@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import databaseAccess.ConnectionFactory;
+import databaseAccess.Login;
 import databaseAccess.QueryHandler;
 import dialog.DialogFactory;
 import javafx.event.ActionEvent;
@@ -30,10 +32,10 @@ public class FXMLUserLoginDialogController implements Initializable {
     private void loginButtonAction(ActionEvent e) {
         QueryHandler qh = QueryHandler.getInstance();
         DialogFactory df = DialogFactory.getInstance();
-        if (qh.hasConnectionDetails()) {
-            if (qh.hasUser()) {
-                String lastLoggedUserName = qh.getLoggedUserName();
-                qh.logOut();
+        if (ConnectionFactory.getInstance().hasValidConnectionDetails()) {
+            if (Login.getInstance().hasUser()) {
+                String lastLoggedUserName = Login.getInstance().getLoggedUserName();
+                Login.getInstance().logOut();
                 df.showAlert(Alert.AlertType.INFORMATION, "Používateľ: " +
                         lastLoggedUserName + " bol odhlásený.");
                 loginButton.setText("Prihlásiť sa");
@@ -41,11 +43,11 @@ public class FXMLUserLoginDialogController implements Initializable {
             } else {
                 String username = usernameTextField.getText();
                 String password = passwordTextField.getText();
-                if (qh.logIn(username, password)) {
+                if (Login.getInstance().logIn(username, password)) {
                     // successful login
                     disableInput();
                     df.showAlert(Alert.AlertType.INFORMATION, "Prihlásený používateľ: " +
-                            qh.getLoggedUserName() + ".");
+                            Login.getInstance().getLoggedUserName() + ".");
                     Stage stage = (Stage) loginButton.getScene().getWindow();
                     stage.close();
                 } else {
@@ -66,11 +68,11 @@ public class FXMLUserLoginDialogController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         QueryHandler qh = QueryHandler.getInstance();
         DialogFactory df = DialogFactory.getInstance();
-        if (qh.hasConnectionDetails()) {
-            if (qh.hasUser()) {
+        if (ConnectionFactory.getInstance().hasValidConnectionDetails()) {
+            if (Login.getInstance().hasUser()) {
                 // user logged in - offer logout
                 disableInput();
-                usernameTextField.setText(qh.getLoggedUserUsername());
+                usernameTextField.setText(Login.getInstance().getLoggedUserUsername());
                 loginButton.setText("Odhlásiť");
                 loginButton.requestFocus();
             } else {
