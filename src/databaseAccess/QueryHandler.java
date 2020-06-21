@@ -1536,4 +1536,50 @@ public class QueryHandler {
         }
         return true;
     }
+
+    /**
+     * Retrives all low on stock items.
+     * @param items list to store retrieved data in.
+     * @return true on success.
+     */
+    public boolean getLowStockItems(ObservableList<Item> items) {
+        if (!hasConnectionDetails() || !hasUser()) return false;
+
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet result = null;
+
+        try {
+            conn = getConnection();
+            assert conn != null;
+
+            statement = conn.prepareStatement(
+                    "SELECT * FROM item WHERE item.cur_amount <= item.min_amount");
+            result = statement.executeQuery();
+            while (result.next()) {
+                Item item = new Item(
+                        result.getInt("id"),
+                        result.getString("name"),
+                        result.getString("barcode"),
+                        result.getInt("min_amount"),
+                        result.getInt("cur_amount"),
+                        result.getString("unit"),
+                        result.getString("note"),
+                        result.getInt("category")
+                );
+                items.add(item);
+            }
+        } catch (SQLException e) {
+            return false;
+        } finally {
+            try {
+                if (result != null) result.close();
+                if (statement != null) statement.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                items = null;
+            }
+        }
+        return true;
+    }
 }

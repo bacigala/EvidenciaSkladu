@@ -290,8 +290,16 @@ public class FXMLMainWindowController implements Initializable {
      * MENU ITEM "Kontrola" -> "Nizky stav" Opens StockCheckDialog.
      */
     @FXML
-    private void StockCheckAction() {
-        // todo: implement this too :)
+    private void StockCheckAction() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLCheckAmountDialog.fxml"));
+        Parent root1 = fxmlLoader.load();
+        Stage stage = new Stage();
+        stage.setScene(new Scene(root1));
+        stage.initModality(Modality.APPLICATION_MODAL);
+        FXMLCheckAmountDialogController controller = fxmlLoader.getController();
+        controller.initData();
+        stage.showAndWait();
+        reloadMainTable();
     }
 
     /**

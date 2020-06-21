@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import databaseAccess.*;
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -20,17 +22,16 @@ import javafx.stage.Stage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.util.Callback;
-import supportStructures.EditableBoolean;
 
 /**
- * Dialog for soon expiration date display.
- * Lists all items with soon expiry date.
+ * Dialog for low stock items.
+ * Lists all items with insufficient amount in stock.
  */
 
-public class FXMLCheckExpirationDialogController implements Initializable {
-    @FXML private javafx.scene.control.TableView<ExpiryDateWarningRecord> mainTable;
+public class FXMLCheckAmountDialogController implements Initializable {
+    @FXML private javafx.scene.control.TableView<Item> mainTable;
 
-    private final ObservableList<ExpiryDateWarningRecord> itemList = FXCollections.observableArrayList();
+    private final ObservableList<Item> itemList = FXCollections.observableArrayList();
 
     /**
      * Requests current list of Items from DB and displays it in the table.
@@ -38,37 +39,42 @@ public class FXMLCheckExpirationDialogController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TableView setup
-        TableColumn itemNameColumn = new TableColumn<ExpiryDateWarningRecord, String>("Názov");
+        TableColumn itemNameColumn = new TableColumn<Item, String>("Názov");
         itemNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-        TableColumn itemCurrentAmountColumn = new TableColumn<ExpiryDateWarningRecord, String>("Počet");
-        itemCurrentAmountColumn.setCellValueFactory(new PropertyValueFactory<>("expiryAmount"));
+        TableColumn itemCurrentAmountColumn = new TableColumn<Item, String>("Minimum");
+        itemCurrentAmountColumn.setCellValueFactory(new PropertyValueFactory<>("minAmount"));
 
-        TableColumn itemExpiryDateColumn = new TableColumn<ExpiryDateWarningRecord, String>("Expirácia");
-        itemExpiryDateColumn.setCellValueFactory(new PropertyValueFactory<>("expiryDate"));
+        TableColumn itemExpiryDateColumn = new TableColumn<Item, String>("Aktuálne");
+        itemExpiryDateColumn.setCellValueFactory(new PropertyValueFactory<>("curAmount"));
 
-        TableColumn itemDetailButtonColumn = new TableColumn<>("Detail");
+        TableColumn itemDetailButtonColumn = new TableColumn<>("Možnosti");
         itemDetailButtonColumn.setSortable(false);
 
         itemDetailButtonColumn.setCellValueFactory(
-                (Callback<TableColumn.CellDataFeatures<ExpiryDateWarningRecord, Boolean>, ObservableValue<Boolean>>)
+                (Callback<TableColumn.CellDataFeatures<Item, Boolean>, ObservableValue<Boolean>>)
                         p -> new SimpleBooleanProperty(p.getValue() != null));
 
         itemDetailButtonColumn.setCellFactory(
-                (Callback<TableColumn<ExpiryDateWarningRecord, Boolean>, TableCell<ExpiryDateWarningRecord, Boolean>>) p -> new ButtonCell());
+                (Callback<TableColumn<Item, Boolean>, TableCell<Item, Boolean>>) p -> new ButtonCell());
 
         mainTable.getColumns().addAll(itemNameColumn, itemCurrentAmountColumn, itemExpiryDateColumn, itemDetailButtonColumn);
-        mainTable.setPlaceholder(new Label("Žiadne xz."));
+        mainTable.setPlaceholder(new Label("Žiadne záznamy."));
+
+        //todo  bind tableview with observable list
+        Property<ObservableList<Item>> itemListProperty = new SimpleObjectProperty<>(itemList);
+        mainTable.itemsProperty().bind(itemListProperty); // The Binding
+
         populateTable();
     }
 
     // cell in action column
-    private class ButtonCell extends TableCell<ExpiryDateWarningRecord, Boolean> {
-        final Button detailButton = new Button("Výber");
+    private class ButtonCell extends TableCell<Item, Boolean> {
+        final Button supplyButton = new Button("Vklad");
 
         ButtonCell() {
-            detailButton.setOnAction(t -> {
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLItemOfftakeDialog.fxml"));
+            supplyButton.setOnAction(t -> {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLItemSupplyDialog.fxml"));
                 Parent root1 = null;
                 try {
                     root1 = fxmlLoader.load();
@@ -78,7 +84,7 @@ public class FXMLCheckExpirationDialogController implements Initializable {
                 Stage stage = new Stage();
                 stage.setScene(new Scene(root1));
                 stage.initModality(Modality.APPLICATION_MODAL);
-                FXMLItemOfftakeDialogController controller = fxmlLoader.getController();
+                FXMLItemSupplyDialogController controller = fxmlLoader.getController();
                 controller.initData(getTableView().getItems().get(getIndex()));
                 stage.showAndWait();
 
@@ -86,7 +92,7 @@ public class FXMLCheckExpirationDialogController implements Initializable {
             });
         }
 
-        HBox pane = new HBox(detailButton);
+        HBox pane = new HBox(supplyButton);
 
         //Display button if the row is not empty
         @Override
@@ -115,8 +121,7 @@ public class FXMLCheckExpirationDialogController implements Initializable {
      */
     private void populateTable() {
         itemList.clear();
-        QueryHandler.getInstance().getSoonExpiryItems(itemList);
-        mainTable.getItems().addAll(itemList);
+        QueryHandler.getInstance().getLowStockItems(itemList);
     }
 
 }
