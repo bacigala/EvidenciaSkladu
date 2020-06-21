@@ -19,103 +19,48 @@ import java.util.logging.Logger;
  */
 
 public class QueryHandler {
-    // singleton instance
-    private static final QueryHandler queryHandler = new QueryHandler();
-
     // logged in user info
     private boolean loggedUserAdmin = false;
     private String loggedUserUsername = "";
     private String loggedUserName = "";
     private int loggedUserId = 0;
 
-    // connection details
-    private String databaseIp = "192.168.0.10";
-    private String databasePort = "3306";
-    private String databaseName = "zubardb";
-    private String databaseUsername;
-    private String databasePassword;
-
     // last retrieved list of items and map of categories
     private ArrayList<Item> itemList = new ArrayList<>();
     private HashMap<Integer, Category> categoryMap = new HashMap<>();
 
-
-    /**
-     * Empty constructor - singleton class.
-     */
+    // singleton
+    private static final QueryHandler queryHandler = new QueryHandler();
     private QueryHandler() {}
-
-    /**
-     * @return the only singleton instance.
-     */
     public static QueryHandler getInstance() {
         return queryHandler;
     }
 
-    /**
-     * @return connection based on current connection details.
-     */
+
+    // todo: move this out
     private Connection getConnection() {
-        Connection connection = null;
-        try {
-            connection = DriverManager.getConnection("jdbc:mysql://"
-                    + databaseIp + ":" + databasePort + "/"
-                    + databaseName, databaseUsername, databasePassword);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return connection;
+        return ConnectionFactory.getInstance().getConnection();
     }
-
-    /**
-     * @return true if valid connection details are present.
-     */
     public boolean hasConnectionDetails() {
-        Connection connection = getConnection();
-        boolean result = connection != null;
-        if (result) {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return result;
+        return ConnectionFactory.getInstance().hasValidConnectionDetails();
     }
-
-    /**
-     * Setups connection with basic database privileges. (additional protection)
-     * @return true if logged in.
-     */
     public boolean setBasicUserConnectionDetails() {
-        databaseUsername = "basic-user";
-        databasePassword = "CwJNF7zJciaxMY3v";
-        return hasConnectionDetails();
+        return ConnectionFactory.getInstance().setBasicUserConnectionDetails();
     }
-
     public boolean setBasicUserConnectionDetails(String ip, String port) {
-        databaseIp = ip;
-        databasePort = port;
-        return setBasicUserConnectionDetails();
+        return ConnectionFactory.getInstance().setConnectionDetails(ip, port);
     }
-
-    /**
-     * Setups connection with admin database privileges.
-     * @return true if logged in.
-     */
     private boolean setAdminUserConnectionDetails() {
-        databaseUsername = "admin-user";
-        databasePassword = "scfAT4nHm5MKJu9D";
-        return hasConnectionDetails();
+        return ConnectionFactory.getInstance().setAdminUserConnectionDetails();
     }
-
     public String getDatabaseIp() {
-        return databaseIp;
+        return ConnectionFactory.getInstance().getDatabaseIp();
     }
-
     public String getDatabasePort() {
-        return databasePort;
+        return ConnectionFactory.getInstance().getDatabasePort();
     }
+    // todo: END OF move out
+
 
     /**
      * Verifies username and password.

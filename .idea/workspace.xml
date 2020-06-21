@@ -2,102 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cdb932d9-7e58-4d94-93a9-e7b232ef17da" name="Default" comment="&quot;completed 'customAttributeModifyDialog', now it modifies Sets to signalise desired changes&quot;">
+      <change afterPath="$PROJECT_DIR$/src/databaseAccess/ConnectionFactory.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/databaseAccess/Account.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/databaseAccess/Category.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/databaseAccess/ConsumptionOverviewRecord.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/databaseAccess/CustomAttribute.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/databaseAccess/ExpiryDateWarningRecord.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/databaseAccess/Item.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/databaseAccess/ItemMoveLogRecord.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/databaseAccess/ItemOfftakeRecord.class" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/databaseAccess/QueryHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/EvidenciaSkladu/databaseAccess/QueryHandler.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/DialogFactory.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/DialogFactory.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLAccountManagementDialog.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLAccountManagementDialogController$ButtonCell.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLAccountManagementDialogController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLAccountModifyDialog.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLAccountModifyDialogController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLCategoryManagementDialog.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLCategoryManagementDialogController$ButtonCell.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLCategoryManagementDialogController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLCategoryModifyDialog.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLCategoryModifyDialogController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLCheckAmountDialog.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLCheckAmountDialogController$ButtonCell.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLCheckAmountDialogController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLCheckExpirationDialog.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLCheckExpirationDialogController$ButtonCell.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLCheckExpirationDialogController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLConnectionDetailsDialog.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLConnectionDetailsDialogController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLConsumptionOverviewDialog.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLConsumptionOverviewDialogController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLCustomAttributeCreateDialog.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLCustomAttributeCreateDialogController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLCustomAttributeModifyDialog.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLCustomAttributeModifyDialogController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLItemExpiryDateCheckDialog.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLItemExpiryDateCheckDialogController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLItemModifyDialog.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLItemModifyDialogController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLItemOfftakeDialog.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLItemOfftakeDialogController$1.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLItemOfftakeDialogController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLItemSupplyDialog.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLItemSupplyDialogController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLItemTransactionsDialog.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLItemTransactionsDialogController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLSimpleChoiceDialog.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLSimpleChoiceDialogController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLUserLoginDialog.fxml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/FXMLUserLoginDialogController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/mainWindow/FXMLMainWindowController.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/EvidenciaSkladu/mainWindow/FXMLMainWindowController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/databaseAccess/Account.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/domain/Account.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/databaseAccess/Category.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/domain/Category.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/databaseAccess/ConsumptionOverviewRecord.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/domain/ConsumptionOverviewRecord.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/databaseAccess/CustomAttribute.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/domain/CustomAttribute.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/databaseAccess/ExpiryDateWarningRecord.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/domain/ExpiryDateWarningRecord.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/databaseAccess/Item.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/domain/Item.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/databaseAccess/ItemMoveLogRecord.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/domain/ItemMoveLogRecord.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/databaseAccess/ItemOfftakeRecord.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/domain/ItemOfftakeRecord.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/controller/FXMLAccountManagementDialogController$ButtonCell.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/controller/FXMLAccountManagementDialogController$ButtonCell.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/controller/FXMLAccountManagementDialogController.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/controller/FXMLAccountManagementDialogController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/controller/FXMLCategoryManagementDialogController$ButtonCell.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/controller/FXMLCategoryManagementDialogController$ButtonCell.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/controller/FXMLCategoryManagementDialogController.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/controller/FXMLCategoryManagementDialogController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/controller/FXMLCheckExpirationDialogController$ButtonCell.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/controller/FXMLCheckExpirationDialogController$ButtonCell.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/controller/FXMLItemModifyDialogController.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/EvidenciaSkladu/dialog/controller/FXMLItemModifyDialogController.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/databaseAccess/QueryHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/databaseAccess/QueryHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/DialogFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/DialogFactory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLAccountManagementDialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/fxml/FXMLAccountManagementDialog.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLAccountManagementDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLAccountManagementDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLAccountModifyDialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/fxml/FXMLAccountModifyDialog.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLAccountModifyDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLAccountModifyDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLCategoryManagementDialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/fxml/FXMLCategoryManagementDialog.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLCategoryManagementDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLCategoryManagementDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLCategoryModifyDialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/fxml/FXMLCategoryModifyDialog.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLCategoryModifyDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLCategoryModifyDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLCheckAmountDialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/fxml/FXMLCheckAmountDialog.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLCheckAmountDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLCheckAmountDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLCheckExpirationDialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/fxml/FXMLCheckExpirationDialog.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLCheckExpirationDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLCheckExpirationDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLConnectionDetailsDialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/fxml/FXMLConnectionDetailsDialog.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLConnectionDetailsDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLConnectionDetailsDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLConsumptionOverviewDialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/fxml/FXMLConsumptionOverviewDialog.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLConsumptionOverviewDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLConsumptionOverviewDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLCustomAttributeCreateDialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/fxml/FXMLCustomAttributeCreateDialog.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLCustomAttributeCreateDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLCustomAttributeCreateDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLCustomAttributeModifyDialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/fxml/FXMLCustomAttributeModifyDialog.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLCustomAttributeModifyDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLCustomAttributeModifyDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLItemExpiryDateCheckDialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/fxml/FXMLItemExpiryDateCheckDialog.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLItemExpiryDateCheckDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLItemExpiryDateCheckDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLItemModifyDialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/fxml/FXMLItemModifyDialog.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLItemModifyDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLItemModifyDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLItemOfftakeDialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/fxml/FXMLItemOfftakeDialog.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLItemOfftakeDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLItemOfftakeDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLItemSupplyDialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/fxml/FXMLItemSupplyDialog.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLItemSupplyDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLItemSupplyDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLItemTransactionsDialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/fxml/FXMLItemTransactionsDialog.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLItemTransactionsDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLItemTransactionsDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLSimpleChoiceDialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/fxml/FXMLSimpleChoiceDialog.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLSimpleChoiceDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLSimpleChoiceDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLUserLoginDialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/fxml/FXMLUserLoginDialog.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dialog/FXMLUserLoginDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLUserLoginDialogController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/mainWindow/FXMLMainWindowController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/mainWindow/FXMLMainWindowController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -309,7 +223,7 @@
     </configuration>
   </component>
   <component name="StructureViewFactory">
-    <option name="ACTIVE_ACTIONS" value=",VISIBILITY_SORTER" />
+    <option name="ACTIVE_ACTIONS" value=",VISIBILITY_SORTER,SHOW_FIELDS" />
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -338,7 +252,7 @@
       <workItem from="1592549174911" duration="1982000" />
       <workItem from="1592637858606" duration="11565000" />
       <workItem from="1592664771026" duration="14925000" />
-      <workItem from="1592716745160" duration="11884000" />
+      <workItem from="1592716745160" duration="21252000" />
     </task>
     <task id="LOCAL-00001" summary="&quot;completed 'customAttributeModifyDialog', now it modifies Sets to signalise desired changes&quot;">
       <created>1589276133406</created>
@@ -384,10 +298,10 @@
       <screen x="0" y="0" width="1600" height="870" />
     </state>
     <state x="583" y="330" width="433" height="241" key="#com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesDialog.classes/0.0.1600.870@0.0.1600.870" timestamp="1592748622615" />
-    <state x="531" y="275" key="#com.intellij.refactoring.move.moveInstanceMethod.MoveInstanceMethodDialog" timestamp="1592478165555">
+    <state x="531" y="275" key="#com.intellij.refactoring.move.moveInstanceMethod.MoveInstanceMethodDialog" timestamp="1592752255506">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state x="531" y="275" key="#com.intellij.refactoring.move.moveInstanceMethod.MoveInstanceMethodDialog/0.0.1600.870@0.0.1600.870" timestamp="1592478165555" />
+    <state x="531" y="275" key="#com.intellij.refactoring.move.moveInstanceMethod.MoveInstanceMethodDialog/0.0.1600.870@0.0.1600.870" timestamp="1592752255506" />
     <state x="498" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog" timestamp="1584178399728">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
@@ -408,22 +322,22 @@
       <screen x="0" y="0" width="1600" height="870" />
     </state>
     <state x="506" y="175" key="FileChooserDialogImpl/0.0.1600.870@0.0.1600.870" timestamp="1592748584826" />
-    <state width="1556" height="174" key="GridCell.Tab.0.bottom" timestamp="1592748830954">
+    <state width="1556" height="318" key="GridCell.Tab.0.bottom" timestamp="1592759347626">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state width="1556" height="174" key="GridCell.Tab.0.bottom/0.0.1600.870@0.0.1600.870" timestamp="1592748830954" />
-    <state width="1556" height="174" key="GridCell.Tab.0.center" timestamp="1592748830954">
+    <state width="1556" height="318" key="GridCell.Tab.0.bottom/0.0.1600.870@0.0.1600.870" timestamp="1592759347626" />
+    <state width="1556" height="318" key="GridCell.Tab.0.center" timestamp="1592759347625">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state width="1556" height="174" key="GridCell.Tab.0.center/0.0.1600.870@0.0.1600.870" timestamp="1592748830954" />
-    <state width="1556" height="174" key="GridCell.Tab.0.left" timestamp="1592748830954">
+    <state width="1556" height="318" key="GridCell.Tab.0.center/0.0.1600.870@0.0.1600.870" timestamp="1592759347625" />
+    <state width="1556" height="318" key="GridCell.Tab.0.left" timestamp="1592759347625">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state width="1556" height="174" key="GridCell.Tab.0.left/0.0.1600.870@0.0.1600.870" timestamp="1592748830954" />
-    <state width="1556" height="174" key="GridCell.Tab.0.right" timestamp="1592748830954">
+    <state width="1556" height="318" key="GridCell.Tab.0.left/0.0.1600.870@0.0.1600.870" timestamp="1592759347625" />
+    <state width="1556" height="318" key="GridCell.Tab.0.right" timestamp="1592759347625">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state width="1556" height="174" key="GridCell.Tab.0.right/0.0.1600.870@0.0.1600.870" timestamp="1592748830954" />
+    <state width="1556" height="318" key="GridCell.Tab.0.right/0.0.1600.870@0.0.1600.870" timestamp="1592759347625" />
     <state width="1540" height="268" key="GridCell.Tab.1.bottom" timestamp="1589273637783">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
@@ -464,10 +378,10 @@
       <screen x="0" y="0" width="1600" height="870" />
     </state>
     <state x="542" y="62" key="refactoring.ChangeSignatureDialog/0.0.1600.870@0.0.1600.870" timestamp="1592550752604" />
-    <state x="456" y="192" key="run.anything.popup" timestamp="1592748990413">
+    <state x="456" y="192" key="run.anything.popup" timestamp="1592759156999">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state x="456" y="192" key="run.anything.popup/0.0.1600.870@0.0.1600.870" timestamp="1592748990413" />
+    <state x="456" y="192" key="run.anything.popup/0.0.1600.870@0.0.1600.870" timestamp="1592759156999" />
     <state x="463" y="186" width="672" height="678" key="search.everywhere.popup" timestamp="1592481905255">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
