@@ -63,7 +63,7 @@ public class DialogFactory {
      */
     public boolean showConnectionDetailsDialog() {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLConnectionDetailsDialog.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("fxml/FXMLConnectionDetailsDialog.fxml"));
             Parent root1 = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root1));
@@ -82,7 +82,7 @@ public class DialogFactory {
      */
     public boolean showUserLoginDialog() {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLUserLoginDialog.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("fxml/FXMLUserLoginDialog.fxml"));
             Parent root1 = (Parent) fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root1));

@@ -1,6 +1,7 @@
 
 package databaseAccess;
 
+import domain.*;
 import javafx.collections.ObservableList;
 
 import java.io.IOException;

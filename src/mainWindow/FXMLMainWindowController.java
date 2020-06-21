@@ -1,11 +1,11 @@
 
 package mainWindow;
 
-import databaseAccess.CustomAttribute;
-import databaseAccess.Item;
+import dialog.controller.*;
+import domain.CustomAttribute;
+import domain.Item;
 import databaseAccess.QueryHandler;
 import dialog.*;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -148,7 +148,7 @@ public class FXMLMainWindowController implements Initializable {
     private void itemSupply() throws IOException {
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLItemSupplyDialog.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLItemSupplyDialog.fxml"));
             Parent root1 = (Parent) fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root1));  
@@ -167,7 +167,7 @@ public class FXMLMainWindowController implements Initializable {
     private void itemRequest() throws IOException {
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLItemOfftakeDialog.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLItemOfftakeDialog.fxml"));
             Parent root1 = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root1));
@@ -186,7 +186,7 @@ public class FXMLMainWindowController implements Initializable {
     private void itemTransactions() throws IOException {
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLItemTransactionsDialog.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLItemTransactionsDialog.fxml"));
             Parent root1 = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root1));
@@ -205,7 +205,7 @@ public class FXMLMainWindowController implements Initializable {
     private void itemModify() throws IOException {
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLItemModifyDialog.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLItemModifyDialog.fxml"));
             Parent root1 = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root1));
@@ -224,7 +224,7 @@ public class FXMLMainWindowController implements Initializable {
     @FXML
     private void openNewItemDialog() throws IOException {
         Item newItem = new Item(0, "", "", 0, 0, "", "", 1);
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLItemModifyDialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLItemModifyDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));
@@ -242,7 +242,7 @@ public class FXMLMainWindowController implements Initializable {
      */
     @FXML
     private void openAccountManagement() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLAccountManagementDialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLAccountManagementDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));
@@ -259,7 +259,7 @@ public class FXMLMainWindowController implements Initializable {
      */
     @FXML
     private void openCategoryManagement() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLCategoryManagementDialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLCategoryManagementDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));
@@ -275,7 +275,7 @@ public class FXMLMainWindowController implements Initializable {
      */
     @FXML
     private void expiryDateCheckAction() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLCheckExpirationDialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLCheckExpirationDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));
@@ -291,7 +291,7 @@ public class FXMLMainWindowController implements Initializable {
      */
     @FXML
     private void StockCheckAction() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLCheckAmountDialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLCheckAmountDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));
@@ -307,7 +307,7 @@ public class FXMLMainWindowController implements Initializable {
      */
     @FXML
     private void ConsumptionCheckAction() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLConsumptionOverviewDialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLConsumptionOverviewDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));
