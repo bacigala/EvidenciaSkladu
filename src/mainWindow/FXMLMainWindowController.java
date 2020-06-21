@@ -303,6 +303,19 @@ public class FXMLMainWindowController implements Initializable {
     }
 
     /**
+     * MENU ITEM "Kontrola" -> "Spotreba" Opens ConsumptionOverviewDialog.
+     */
+    @FXML
+    private void ConsumptionCheckAction() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/FXMLConsumptionOverviewDialog.fxml"));
+        Parent root1 = fxmlLoader.load();
+        Stage stage = new Stage();
+        stage.setScene(new Scene(root1));
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.showAndWait();
+    }
+
+    /**
      * Disables GUI functions and hides all visible information which require login to be viewed.
      */
     private void userLogoutState() {

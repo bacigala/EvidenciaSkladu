@@ -27,6 +27,7 @@
               <items>
                 <MenuItem mnemonicParsing="false" onAction="#expiryDateCheckAction" text="Expirácia" />
                   <MenuItem mnemonicParsing="false" onAction="#StockCheckAction" text="Nízky stav" />
+                  <MenuItem mnemonicParsing="false" onAction="#ConsumptionCheckAction" text="Spotreba" />
               </items>
             </Menu>
         </menus>
