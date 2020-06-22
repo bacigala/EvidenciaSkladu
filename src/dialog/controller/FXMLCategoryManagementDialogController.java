@@ -83,7 +83,7 @@ public class FXMLCategoryManagementDialogController implements Initializable {
                 stage.showAndWait();
 
                 if (saveRequest.get()) {
-                    ComplexQueryHandler.getInstance().modifyCategory(targetCategory);
+                    CategoryDAO.getInstance().modifyCategory(targetCategory);
                 }
 
                 populateTable();
@@ -98,7 +98,7 @@ public class FXMLCategoryManagementDialogController implements Initializable {
 
                 Category selectedCategory = null;
 
-                if (qh.hasItems(targetCategory.getId())) {
+                if (CategoryDAO.getInstance().hasItems(targetCategory.getId())) {
                     // v kategorii su nejake polozky
                     FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/FXMLSimpleChoiceDialog.fxml"));
                     Parent root1 = null;
@@ -114,7 +114,7 @@ public class FXMLCategoryManagementDialogController implements Initializable {
                     stage.setTitle("Prevod položiek");
 
                     ObservableList<Category> categoreis = FXCollections.observableArrayList();
-                    categoreis.addAll(ComplexQueryHandler.getInstance().getCategoryMap().values());
+                    categoreis.addAll(CategoryDAO.getInstance().getCategoryMap().values());
 
                     controller.setChoiceList(categoreis);
                     controller.setLabelText("Vyberte kategóriu pod ktorú budú prevedené položky odstránenej kategoórie.");
@@ -127,7 +127,7 @@ public class FXMLCategoryManagementDialogController implements Initializable {
                 }
 
                 // pokusime sa odstranit vybranu kategoriu
-                if(qh.deleteCategory(targetCategory, selectedCategory)) {
+                if(CategoryDAO.getInstance().deleteCategory(targetCategory, selectedCategory)) {
                     df.showAlert(Alert.AlertType.INFORMATION, "Kategória bola úspešne odstránená");
                 } else {
                     df.showAlert(Alert.AlertType.ERROR, "Kategóriu sa nepodarilo odstrániť");
@@ -175,7 +175,7 @@ public class FXMLCategoryManagementDialogController implements Initializable {
         stage.showAndWait();
 
         if (saveRequest.get()) {
-            ComplexQueryHandler.getInstance().createCategory(newCategory);
+            CategoryDAO.getInstance().createCategory(newCategory);
         }
 
         ItemDAO.getInstance().reloadItemList();
@@ -187,7 +187,7 @@ public class FXMLCategoryManagementDialogController implements Initializable {
      */
     private void populateTable() {
         ObservableList<Category> categoryList
-                = FXCollections.observableArrayList(ComplexQueryHandler.getInstance().getCategoryMap().values());
+                = FXCollections.observableArrayList(CategoryDAO.getInstance().getCategoryMap().values());
         mainTable.getItems().clear();
         if (!categoryList.isEmpty()) {
             for (Category category : categoryList) {

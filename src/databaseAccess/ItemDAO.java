@@ -72,8 +72,8 @@ public class ItemDAO {
         }
         if (exceptionThrown) return false;
         itemList = newItemList;
-        //todo: move reloadCatList to categoryDAO
-        return ComplexQueryHandler.getInstance().reloadCatList();
+
+        return CategoryDAO.getInstance().reloadCatList();
     }
 
     /**

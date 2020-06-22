@@ -1,6 +1,7 @@
 
 package domain;
 
+import databaseAccess.CategoryDAO;
 import databaseAccess.ComplexQueryHandler;
 
 /**
@@ -62,7 +63,7 @@ public class Item {
     }
     
     public String getCategoryName() {
-        return ComplexQueryHandler.getInstance().getCategoryMap().get(getCategory()).getName();
+        return CategoryDAO.getInstance().getCategoryMap().get(getCategory()).getName();
     }
 
 }

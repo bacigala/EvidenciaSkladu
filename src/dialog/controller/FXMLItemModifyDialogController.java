@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
+import databaseAccess.CategoryDAO;
 import databaseAccess.ItemDAO;
 import databaseAccess.Login;
 import dialog.DialogFactory;
@@ -73,8 +74,8 @@ public class FXMLItemModifyDialogController implements Initializable {
             curAmountTextField.setText(Integer.toString(item.getCurAmount()));
             minAmountTextField.setText(Integer.toString(item.getMinAmount()));
             unitTextField.setText(item.getUnit());
-            categoryChoiceBox.getItems().addAll(qh.getCategoryMap().values());
-            categoryChoiceBox.setValue(qh.getCategoryMap().get(item.getCategory()));
+            categoryChoiceBox.getItems().addAll(CategoryDAO.getInstance().getCategoryMap().values());
+            categoryChoiceBox.setValue(CategoryDAO.getInstance().getCategoryMap().get(item.getCategory()));
 
             // custom attributes table
             TableColumn attributeName = new TableColumn("Atribút");
