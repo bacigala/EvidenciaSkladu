@@ -73,7 +73,8 @@ public class FXMLItemOfftakeDialogController implements Initializable {
             );
 
             mainTable.getColumns().addAll(expirationColumn, currentAmountColumn, requestedAmountColumn);
-            QueryHandler.getInstance().getItemOfftakeRecords(item.getId(), requestList);
+            //todo: use return value to show appropriate error
+            ItemDAO.getInstance().getItemVarieties(item.getId(), requestList);
             populateTable();
         } else {
             // error - invalid initialization data received
@@ -88,10 +89,10 @@ public class FXMLItemOfftakeDialogController implements Initializable {
     @FXML
     private void offtakeButtonAction() {
         rootAnchorPane.setDisable(true);
-        QueryHandler qh = QueryHandler.getInstance();
+        ComplexQueryHandler qh = ComplexQueryHandler.getInstance();
         DialogFactory df = DialogFactory.getInstance();
         try {
-            if (qh.itemOfftake(item, requestList)) {
+            if (ItemDAO.getInstance().itemOfftake(item, requestList)) {
                 DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Výber položky prebehla úspešne.");
                 cancelButtonAction();
             } else {

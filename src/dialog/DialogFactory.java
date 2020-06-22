@@ -2,7 +2,6 @@ package dialog;
 
 import databaseAccess.ConnectionFactory;
 import databaseAccess.Login;
-import databaseAccess.QueryHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;

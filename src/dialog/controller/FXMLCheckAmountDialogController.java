@@ -122,7 +122,7 @@ public class FXMLCheckAmountDialogController implements Initializable {
      */
     private void populateTable() {
         itemList.clear();
-        QueryHandler.getInstance().getLowStockItems(itemList);
+        ComplexQueryHandler.getInstance().getLowStockItems(itemList);
     }
 
 }

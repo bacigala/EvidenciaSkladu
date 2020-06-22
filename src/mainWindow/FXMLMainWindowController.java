@@ -2,11 +2,12 @@
 package mainWindow;
 
 import databaseAccess.ConnectionFactory;
+import databaseAccess.ItemDAO;
 import databaseAccess.Login;
 import dialog.controller.*;
 import domain.CustomAttribute;
 import domain.Item;
-import databaseAccess.QueryHandler;
+import databaseAccess.ComplexQueryHandler;
 import dialog.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -88,7 +89,7 @@ public class FXMLMainWindowController implements Initializable {
         selectedItemPropertiesTable.setPlaceholder(new Label("Bez ďalších atribútov."));
 
         // test default connection settings, require login information
-        QueryHandler queryHandler = QueryHandler.getInstance();
+        ComplexQueryHandler queryHandler = ComplexQueryHandler.getInstance();
         if (ConnectionFactory.getInstance().setBasicUserConnectionDetails()) {
             // successfully established database connection
             openLogInSettings();
@@ -102,10 +103,9 @@ public class FXMLMainWindowController implements Initializable {
     @FXML
     private boolean reloadMainTable() {
         clearItemDetails();
-        QueryHandler qh = QueryHandler.getInstance();
-        if (qh.reloadItemList()) {
+        if (ItemDAO.getInstance().reloadItemList()) {
             mainTable.getItems().clear();
-            for (Item i : qh.getItemList()) {
+            for (Item i : ItemDAO.getInstance().getItemList()) {
                 mainTable.getItems().add(i);
             } 
             return true;
@@ -121,10 +121,10 @@ public class FXMLMainWindowController implements Initializable {
         // clear previously loaded custom attributes
         selectedItemPropertiesTable.getItems().clear();
 
-        QueryHandler qh = QueryHandler.getInstance();
+        ComplexQueryHandler qh = ComplexQueryHandler.getInstance();
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
-            HashSet<CustomAttribute> newCustomAttributes = qh.getItemCustomAttributes(selectedItem.getId());
+            HashSet<CustomAttribute> newCustomAttributes = ItemDAO.getInstance().getItemCustomAttributes(selectedItem.getId());
             if (newCustomAttributes != null) {
                 for (CustomAttribute ca : newCustomAttributes) {
                     selectedItemPropertiesTable.getItems().add(ca);

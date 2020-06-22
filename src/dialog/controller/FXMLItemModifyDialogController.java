@@ -5,12 +5,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
+import databaseAccess.ItemDAO;
 import databaseAccess.Login;
 import dialog.DialogFactory;
 import domain.Category;
 import domain.CustomAttribute;
 import domain.Item;
-import databaseAccess.QueryHandler;
+import databaseAccess.ComplexQueryHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -62,7 +63,7 @@ public class FXMLItemModifyDialogController implements Initializable {
     public void initData(Item item, HashSet<CustomAttribute> customAttributes) {
 
         if (item != null) {
-            QueryHandler qh = QueryHandler.getInstance();
+            ComplexQueryHandler qh = ComplexQueryHandler.getInstance();
 
             permanentDeletionButton.setDisable(isNewItem && Login.getInstance().hasAdmin());
 
@@ -93,47 +94,50 @@ public class FXMLItemModifyDialogController implements Initializable {
      * Button 'Ulozit' sends desired changes to QueryHandler.
      */
     @FXML
-    private void saveButton() throws IOException {
-        // contains all basic values (item) properties which need to be updated
-        HashMap<String, String> newBasicValues = new HashMap<>();
-
-        if (!nameTextField.getText().equals(item.getName())) {
-            // name was changed
-            newBasicValues.put("name", nameTextField.getText());
-        }
-        if (!codeTextField.getText().equals(item.getBarcode())) {
-            // code was changed
-            newBasicValues.put("barcode", codeTextField.getText());
-        }
-        if (!minAmountTextField.getText().equals(item.getMinAmount())) {
-            // min-amount was changed
-            newBasicValues.put("min_amount", minAmountTextField.getText());
-        }
-        if (!unitTextField.getText().equals(item.getUnit())) {
-            // unit was changed
-            newBasicValues.put("unit", unitTextField.getText());
-        }
-        if (!categoryChoiceBox.getValue().getName().equals(item.getCategoryName())) {
-            // category was changed
-            newBasicValues.put("category", Integer.toString(categoryChoiceBox.getValue().getId()));
-        }
-
-        QueryHandler qh = QueryHandler.getInstance();
+    private void saveButton() {
+        ComplexQueryHandler qh = ComplexQueryHandler.getInstance();
         DialogFactory df = DialogFactory.getInstance();
         try {
             if (isNewItem) {
-                if (qh.itemInsert(item, newBasicValues, attributesToAdd)) {
+                if (nameTextField.getText().equals("")) {
+                    df.showAlert(Alert.AlertType.WARNING, "Prosím, zadajte názov položky.");
+                    return;
+                }
+                int minAmount = 0;
+                if (!minAmountTextField.getText().equals("")) {
+                    minAmount = Integer.parseInt(minAmountTextField.getText());
+                }
+                Item newItem = new Item(0, nameTextField.getText(), codeTextField.getText(), minAmount,
+                        0, unitTextField.getText(), "", categoryChoiceBox.getValue().getId());
+                if (ItemDAO.getInstance().itemInsert(newItem, attributesToAdd)) {
                     DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Nová položka bola úspešne vytvorená.");
                     cancelButton();
                 } else {
-                    df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");
+                    throw new IOException();
                 }
             } else {
-                if (qh.itemUpdate(item, newBasicValues, attributesToAdd, attributesToDelete)) {
+                HashMap<String, String> newBasicValues = new HashMap<>();
+                //check whether attribute was changed -> add to hashMap
+                if (!nameTextField.getText().equals(item.getName())) {
+                    newBasicValues.put("name", nameTextField.getText());
+                }
+                if (!codeTextField.getText().equals(item.getBarcode())) {
+                   newBasicValues.put("barcode", codeTextField.getText());
+                }
+                if (!minAmountTextField.getText().equals(item.getMinAmount())) {
+                    newBasicValues.put("min_amount", minAmountTextField.getText());
+                }
+                if (!unitTextField.getText().equals(item.getUnit())) {
+                    newBasicValues.put("unit", unitTextField.getText());
+                }
+                if (!categoryChoiceBox.getValue().getName().equals(item.getCategoryName())) {
+                    newBasicValues.put("category", Integer.toString(categoryChoiceBox.getValue().getId()));
+                }
+                if (ItemDAO.getInstance().itemUpdate(item, newBasicValues, attributesToAdd, attributesToDelete)) {
                     DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Úprava položky prebehla úspešne.");
                     cancelButton();
                 } else {
-                    df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");
+                    throw new IOException();
                 }
             }
         } catch (Exception e) {
@@ -146,11 +150,11 @@ public class FXMLItemModifyDialogController implements Initializable {
      */
     @FXML
     private void permanentDeleteButtonAction() throws IOException {
-        QueryHandler qh = QueryHandler.getInstance();
+        ComplexQueryHandler qh = ComplexQueryHandler.getInstance();
         DialogFactory df = DialogFactory.getInstance();
         // todo: extra warning before delete
         try {
-            if (qh.itemDelete(item)) {
+            if (ItemDAO.itemDelete(item)) {
                 DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Položka bola úspešne odstránená z databázy.");
                 cancelButton();
             } else {

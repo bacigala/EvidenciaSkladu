@@ -66,7 +66,7 @@ public class FXMLConsumptionOverviewDialogController implements Initializable {
      */
     private void populateTable() {
         itemList.clear();
-        QueryHandler.getInstance().getConsumptionOverviewRecords(itemList);
+        ComplexQueryHandler.getInstance().getConsumptionOverviewRecords(itemList);
     }
 
 }

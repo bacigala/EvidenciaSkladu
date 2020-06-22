@@ -82,7 +82,7 @@ public class Login {
         loggedUserId = 0;
 
 //        todo: delete login-required access content
-//        itemList.clear();
+        ItemDAO.dropItemList();
 //        categoryMap.clear();
     }
 

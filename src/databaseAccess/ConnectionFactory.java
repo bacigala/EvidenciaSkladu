@@ -38,7 +38,7 @@ public class ConnectionFactory {
      * @return connection from the pool or a new if the pool is empty
       */
     Connection getConnection() {
-        Connection connection = null;
+        Connection connection;
         if (!connectionPool.isEmpty()) {
             // use connection from the pool
             connection = connectionPool.remove(connectionPool.size() - 1);

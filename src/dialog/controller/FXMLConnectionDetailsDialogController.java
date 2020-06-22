@@ -2,11 +2,9 @@
 package dialog.controller;
 
 import java.net.URL;
-import java.sql.Connection;
 import java.util.ResourceBundle;
 
 import databaseAccess.ConnectionFactory;
-import databaseAccess.QueryHandler;
 import dialog.DialogFactory;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

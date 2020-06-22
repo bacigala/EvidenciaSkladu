@@ -5,10 +5,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import databaseAccess.ItemDAO;
 import dialog.DialogFactory;
 import domain.Category;
 import domain.Item;
-import databaseAccess.QueryHandler;
+import databaseAccess.ComplexQueryHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -48,10 +49,10 @@ public class FXMLItemSupplyDialogController implements Initializable {
     // button "Vklad"
     @FXML
     private void supplyButton() throws IOException {
-        QueryHandler qh = QueryHandler.getInstance();
+        ComplexQueryHandler qh = ComplexQueryHandler.getInstance();
         DialogFactory df = DialogFactory.getInstance();
         try {
-            if (qh.itemSupply(item.getId(), Integer.parseInt(newAmountTextField.getText()), newExpirationDatePicker.getValue())) {
+            if (ItemDAO.getInstance().itemSupply(item.getId(), Integer.parseInt(newAmountTextField.getText()), newExpirationDatePicker.getValue())) {
                 DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Vklad položky prebehol úspešne.");
                 cancelButton();
             } else {

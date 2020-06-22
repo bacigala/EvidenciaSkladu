@@ -83,7 +83,7 @@ public class FXMLCategoryManagementDialogController implements Initializable {
                 stage.showAndWait();
 
                 if (saveRequest.get()) {
-                    QueryHandler.getInstance().modifyCategory(targetCategory);
+                    ComplexQueryHandler.getInstance().modifyCategory(targetCategory);
                 }
 
                 populateTable();
@@ -94,7 +94,7 @@ public class FXMLCategoryManagementDialogController implements Initializable {
                 Category targetCategory = getTableView().getItems().get(getIndex());
 
                 DialogFactory df = DialogFactory.getInstance();
-                QueryHandler qh = QueryHandler.getInstance();
+                ComplexQueryHandler qh = ComplexQueryHandler.getInstance();
 
                 Category selectedCategory = null;
 
@@ -114,7 +114,7 @@ public class FXMLCategoryManagementDialogController implements Initializable {
                     stage.setTitle("Prevod položiek");
 
                     ObservableList<Category> categoreis = FXCollections.observableArrayList();
-                    categoreis.addAll(QueryHandler.getInstance().getCategoryMap().values());
+                    categoreis.addAll(ComplexQueryHandler.getInstance().getCategoryMap().values());
 
                     controller.setChoiceList(categoreis);
                     controller.setLabelText("Vyberte kategóriu pod ktorú budú prevedené položky odstránenej kategoórie.");
@@ -175,10 +175,10 @@ public class FXMLCategoryManagementDialogController implements Initializable {
         stage.showAndWait();
 
         if (saveRequest.get()) {
-            QueryHandler.getInstance().createCategory(newCategory);
+            ComplexQueryHandler.getInstance().createCategory(newCategory);
         }
 
-        QueryHandler.getInstance().reloadItemList();
+        ItemDAO.getInstance().reloadItemList();
         populateTable();
     }
 
@@ -187,7 +187,7 @@ public class FXMLCategoryManagementDialogController implements Initializable {
      */
     private void populateTable() {
         ObservableList<Category> categoryList
-                = FXCollections.observableArrayList(QueryHandler.getInstance().getCategoryMap().values());
+                = FXCollections.observableArrayList(ComplexQueryHandler.getInstance().getCategoryMap().values());
         mainTable.getItems().clear();
         if (!categoryList.isEmpty()) {
             for (Category category : categoryList) {

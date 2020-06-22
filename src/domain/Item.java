@@ -1,7 +1,7 @@
 
 package domain;
 
-import databaseAccess.QueryHandler;
+import databaseAccess.ComplexQueryHandler;
 
 /**
  * Represents one record in the table "item".
@@ -62,7 +62,7 @@ public class Item {
     }
     
     public String getCategoryName() {
-        return QueryHandler.getInstance().getCategoryMap().get(getCategory()).getName();
+        return ComplexQueryHandler.getInstance().getCategoryMap().get(getCategory()).getName();
     }
 
 }

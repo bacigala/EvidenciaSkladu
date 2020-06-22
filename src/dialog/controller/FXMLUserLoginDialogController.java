@@ -11,7 +11,7 @@ import java.util.ResourceBundle;
 
 import databaseAccess.ConnectionFactory;
 import databaseAccess.Login;
-import databaseAccess.QueryHandler;
+import databaseAccess.ComplexQueryHandler;
 import dialog.DialogFactory;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -30,7 +30,7 @@ public class FXMLUserLoginDialogController implements Initializable {
      */
     @FXML
     private void loginButtonAction(ActionEvent e) {
-        QueryHandler qh = QueryHandler.getInstance();
+        ComplexQueryHandler qh = ComplexQueryHandler.getInstance();
         DialogFactory df = DialogFactory.getInstance();
         if (ConnectionFactory.getInstance().hasValidConnectionDetails()) {
             if (Login.getInstance().hasUser()) {
@@ -66,7 +66,7 @@ public class FXMLUserLoginDialogController implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        QueryHandler qh = QueryHandler.getInstance();
+        ComplexQueryHandler qh = ComplexQueryHandler.getInstance();
         DialogFactory df = DialogFactory.getInstance();
         if (ConnectionFactory.getInstance().hasValidConnectionDetails()) {
             if (Login.getInstance().hasUser()) {

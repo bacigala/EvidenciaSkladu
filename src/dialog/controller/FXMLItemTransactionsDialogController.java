@@ -5,9 +5,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
+import databaseAccess.ItemDAO;
 import domain.Item;
 import domain.ItemMoveLogRecord;
-import databaseAccess.QueryHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
@@ -33,7 +33,7 @@ public class FXMLItemTransactionsDialogController implements Initializable {
     public void initData(Item item) {
         if (item != null) {
 
-            ArrayList<ItemMoveLogRecord> logRecords = QueryHandler.getInstance().getItemTransactions(item.getId());
+            ArrayList<ItemMoveLogRecord> logRecords = ItemDAO.getInstance().getItemTransactions(item.getId());
 
 
             TableColumn transDate = new TableColumn("Dátum");

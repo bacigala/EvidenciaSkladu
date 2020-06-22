@@ -93,7 +93,7 @@ public class FXMLAccountManagementDialogController implements Initializable {
                 stage.showAndWait();
 
                 if (saveRequest.get()) {
-                    QueryHandler.getInstance().modifyAccount(targetAccount);
+                    ComplexQueryHandler.getInstance().modifyAccount(targetAccount);
                 }
 
                 populateTable();
@@ -104,7 +104,7 @@ public class FXMLAccountManagementDialogController implements Initializable {
                 Account targetAccount = getTableView().getItems().get(getIndex());
 
                 DialogFactory df = DialogFactory.getInstance();
-                QueryHandler qh = QueryHandler.getInstance();
+                ComplexQueryHandler qh = ComplexQueryHandler.getInstance();
 
                 Account selectedAccount = null;
 
@@ -124,7 +124,7 @@ public class FXMLAccountManagementDialogController implements Initializable {
                     stage.setTitle("Prevod transakcii");
 
                     ObservableList<Account> accounts = FXCollections.observableArrayList();
-                    QueryHandler.getInstance().getAccounts(accounts);
+                    ComplexQueryHandler.getInstance().getAccounts(accounts);
 
                     controller.setChoiceList(accounts);
                     controller.setLabelText("Vyberte konto pod ktoré budú prevedené transakcie odstráneného konta.");
@@ -190,7 +190,7 @@ public class FXMLAccountManagementDialogController implements Initializable {
         stage.showAndWait();
 
         if (saveRequest.get()) {
-            QueryHandler.getInstance().createAccount(newAccount);
+            ComplexQueryHandler.getInstance().createAccount(newAccount);
         }
 
         populateTable();
@@ -201,7 +201,7 @@ public class FXMLAccountManagementDialogController implements Initializable {
      */
     private void populateTable() {
         accountList.clear();
-        QueryHandler.getInstance().getAccounts(accountList);
+        ComplexQueryHandler.getInstance().getAccounts(accountList);
         mainTable.getItems().clear();
         if (!accountList.isEmpty()) {
             for (Account account : accountList) {

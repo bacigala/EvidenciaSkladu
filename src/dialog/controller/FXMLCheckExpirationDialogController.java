@@ -115,7 +115,7 @@ public class FXMLCheckExpirationDialogController implements Initializable {
      */
     private void populateTable() {
         itemList.clear();
-        QueryHandler.getInstance().getSoonExpiryItems(itemList);
+        ComplexQueryHandler.getInstance().getSoonExpiryItems(itemList);
         mainTable.getItems().addAll(itemList);
     }
 
