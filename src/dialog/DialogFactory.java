@@ -12,23 +12,13 @@ import java.io.IOException;
 
 /**
  * Creates and shows dialogs.
+ * Singleton.
  */
 
 public class DialogFactory {
-    /**
-     * The only singleton instance of the class.
-     */
+    // singleton
     private static final DialogFactory singletonInstance = new DialogFactory();
-
-    /**
-     * Empty private constructor - singleton class.
-     */
     private DialogFactory() {}
-
-    /**
-     * Access to the only singleton instance of the class.
-     * @return singleton instance of the class
-     */
     public static DialogFactory getInstance() {
         return singletonInstance;
     }

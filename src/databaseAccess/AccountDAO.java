@@ -69,6 +69,9 @@ public class AccountDAO {
         if (!Login.getInstance().hasAdmin()) return false;
         if (newAccount == null) return false;
 
+        // blank password not allowed
+        if (newAccount.getPassword().equals("")) return false;
+
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
@@ -173,7 +176,7 @@ public class AccountDAO {
                 statement.setInt(5, targetAccount.getId());
             } else {
                 statement = conn.prepareStatement(
-                        "UPDATE account SET name = ?, surname = ?, login = ?, admin = ?, password = sha2(?,256), WHERE id = ?");
+                        "UPDATE account SET name = ?, surname = ?, login = ?, admin = ?, password = sha2(?,256) WHERE id = ?");
                 statement.setString(5, targetAccount.getPassword());
                 statement.setInt(6, targetAccount.getId());
             }
@@ -271,7 +274,7 @@ public class AccountDAO {
 
             // verify whether account to be deleted exists
             statement = conn.prepareStatement(
-                    "SELECT 1 FROM account WHERE account_id = ?");
+                    "SELECT 1 FROM account WHERE id = ?");
             statement.setInt(1, accountToDelete.getId());
             result = statement.executeQuery();
             if (!result.next()) throw new IllegalArgumentException();
@@ -286,7 +289,7 @@ public class AccountDAO {
                 if (accountToTakeOver == null) throw new IllegalArgumentException();
                 // verify that account to take over the transactions exists
                 statement = conn.prepareStatement(
-                        "SELECT 1 FROM account WHERE account_id = ?");
+                        "SELECT 1 FROM account WHERE id = ?");
                 statement.setInt(1, accountToTakeOver.getId());
                 result = statement.executeQuery();
                 if (!result.next()) throw new IllegalArgumentException();
@@ -298,7 +301,6 @@ public class AccountDAO {
                 statement.setInt(2, accountToDelete.getId());
                 if (statement.executeUpdate() < 1) {
                     // todo error
-                    System.out.println("nepodarilo previest transakcie...");
                     throw new SQLException();
                 }
             }

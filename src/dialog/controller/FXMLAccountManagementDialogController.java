@@ -1,14 +1,15 @@
 
 package dialog.controller;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.*;
-import databaseAccess.*;
+import databaseAccess.AccountDAO;
 import dialog.DialogFactory;
 import domain.Account;
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -19,10 +20,12 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.util.Callback;
 import supportStructures.EditableBoolean;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  * Dialog for account management.
@@ -30,24 +33,26 @@ import supportStructures.EditableBoolean;
  */
 
 public class FXMLAccountManagementDialogController implements Initializable {
+
+    // dialog components
     @FXML private javafx.scene.control.TableView<Account> mainTable;
-    @FXML private javafx.scene.layout.AnchorPane rootAnchorPane;
 
     private final ObservableList<Account> accountList = FXCollections.observableArrayList();
 
-    /**
-     * Loads current account list from DB (using QueryHandler) and populates the table.
-     */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TableView setup
-        TableColumn fullNameColumn = new TableColumn<Account, String>("meno");
+        mainTable.setPlaceholder(new Label("Žiadne používateľské kontá."));
+        Property<ObservableList<Account>> accountListProperty = new SimpleObjectProperty<>(accountList);
+        mainTable.itemsProperty().bind(accountListProperty);
+
+        TableColumn<Account, String> fullNameColumn = new TableColumn<>("meno");
         fullNameColumn.setCellValueFactory(new PropertyValueFactory<>("fullName"));
 
-        TableColumn loginColumn = new TableColumn<Account, String>("login");
+        TableColumn<Account, String> loginColumn = new TableColumn<>("login");
         loginColumn.setCellValueFactory(new PropertyValueFactory<>("login"));
 
-        TableColumn isAdminTextColumn = new TableColumn<Account, String>("administrátor");
+        TableColumn<Account, String> isAdminTextColumn = new TableColumn<>("administrátor");
         isAdminTextColumn.setCellValueFactory(new PropertyValueFactory<>("isAdminText"));
 
         TableColumn accountModifyButtonColumn = new TableColumn<>("akcie");
@@ -57,24 +62,20 @@ public class FXMLAccountManagementDialogController implements Initializable {
                 (Callback<TableColumn.CellDataFeatures<Account, Boolean>, ObservableValue<Boolean>>)
                         p -> new SimpleBooleanProperty(p.getValue() != null));
 
-        accountModifyButtonColumn.setCellFactory(
-                (Callback<TableColumn<Account, Boolean>, TableCell<Account, Boolean>>) p -> new ButtonCell());
+        accountModifyButtonColumn.setCellFactory(p -> new ButtonCell());
 
         mainTable.getColumns().addAll(fullNameColumn, loginColumn, isAdminTextColumn, accountModifyButtonColumn);
         populateTable();
     }
 
-    // cell in action column
+    // cell in accountModifyButtonColumn
     private class ButtonCell extends TableCell<Account, Boolean> {
         final Button modifyButton = new Button("Upraviť");
         final Button deleteButton = new Button("Odstrániť");
 
         ButtonCell() {
             modifyButton.setOnAction(t -> {
-                // todo: modify button clicked -> open dialog for modification
                 Account targetAccount = getTableView().getItems().get(getIndex());
-
-                EditableBoolean saveRequest = new EditableBoolean(false);
 
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/FXMLAccountModifyDialog.fxml"));
                 Parent root1 = null;
@@ -82,31 +83,24 @@ public class FXMLAccountManagementDialogController implements Initializable {
                     root1 = fxmlLoader.load();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    // todo: nepodarilo sa otvorit dialog ?
                 }
                 Stage stage = new Stage();
+                assert root1 != null;
                 stage.setScene(new Scene(root1));
                 stage.initModality(Modality.APPLICATION_MODAL);
                 FXMLAccountModifyDialogController controller = fxmlLoader.getController();
-                controller.initData(targetAccount, saveRequest);
+                controller.initData(targetAccount);
                 stage.setTitle("Upraviť konto");
                 stage.showAndWait();
-
-                if (saveRequest.get()) {
-                    AccountDAO.getInstance().modifyAccount(targetAccount);
-                }
 
                 populateTable();
             });
 
             deleteButton.setOnAction(t -> {
-                // todo: delete button clicked -> check and delete
                 Account targetAccount = getTableView().getItems().get(getIndex());
-
                 DialogFactory df = DialogFactory.getInstance();
-                ComplexQueryHandler qh = ComplexQueryHandler.getInstance();
 
-                Account selectedAccount = null;
+                Account newTransactionOwnerAccount = null;
 
                 if (AccountDAO.getInstance().hasTransactions(targetAccount.getId())) {
                     // na pouzivatela su napisane nejake transakcie
@@ -118,6 +112,7 @@ public class FXMLAccountManagementDialogController implements Initializable {
                         e.printStackTrace();
                     }
                     Stage stage = new Stage();
+                    assert root1 != null;
                     stage.setScene(new Scene(root1));
                     stage.initModality(Modality.APPLICATION_MODAL);
                     FXMLSimpleChoiceDialogController<Account> controller = fxmlLoader.getController();
@@ -127,16 +122,16 @@ public class FXMLAccountManagementDialogController implements Initializable {
                     AccountDAO.getInstance().getAccounts(accounts);
 
                     controller.setChoiceList(accounts);
-                    controller.setLabelText("Vyberte konto pod ktoré budú prevedené transakcie odstráneného konta.");
+                    controller.setLabelText("Transkakcie previesť pod konto:");
 
                     stage.showAndWait();
 
-                    selectedAccount = (Account) controller.getChoice();
-                    if (selectedAccount == null) return;
+                    newTransactionOwnerAccount = controller.getChoice();
+                    if (newTransactionOwnerAccount == null) return;
                 }
 
                 // pokusime sa odstranit vybrany ucet
-                if(AccountDAO.getInstance().deleteAccount(targetAccount, selectedAccount)) {
+                if(AccountDAO.getInstance().deleteAccount(targetAccount, newTransactionOwnerAccount)) {
                     df.showAlert(Alert.AlertType.INFORMATION, "Konto bolo úspešne odstránené.");
                 } else {
                     df.showAlert(Alert.AlertType.ERROR, "Konto sa nepodarilo odstrániť");
@@ -152,9 +147,11 @@ public class FXMLAccountManagementDialogController implements Initializable {
         @Override
         protected void updateItem(Boolean t, boolean empty) {
             super.updateItem(t, empty);
-            if(!empty){
-                setGraphic(pane);
+            if (empty || t == null) {
+                setGraphic(null);
+                return;
             }
+            setGraphic(pane);
         }
     }
 
@@ -185,7 +182,7 @@ public class FXMLAccountManagementDialogController implements Initializable {
         stage.setScene(new Scene(root1));
         stage.initModality(Modality.APPLICATION_MODAL);
         FXMLAccountModifyDialogController controller = fxmlLoader.getController();
-        controller.initData(newAccount, saveRequest);
+        controller.initData(newAccount);
         stage.setTitle("Nové konto");
         stage.showAndWait();
 
@@ -202,14 +199,6 @@ public class FXMLAccountManagementDialogController implements Initializable {
     private void populateTable() {
         accountList.clear();
         AccountDAO.getInstance().getAccounts(accountList);
-        mainTable.getItems().clear();
-        if (!accountList.isEmpty()) {
-            for (Account account : accountList) {
-                mainTable.getItems().add(account);
-            }
-        } else {
-            mainTable.setPlaceholder(new Label("Žiadne používateľské kontá."));
-        }
     }
 
 }

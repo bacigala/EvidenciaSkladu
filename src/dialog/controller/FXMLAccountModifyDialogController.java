@@ -1,24 +1,24 @@
 
 package dialog.controller;
 
-import java.net.URL;
-import java.util.*;
-
+import databaseAccess.AccountDAO;
 import dialog.DialogFactory;
 import domain.Account;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
-import supportStructures.EditableBoolean;
+
+import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  * Dialog for Account modification.
+ * Saves as new / Updates given account (saves as new if account ID == 0)
  */
 
 public class FXMLAccountModifyDialogController implements Initializable {
 
-    @FXML private javafx.scene.layout.AnchorPane mainAnchorPane;
     @FXML private javafx.scene.control.TextField nameTextField;
     @FXML private javafx.scene.control.TextField surnameTextField;
     @FXML private javafx.scene.control.TextField loginTextField;
@@ -27,7 +27,7 @@ public class FXMLAccountModifyDialogController implements Initializable {
     @FXML private javafx.scene.control.CheckBox adminCheckBox;
 
     private Account account = null;
-    private EditableBoolean saveRequest = null;
+    private boolean newAccount = false;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -38,22 +38,21 @@ public class FXMLAccountModifyDialogController implements Initializable {
      * Receives initialization data - account to be edited.
      * Setups default values.
      */
-    public void initData(Account account, EditableBoolean saveRequest) {
-        if (account != null && saveRequest != null) {
-            // store received pointers
-            this.account = account;
-            this.saveRequest = saveRequest;
-            this.saveRequest.set(false);
-
-            // fill default values
-            nameTextField.setText(account.getName());
-            surnameTextField.setText(account.getSurname());
-            loginTextField.setText(account.getLogin());
-            adminCheckBox.setSelected(account.isAdmin());
-        } else {
+    public void initData(Account account) {
+        if (account == null) {
             DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Nepodarilo sa načítať.");
             closeStage();
+            return;
         }
+
+        this.account = account;
+        newAccount = account.getId() == 0;
+
+        // fill default values
+        nameTextField.setText(account.getName());
+        surnameTextField.setText(account.getSurname());
+        loginTextField.setText(account.getLogin());
+        adminCheckBox.setSelected(account.isAdmin());
     }
 
     /**
@@ -61,48 +60,64 @@ public class FXMLAccountModifyDialogController implements Initializable {
      */
     @FXML
     private void saveButtonAction() {
-        if (changesMade()) {
-            DialogFactory df = DialogFactory.getInstance();
-            if (nameTextField.getText().equals("")) {
-                df.showAlert(Alert.AlertType.WARNING, "Prosím, vyplňte meno.");
-                return;
-            }
-            if (surnameTextField.getText().equals("")) {
-                df.showAlert(Alert.AlertType.WARNING, "Prosím, vyplňte priezvisko.");
-                return;
-            }
-            if (loginTextField.getText().equals("")) {
-                df.showAlert(Alert.AlertType.WARNING, "Prosím, vyplňte prihlasovacie meno.");
-                return;
-            }
-            // check password fields
-            if (!psw1PasswordField.getText().equals(psw2PasswordField.getText())) {
-                df.showAlert(Alert.AlertType.WARNING, "Heslo a overenie hesla sa nezhodujú.");
-                return;
-            }
-
-            // no errors -> close and save
-            account.setName(nameTextField.getText());
-            account.setSurname(surnameTextField.getText());
-            account.setLogin(loginTextField.getText());
-            account.setPassword(psw1PasswordField.getText());
-            account.setAdmin(adminCheckBox.isSelected());
-
-            saveRequest.set(true);
+        if (!changesMade()) {
             closeStage();
-        } else {
-            // nenastali zmeny -> zatvor dialog
-            saveRequest.set(false);
-            closeStage();
+            return;
         }
+
+        // check user input
+        DialogFactory df = DialogFactory.getInstance();
+        if (nameTextField.getText().equals("")) {
+            df.showAlert(Alert.AlertType.WARNING, "Prosím, vyplňte meno.");
+            return;
+        }
+        if (surnameTextField.getText().equals("")) {
+            df.showAlert(Alert.AlertType.WARNING, "Prosím, vyplňte priezvisko.");
+            return;
+        }
+        if (loginTextField.getText().equals("")) {
+            df.showAlert(Alert.AlertType.WARNING, "Prosím, vyplňte prihlasovacie meno.");
+            return;
+        }
+        // check password fields
+        if (!psw1PasswordField.getText().equals(psw2PasswordField.getText())) {
+            df.showAlert(Alert.AlertType.WARNING, "Heslo a overenie hesla sa nezhodujú.");
+            return;
+        }
+        if (newAccount && psw1PasswordField.getText().equals("")) {
+            df.showAlert(Alert.AlertType.WARNING, "Prosím vypňte heslo.");
+            return;
+        }
+
+        // no errors -> close and save
+        account.setName(nameTextField.getText());
+        account.setSurname(surnameTextField.getText());
+        account.setLogin(loginTextField.getText());
+        account.setPassword(psw1PasswordField.getText());
+        account.setAdmin(adminCheckBox.isSelected());
+
+        if (newAccount) {
+            if (AccountDAO.getInstance().createAccount(account)) {
+                df.showAlert(Alert.AlertType.INFORMATION, "Nové konto bolo úspešne vytvorené.");
+            } else {
+                df.showAlert(Alert.AlertType.ERROR, "Konto sa nepodarilo vytvoriť.");
+            }
+        } else {
+            if (AccountDAO.getInstance().modifyAccount(account)) {
+                df.showAlert(Alert.AlertType.INFORMATION, "Konto bolo úspešne upravené.");
+            } else {
+                df.showAlert(Alert.AlertType.ERROR, "Konto sa nepodarilo upraviť.");
+            }
+        }
+
+        closeStage();
     }
 
     /**
-     * Button 'Odstranit' Verifies input and setups return values.
+     * Button 'Zrusit' Verifies input and setups return values.
      */
     @FXML
     private void cancelButtonAction() {
-        saveRequest.set(false);
         closeStage();
     }
 
@@ -125,8 +140,7 @@ public class FXMLAccountModifyDialogController implements Initializable {
         if (adminCheckBox.isSelected() != account.isAdmin()) return true;
         if (!surnameTextField.getText().equals(account.getSurname())) return true;
         if (!psw1PasswordField.getText().equals("")) return true;
-        if (!psw2PasswordField.getText().equals("")) return true;
-        return false;
+        return !psw2PasswordField.getText().equals("");
     }
 
 }

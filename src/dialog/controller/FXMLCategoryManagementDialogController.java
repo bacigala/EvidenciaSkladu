@@ -1,14 +1,17 @@
 
 package dialog.controller;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.*;
-import databaseAccess.*;
+import databaseAccess.CategoryDAO;
+import databaseAccess.ComplexQueryHandler;
+import databaseAccess.ItemDAO;
 import dialog.DialogFactory;
 import domain.Category;
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -19,10 +22,12 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.util.Callback;
 import supportStructures.EditableBoolean;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  * Dialog for category management.
@@ -33,9 +38,15 @@ public class FXMLCategoryManagementDialogController implements Initializable {
 
     @FXML private javafx.scene.control.TableView<Category> mainTable;
 
+    ObservableList<Category> categoryList = FXCollections.observableArrayList();
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TableView setup
+        mainTable.setPlaceholder(new Label("Žiadne kategórie."));
+        Property<ObservableList<Category>> categoryListProperty = new SimpleObjectProperty<>(categoryList);
+        mainTable.itemsProperty().bind(categoryListProperty);
+
         TableColumn<Category, String> fullNameColumn = new TableColumn<Category, String>("Názov");
         fullNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 
@@ -143,9 +154,11 @@ public class FXMLCategoryManagementDialogController implements Initializable {
         @Override
         protected void updateItem(Boolean t, boolean empty) {
             super.updateItem(t, empty);
-            if(!empty){
-                setGraphic(pane);
+            if (empty || t == null) {
+                setGraphic(null);
+                return;
             }
+            setGraphic(pane);
         }
     }
 
@@ -160,7 +173,6 @@ public class FXMLCategoryManagementDialogController implements Initializable {
 
     @FXML
     private void newCategoryButtonAction() throws IOException {
-        // todo new category dialo open -> check -> QUERY
         Category newCategory = new Category(0, 0, "", "", "");
         EditableBoolean saveRequest = new EditableBoolean(false);
 
@@ -186,16 +198,8 @@ public class FXMLCategoryManagementDialogController implements Initializable {
      * Populates table with provided UserAccounts.
      */
     private void populateTable() {
-        ObservableList<Category> categoryList
-                = FXCollections.observableArrayList(CategoryDAO.getInstance().getCategoryMap().values());
-        mainTable.getItems().clear();
-        if (!categoryList.isEmpty()) {
-            for (Category category : categoryList) {
-                mainTable.getItems().add(category);
-            }
-        } else {
-            mainTable.setPlaceholder(new Label("Žiadne kategórie."));
-        }
+        categoryList.clear();
+        categoryList.addAll(CategoryDAO.getInstance().getCategoryMap().values());
     }
 
 }

@@ -55,6 +55,11 @@ public class ConnectionFactory {
             return null;
         }
         usedConnections.add(connection);
+        try {
+            connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return connection;
     }
 
@@ -95,12 +100,12 @@ public class ConnectionFactory {
         try {
             Iterator<Connection> iterator = usedConnections.iterator();
             while (iterator.hasNext()) {
-                iterator.next();
+                iterator.next().close();
                 iterator.remove();
             }
             iterator = connectionPool.iterator();
             while (iterator.hasNext()) {
-                iterator.next();
+                iterator.next().close();
                 iterator.remove();
             }
         } catch (Exception e) {
