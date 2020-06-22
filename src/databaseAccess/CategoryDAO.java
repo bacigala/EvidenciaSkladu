@@ -171,6 +171,7 @@ public class CategoryDAO {
     public boolean deleteCategory(Category categoryToDelete, Category categoryToTakeOver) {
         if (!Login.getInstance().hasAdmin()) return false;
         if (categoryToDelete == null) return false;
+        if (categoryToDelete.getId() == 1) return false; // default category cannot be deleted
 
         Connection conn = null;
         PreparedStatement statement = null;

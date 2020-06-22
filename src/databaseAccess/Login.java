@@ -16,7 +16,7 @@ public class Login {
     // logged in user info
     private boolean loggedUserAdmin = false;
     private String loggedUserUsername = "";
-    private String loggedUserName = "";
+    private String loggedUserFullName = "";
     private int loggedUserId = 0;
 
     // singleton
@@ -45,7 +45,7 @@ public class Login {
             statement.setString(2, password);
             result = statement.executeQuery();
             if (result.next()) {
-                loggedUserName = result.getString("name") + " "
+                loggedUserFullName = result.getString("name") + " "
                         + result.getString("surname");
                 loggedUserId = result.getInt("id");
                 loggedUserAdmin = result.getBoolean("admin");
@@ -78,7 +78,7 @@ public class Login {
         connFactory.setBasicUserConnectionDetails();
         loggedUserAdmin = false;
         loggedUserUsername = "";
-        loggedUserName = "";
+        loggedUserFullName = "";
         loggedUserId = 0;
 
 //        todo: delete login-required access content
@@ -91,8 +91,8 @@ public class Login {
         return loggedUserId;
     }
 
-    public String getLoggedUserName() {
-        return loggedUserName;
+    public String getLoggedUserFullName() {
+        return loggedUserFullName;
     }
 
     public String getLoggedUserUsername() {

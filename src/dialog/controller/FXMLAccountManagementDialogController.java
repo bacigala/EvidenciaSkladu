@@ -93,7 +93,7 @@ public class FXMLAccountManagementDialogController implements Initializable {
                 stage.showAndWait();
 
                 if (saveRequest.get()) {
-                    ComplexQueryHandler.getInstance().modifyAccount(targetAccount);
+                    AccountDAO.getInstance().modifyAccount(targetAccount);
                 }
 
                 populateTable();
@@ -108,7 +108,7 @@ public class FXMLAccountManagementDialogController implements Initializable {
 
                 Account selectedAccount = null;
 
-                if (qh.hasTransactions(targetAccount.getId())) {
+                if (AccountDAO.getInstance().hasTransactions(targetAccount.getId())) {
                     // na pouzivatela su napisane nejake transakcie
                     FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/FXMLSimpleChoiceDialog.fxml"));
                     Parent root1 = null;
@@ -124,7 +124,7 @@ public class FXMLAccountManagementDialogController implements Initializable {
                     stage.setTitle("Prevod transakcii");
 
                     ObservableList<Account> accounts = FXCollections.observableArrayList();
-                    ComplexQueryHandler.getInstance().getAccounts(accounts);
+                    AccountDAO.getInstance().getAccounts(accounts);
 
                     controller.setChoiceList(accounts);
                     controller.setLabelText("Vyberte konto pod ktoré budú prevedené transakcie odstráneného konta.");
@@ -136,7 +136,7 @@ public class FXMLAccountManagementDialogController implements Initializable {
                 }
 
                 // pokusime sa odstranit vybrany ucet
-                if(qh.deleteAccount(targetAccount, selectedAccount)) {
+                if(AccountDAO.getInstance().deleteAccount(targetAccount, selectedAccount)) {
                     df.showAlert(Alert.AlertType.INFORMATION, "Konto bolo úspešne odstránené.");
                 } else {
                     df.showAlert(Alert.AlertType.ERROR, "Konto sa nepodarilo odstrániť");
@@ -190,7 +190,7 @@ public class FXMLAccountManagementDialogController implements Initializable {
         stage.showAndWait();
 
         if (saveRequest.get()) {
-            ComplexQueryHandler.getInstance().createAccount(newAccount);
+            AccountDAO.getInstance().createAccount(newAccount);
         }
 
         populateTable();
@@ -201,7 +201,7 @@ public class FXMLAccountManagementDialogController implements Initializable {
      */
     private void populateTable() {
         accountList.clear();
-        ComplexQueryHandler.getInstance().getAccounts(accountList);
+        AccountDAO.getInstance().getAccounts(accountList);
         mainTable.getItems().clear();
         if (!accountList.isEmpty()) {
             for (Account account : accountList) {

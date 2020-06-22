@@ -34,7 +34,7 @@ public class FXMLUserLoginDialogController implements Initializable {
         DialogFactory df = DialogFactory.getInstance();
         if (ConnectionFactory.getInstance().hasValidConnectionDetails()) {
             if (Login.getInstance().hasUser()) {
-                String lastLoggedUserName = Login.getInstance().getLoggedUserName();
+                String lastLoggedUserName = Login.getInstance().getLoggedUserFullName();
                 Login.getInstance().logOut();
                 df.showAlert(Alert.AlertType.INFORMATION, "Používateľ: " +
                         lastLoggedUserName + " bol odhlásený.");
@@ -47,7 +47,7 @@ public class FXMLUserLoginDialogController implements Initializable {
                     // successful login
                     disableInput();
                     df.showAlert(Alert.AlertType.INFORMATION, "Prihlásený používateľ: " +
-                            Login.getInstance().getLoggedUserName() + ".");
+                            Login.getInstance().getLoggedUserFullName() + ".");
                     Stage stage = (Stage) loginButton.getScene().getWindow();
                     stage.close();
                 } else {
