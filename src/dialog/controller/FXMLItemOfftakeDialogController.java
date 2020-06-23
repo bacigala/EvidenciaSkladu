@@ -6,8 +6,12 @@ import java.time.LocalDate;
 import java.util.*;
 import databaseAccess.*;
 import dialog.DialogFactory;
+import domain.Account;
 import domain.Item;
 import domain.ItemOfftakeRecord;
+import javafx.beans.Observable;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -46,50 +50,51 @@ public class FXMLItemOfftakeDialogController implements Initializable {
      * Setups default values.
      */
     public void initData(Item item) {
-        if (item != null) {
-            this.item = item;
-
-            // TableView setup
-            TableColumn expirationColumn = new TableColumn<ItemOfftakeRecord, LocalDate>("Expirácia");
-            expirationColumn.setCellValueFactory(new PropertyValueFactory<>("expiration"));
-
-            TableColumn currentAmountColumn = new TableColumn<ItemOfftakeRecord, Integer>("K dispozícii");
-            currentAmountColumn.setCellValueFactory(new PropertyValueFactory<>("currentAmount"));
-
-            TableColumn requestedAmountColumn = new TableColumn<>("VÝBER");
-            requestedAmountColumn.setCellValueFactory(new PropertyValueFactory<>("requestedAmount"));
-
-            // requested amount column is editable
-            requestedAmountColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-            requestedAmountColumn.setOnEditCommit(
-                    new EventHandler<TableColumn.CellEditEvent<ItemOfftakeRecord, String>>() {
-                        @Override
-                        public void handle(CellEditEvent<ItemOfftakeRecord, String> t) {
-                            (t.getTableView().getItems().get(
-                                    t.getTablePosition().getRow())
-                            ).setRequestedAmount(Integer.parseInt(t.getNewValue()));
-                        }
-                    }
-            );
-
-            mainTable.getColumns().addAll(expirationColumn, currentAmountColumn, requestedAmountColumn);
-            //todo: use return value to show appropriate error
-            ItemDAO.getInstance().getItemVarieties(item.getId(), requestList);
-            populateTable();
-        } else {
+        if (item == null) {
             // error - invalid initialization data received
             DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Údaje sa nepodarilo načítať.");
             cancelButtonAction();
+            return;
         }
+        this.item = item;
+
+        // TableView setup
+        TableColumn expirationColumn = new TableColumn<ItemOfftakeRecord, LocalDate>("Expirácia");
+        expirationColumn.setCellValueFactory(new PropertyValueFactory<>("expiration"));
+
+        TableColumn currentAmountColumn = new TableColumn<ItemOfftakeRecord, Integer>("K dispozícii");
+        currentAmountColumn.setCellValueFactory(new PropertyValueFactory<>("currentAmount"));
+
+        TableColumn requestedAmountColumn = new TableColumn<>("VÝBER");
+        requestedAmountColumn.setCellValueFactory(new PropertyValueFactory<>("requestedAmount"));
+
+        // requested amount column is editable
+        requestedAmountColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        requestedAmountColumn.setOnEditCommit(
+                new EventHandler<TableColumn.CellEditEvent<ItemOfftakeRecord, String>>() {
+                    @Override
+                    public void handle(CellEditEvent<ItemOfftakeRecord, String> t) {
+                        (t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setRequestedAmount(Integer.parseInt(t.getNewValue()));
+                    }
+                }
+        );
+
+        mainTable.getColumns().addAll(expirationColumn, currentAmountColumn, requestedAmountColumn);
+        //todo: use return value to show appropriate error
+        ItemDAO.getInstance().getItemVarieties(item.getId(), requestList);
+        Property<ObservableList<ItemOfftakeRecord>> listProperty = new SimpleObjectProperty<>(requestList);
+        mainTable.setPlaceholder(new Label("Pre túto položku neexistujú záznamy."));
+        mainTable.itemsProperty().bind(listProperty);
     }
 
     /**
-     * Button 'Vyber' sends desired offtake combination to QueryHandler.
+     * Button 'Vyber' sends desired offtake combination to DB.
      */
     @FXML
     private void offtakeButtonAction() {
         rootAnchorPane.setDisable(true);
-        ComplexQueryHandler qh = ComplexQueryHandler.getInstance();
         DialogFactory df = DialogFactory.getInstance();
         try {
             if (ItemDAO.getInstance().itemOfftake(item, requestList)) {
@@ -99,7 +104,7 @@ public class FXMLItemOfftakeDialogController implements Initializable {
                 df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");
             }
         } catch (Exception e) {
-            df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");
+            df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Chyba spojenia s databázou.");
         }
         rootAnchorPane.setDisable(false);
     }
@@ -121,27 +126,16 @@ public class FXMLItemOfftakeDialogController implements Initializable {
         int requestedAmount = Integer.parseInt(amountRequestTextField.getText());
         for (ItemOfftakeRecord record : requestList.sorted()) {
             int toBeTaken = Math.min(record.getCurrentAmount(), requestedAmount);
-            record.setRequestedAmount(toBeTaken);
+            requestList.remove(record);
+            ItemOfftakeRecord newRecord = new ItemOfftakeRecord(record.getExpiration(), record.getCurrentAmount());
+            newRecord.setRequestedAmount(toBeTaken);
+            requestList.add(newRecord);
             requestedAmount -= toBeTaken;
         }
-        populateTable();
+
         if (requestedAmount > 0) {
             String message = "Požadované množstvo žiaľ nie je dostupné. (chýba " + requestedAmount + " MJ)";
             DialogFactory.getInstance().showAlert(Alert.AlertType.WARNING, message);
-        }
-    }
-
-    /**
-     * Populates table with provided CustomAttributes HashSet.
-     */
-    private void populateTable() {
-        mainTable.getItems().clear();
-        if (!requestList.isEmpty()) {
-            for (ItemOfftakeRecord record : requestList) {
-                mainTable.getItems().add(record);
-            }
-        } else {
-            mainTable.setPlaceholder(new Label("Bez ďalších atribútov."));
         }
     }
 
