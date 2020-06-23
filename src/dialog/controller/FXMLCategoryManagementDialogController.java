@@ -2,7 +2,6 @@
 package dialog.controller;
 
 import databaseAccess.CategoryDAO;
-import databaseAccess.ComplexQueryHandler;
 import databaseAccess.ItemDAO;
 import dialog.DialogFactory;
 import domain.Category;
@@ -23,7 +22,6 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import supportStructures.EditableBoolean;
 
 import java.io.IOException;
 import java.net.URL;
@@ -64,7 +62,7 @@ public class FXMLCategoryManagementDialogController implements Initializable {
                 (Callback<TableColumn<Category, Boolean>, TableCell<Category, Boolean>>) p -> new ButtonCell());
 
         mainTable.getColumns().addAll(fullNameColumn, loginColumn, accountModifyButtonColumn);
-        populateTable();
+        tableRefresh();
     }
 
     // cell in action column
@@ -76,8 +74,6 @@ public class FXMLCategoryManagementDialogController implements Initializable {
             modifyButton.setOnAction(t -> {
                 Category targetCategory = getTableView().getItems().get(getIndex());
 
-                EditableBoolean saveRequest = new EditableBoolean(false);
-
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/FXMLCategoryModifyDialog.fxml"));
                 Parent root1 = null;
                 try {
@@ -86,18 +82,15 @@ public class FXMLCategoryManagementDialogController implements Initializable {
                     e.printStackTrace();
                 }
                 Stage stage = new Stage();
+                assert root1 != null;
                 stage.setScene(new Scene(root1));
                 stage.initModality(Modality.APPLICATION_MODAL);
                 FXMLCategoryModifyDialogController controller = fxmlLoader.getController();
-                controller.initData(targetCategory, saveRequest);
+                controller.initData(targetCategory);
                 stage.setTitle("Upraviť kategóriu");
                 stage.showAndWait();
 
-                if (saveRequest.get()) {
-                    CategoryDAO.getInstance().modifyCategory(targetCategory);
-                }
-
-                populateTable();
+                tableRefresh();
             });
 
             deleteButton.setOnAction(t -> {
@@ -105,7 +98,6 @@ public class FXMLCategoryManagementDialogController implements Initializable {
                 Category targetCategory = getTableView().getItems().get(getIndex());
 
                 DialogFactory df = DialogFactory.getInstance();
-                ComplexQueryHandler qh = ComplexQueryHandler.getInstance();
 
                 Category selectedCategory = null;
 
@@ -119,6 +111,7 @@ public class FXMLCategoryManagementDialogController implements Initializable {
                         e.printStackTrace();
                     }
                     Stage stage = new Stage();
+                    assert root1 != null;
                     stage.setScene(new Scene(root1));
                     stage.initModality(Modality.APPLICATION_MODAL);
                     FXMLSimpleChoiceDialogController<Category> controller = fxmlLoader.getController();
@@ -132,7 +125,7 @@ public class FXMLCategoryManagementDialogController implements Initializable {
 
                     stage.showAndWait();
 
-                    selectedCategory = (Category) controller.getChoice();
+                    selectedCategory = controller.getChoice();
                     if (selectedCategory == null) return;
                     if (selectedCategory.getId() == targetCategory.getId()) return;
                 }
@@ -144,7 +137,7 @@ public class FXMLCategoryManagementDialogController implements Initializable {
                     df.showAlert(Alert.AlertType.ERROR, "Kategóriu sa nepodarilo odstrániť");
                 }
 
-                populateTable();
+                tableRefresh();
             });
         }
 
@@ -162,10 +155,6 @@ public class FXMLCategoryManagementDialogController implements Initializable {
         }
     }
 
-    public void initData() {
-
-    }
-
     @FXML
     private void closeDialog() {
         ((Stage) mainTable.getScene().getWindow()).close();
@@ -174,7 +163,6 @@ public class FXMLCategoryManagementDialogController implements Initializable {
     @FXML
     private void newCategoryButtonAction() throws IOException {
         Category newCategory = new Category(0, 0, "", "", "");
-        EditableBoolean saveRequest = new EditableBoolean(false);
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/FXMLCategoryModifyDialog.fxml"));
         Parent root1 = fxmlLoader.load();
@@ -182,22 +170,18 @@ public class FXMLCategoryManagementDialogController implements Initializable {
         stage.setScene(new Scene(root1));
         stage.initModality(Modality.APPLICATION_MODAL);
         FXMLCategoryModifyDialogController controller = fxmlLoader.getController();
-        controller.initData(newCategory, saveRequest);
+        controller.initData(newCategory);
         stage.setTitle("Nová kategória");
         stage.showAndWait();
 
-        if (saveRequest.get()) {
-            CategoryDAO.getInstance().createCategory(newCategory);
-        }
-
         ItemDAO.getInstance().reloadItemList();
-        populateTable();
+        tableRefresh();
     }
 
     /**
      * Populates table with provided UserAccounts.
      */
-    private void populateTable() {
+    private void tableRefresh() {
         categoryList.clear();
         categoryList.addAll(CategoryDAO.getInstance().getCategoryMap().values());
     }

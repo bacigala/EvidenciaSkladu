@@ -5,8 +5,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import databaseAccess.*;
+import domain.Account;
 import domain.ExpiryDateWarningRecord;
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -58,7 +61,9 @@ public class FXMLCheckExpirationDialogController implements Initializable {
                 (Callback<TableColumn<ExpiryDateWarningRecord, Boolean>, TableCell<ExpiryDateWarningRecord, Boolean>>) p -> new ButtonCell());
 
         mainTable.getColumns().addAll(itemNameColumn, itemCurrentAmountColumn, itemExpiryDateColumn, itemDetailButtonColumn);
-        mainTable.setPlaceholder(new Label("Žiadne xz."));
+        mainTable.setPlaceholder(new Label("Žiadne záznamy."));
+        Property<ObservableList<ExpiryDateWarningRecord>> listProperty = new SimpleObjectProperty<>(itemList);
+        mainTable.itemsProperty().bind(listProperty);
         populateTable();
     }
 
@@ -69,17 +74,19 @@ public class FXMLCheckExpirationDialogController implements Initializable {
         ButtonCell() {
             detailButton.setOnAction(t -> {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/FXMLItemOfftakeDialog.fxml"));
-                Parent root1 = null;
+                Parent root1;
                 try {
                     root1 = fxmlLoader.load();
                 } catch (IOException e) {
                     e.printStackTrace();
+                    return;
                 }
                 Stage stage = new Stage();
                 stage.setScene(new Scene(root1));
                 stage.initModality(Modality.APPLICATION_MODAL);
                 FXMLItemOfftakeDialogController controller = fxmlLoader.getController();
                 controller.initData(getTableView().getItems().get(getIndex()));
+                stage.setTitle("Výber položky.");
                 stage.showAndWait();
 
                 populateTable();
@@ -116,7 +123,6 @@ public class FXMLCheckExpirationDialogController implements Initializable {
     private void populateTable() {
         itemList.clear();
         ComplexQueryHandler.getInstance().getSoonExpiryItems(itemList);
-        mainTable.getItems().addAll(itemList);
     }
 
 }

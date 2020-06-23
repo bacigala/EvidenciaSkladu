@@ -21,7 +21,6 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import supportStructures.EditableBoolean;
 
 import java.io.IOException;
 import java.net.URL;
@@ -42,10 +41,6 @@ public class FXMLAccountManagementDialogController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TableView setup
-        mainTable.setPlaceholder(new Label("Žiadne používateľské kontá."));
-        Property<ObservableList<Account>> accountListProperty = new SimpleObjectProperty<>(accountList);
-        mainTable.itemsProperty().bind(accountListProperty);
-
         TableColumn<Account, String> fullNameColumn = new TableColumn<>("meno");
         fullNameColumn.setCellValueFactory(new PropertyValueFactory<>("fullName"));
 
@@ -65,6 +60,9 @@ public class FXMLAccountManagementDialogController implements Initializable {
         accountModifyButtonColumn.setCellFactory(p -> new ButtonCell());
 
         mainTable.getColumns().addAll(fullNameColumn, loginColumn, isAdminTextColumn, accountModifyButtonColumn);
+        mainTable.setPlaceholder(new Label("Žiadne používateľské kontá."));
+        Property<ObservableList<Account>> accountListProperty = new SimpleObjectProperty<>(accountList);
+        mainTable.itemsProperty().bind(accountListProperty);
         populateTable();
     }
 
@@ -174,7 +172,6 @@ public class FXMLAccountManagementDialogController implements Initializable {
     @FXML
     private void newAccountButtonAction() throws IOException {
         Account newAccount = new Account(0, "", "", "", "", false);
-        EditableBoolean saveRequest = new EditableBoolean(false);
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/FXMLAccountModifyDialog.fxml"));
         Parent root1 = fxmlLoader.load();
@@ -185,10 +182,6 @@ public class FXMLAccountManagementDialogController implements Initializable {
         controller.initData(newAccount);
         stage.setTitle("Nové konto");
         stage.showAndWait();
-
-        if (saveRequest.get()) {
-            AccountDAO.getInstance().createAccount(newAccount);
-        }
 
         populateTable();
     }

@@ -45,10 +45,8 @@ public class FXMLConsumptionOverviewDialogController implements Initializable {
 
         mainTable.getColumns().addAll(nameColumn, lastMonthColumn, avgMonthColumn, avgTrashColumn);
         mainTable.setPlaceholder(new Label("Žiadne záznamy."));
-
-        //todo  bind tableview with observable list
         Property<ObservableList<ConsumptionOverviewRecord>> itemListProperty = new SimpleObjectProperty<>(itemList);
-        mainTable.itemsProperty().bind(itemListProperty); // The Binding
+        mainTable.itemsProperty().bind(itemListProperty);
 
         populateTable();
     }

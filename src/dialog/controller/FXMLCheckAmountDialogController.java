@@ -61,10 +61,8 @@ public class FXMLCheckAmountDialogController implements Initializable {
 
         mainTable.getColumns().addAll(itemNameColumn, itemCurrentAmountColumn, itemExpiryDateColumn, itemDetailButtonColumn);
         mainTable.setPlaceholder(new Label("Žiadne záznamy."));
-
-        //todo  bind tableview with observable list
         Property<ObservableList<Item>> itemListProperty = new SimpleObjectProperty<>(itemList);
-        mainTable.itemsProperty().bind(itemListProperty); // The Binding
+        mainTable.itemsProperty().bind(itemListProperty);
 
         populateTable();
     }
@@ -76,11 +74,12 @@ public class FXMLCheckAmountDialogController implements Initializable {
         ButtonCell() {
             supplyButton.setOnAction(t -> {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/FXMLItemSupplyDialog.fxml"));
-                Parent root1 = null;
+                Parent root1;
                 try {
                     root1 = fxmlLoader.load();
                 } catch (IOException e) {
                     e.printStackTrace();
+                    return;
                 }
                 Stage stage = new Stage();
                 stage.setScene(new Scene(root1));
@@ -99,14 +98,12 @@ public class FXMLCheckAmountDialogController implements Initializable {
         @Override
         protected void updateItem(Boolean t, boolean empty) {
             super.updateItem(t, empty);
-            if(!empty){
-                setGraphic(pane);
+            if (empty || t == null) {
+                setGraphic(null);
+                return;
             }
+            setGraphic(pane);
         }
-    }
-
-    public void initData() {
-
     }
 
     /**

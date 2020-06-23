@@ -4,16 +4,17 @@ package dialog.controller;
 import java.net.URL;
 import java.util.*;
 
+import databaseAccess.CategoryDAO;
 import dialog.DialogFactory;
 import domain.Category;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
-import supportStructures.EditableBoolean;
 
 /**
- * Dialog for Account modification.
+ * Dialog for Account modification / creation.
+ * Initialized with Category -> init_cat_id == 0 ? create_new : modify
  */
 
 public class FXMLCategoryModifyDialogController implements Initializable {
@@ -22,7 +23,7 @@ public class FXMLCategoryModifyDialogController implements Initializable {
     @FXML private javafx.scene.control.TextField noteTextField;
 
     private Category category = null;
-    private EditableBoolean saveRequest = null;
+    private boolean newCategory;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -33,42 +34,52 @@ public class FXMLCategoryModifyDialogController implements Initializable {
      * Receives initialization data - category to be edited.
      * Setups default values.
      */
-    public void initData(Category category, EditableBoolean saveRequest) {
-        if (category != null && saveRequest != null) {
-            // store received pointers
-            this.category= category;
-            this.saveRequest = saveRequest;
-            this.saveRequest.set(false);
-
-            // fill default values
-            nameTextField.setText(category.getName());
-            noteTextField.setText(category.getNote());
-        } else {
-            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Nepodarilo sa načítať.");
+    public void initData(Category category) {
+        if (category == null) {
             closeStage();
+            return;
         }
+        newCategory = category.getId() == 0;
+
+        // store received pointers
+        this.category= category;
+
+        // fill default values
+        nameTextField.setText(category.getName());
+        noteTextField.setText(category.getNote());
     }
 
     /**
-     * Button 'Ulozit' verifies input and requests changes / closes dialog and setups return values.
+     * Button 'Ulozit' verifies input and requests category modification / creation.
      */
     @FXML
     private void saveButtonAction() {
         if (changesMade()) {
             DialogFactory df = DialogFactory.getInstance();
+
+            // verify input
             if (nameTextField.getText().equals("")) {
                 df.showAlert(Alert.AlertType.WARNING, "Prosím, vyplňte názov.");
                 return;
             }
 
-            // no errors -> close and save
+            // request modification / creation
             category.setName(nameTextField.getText());
             category.setNote(noteTextField.getText());
 
-            saveRequest.set(true);
-        } else {
-            // nenastali zmeny -> zatvor dialog
-            saveRequest.set(false);
+            if (newCategory) {
+                if(CategoryDAO.getInstance().createCategory(category)) {
+                    df.showAlert(Alert.AlertType.INFORMATION, "Kategória úspešne vytvorená.");
+                } else {
+                    df.showAlert(Alert.AlertType.WARNING, "Kategóriu sa nepodarilo vytvoriť.");
+                }
+            } else {
+                if(CategoryDAO.getInstance().modifyCategory(category)) {
+                    df.showAlert(Alert.AlertType.INFORMATION, "Kategória úspešne modifikovaná.");
+                } else {
+                    df.showAlert(Alert.AlertType.WARNING, "Kategóriu sa nepodarilo upraviť.");
+                }
+            }
         }
         closeStage();
     }
@@ -78,7 +89,6 @@ public class FXMLCategoryModifyDialogController implements Initializable {
      */
     @FXML
     private void cancelButtonAction() {
-        saveRequest.set(false);
         closeStage();
     }
 

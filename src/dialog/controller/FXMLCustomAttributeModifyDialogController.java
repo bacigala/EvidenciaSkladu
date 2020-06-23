@@ -22,10 +22,11 @@ public class FXMLCustomAttributeModifyDialogController implements Initializable 
     @FXML private javafx.scene.control.TextField nameTextField;
     @FXML private javafx.scene.control.TextField valueTextField;
     @FXML private javafx.scene.control.Button saveButton;
-    @FXML private javafx.scene.control.Button deleteButton;
+    @FXML private javafx.scene.control.Button cancelButton;
 
     private CustomAttribute originalAttribute;
     private HashSet<CustomAttribute> attributesToAdd, attributesToDelete;
+    private boolean newAttribute = false;
 
     /**
      * BUTTON "Ulozit" Assigns CustomAttribute to corresponding set.
@@ -43,8 +44,11 @@ public class FXMLCustomAttributeModifyDialogController implements Initializable 
         }
         if (!newName.equals("") && !newValue.equals("")) {
             // values changed -> update sets
-            this.attributesToAdd.add(new CustomAttribute(newName, newValue));
-            deleteButtonAction(new ActionEvent());
+            attributesToAdd.add(new CustomAttribute(newName, newValue));
+            if (!newAttribute) {
+                if(!attributesToAdd.remove(originalAttribute)) attributesToDelete.add(originalAttribute);
+            }
+            close();
         } else {
             // error - wrong input
             df.showAlert(Alert.AlertType.ERROR, "Zadané údaje sú neplatné.");
@@ -53,16 +57,11 @@ public class FXMLCustomAttributeModifyDialogController implements Initializable 
     }
 
     /**
-     * BUTTON "Odstranit" Assigns CustomAttribute to corresponding set.
+     * BUTTON "Zrusit" Closes dialog with no impact.
      */
     @FXML
-    private void deleteButtonAction(ActionEvent e) {
+    private void cancelButtonAction() {
         disableInput();
-        if (this.attributesToAdd.contains(originalAttribute)) {
-            this.attributesToAdd.remove(originalAttribute);
-        } else {
-            this.attributesToDelete.add(originalAttribute);
-        }
         close();
     }
 
@@ -75,30 +74,28 @@ public class FXMLCustomAttributeModifyDialogController implements Initializable 
      * Saves pointers to provided sets of change / delete attributes.
      * Populates input fields with current values.
      */
-    public void initData(CustomAttribute customAttribute, HashSet<CustomAttribute> attributesToAdd,
+    public void initData(HashSet<CustomAttribute> attributesToAdd) {
+        newAttribute = true;
+        this.originalAttribute = new CustomAttribute("", "");
+        this.attributesToAdd = attributesToAdd;
+    }
+
+    public void initData(CustomAttribute originalAttribute, HashSet<CustomAttribute> attributesToAdd,
                          HashSet<CustomAttribute> attributesToDelete) {
-        if (customAttribute != null && attributesToAdd != null && attributesToDelete != null) {
-            this.originalAttribute = customAttribute;
-            this.attributesToAdd = attributesToAdd;
-            this.attributesToDelete =  attributesToDelete;
-            nameTextField.setText(customAttribute.getName());
-            valueTextField.setText(customAttribute.getValue());
-
-            /**
-             * Disables / enables DELETE button after original name / value changes.
-             */
-            nameTextField.textProperty().addListener((obs, oldText, newText) -> {
-                deleteButton.setDisable(nameOrValueChanged());
-            });
-            valueTextField.textProperty().addListener((obs, oldText, newText) -> {
-                deleteButton.setDisable(nameOrValueChanged());
-            });
-
-        } else {
+        if (originalAttribute == null || attributesToAdd == null || attributesToDelete == null) {
             // error - invalid init data received
             DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Dáta sa nepodarilo načítať.");
             close();
+            return;
         }
+
+        newAttribute = false;
+        this.originalAttribute = originalAttribute;
+        nameTextField.setText(originalAttribute.getName());
+        valueTextField.setText(originalAttribute.getValue());
+
+        this.attributesToAdd = attributesToAdd;
+        this.attributesToDelete =  attributesToDelete;
     }
 
     /**

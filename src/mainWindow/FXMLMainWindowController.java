@@ -157,6 +157,7 @@ public class FXMLMainWindowController implements Initializable {
             stage.initModality(Modality.APPLICATION_MODAL);
             FXMLItemSupplyDialogController controller = fxmlLoader.<FXMLItemSupplyDialogController>getController();
             controller.initData(selectedItem);
+            stage.setTitle("Vklad položky " + selectedItem.getName());
             stage.showAndWait();
             reloadMainTable();
         }
@@ -176,6 +177,7 @@ public class FXMLMainWindowController implements Initializable {
             stage.initModality(Modality.APPLICATION_MODAL);
             FXMLItemOfftakeDialogController controller = fxmlLoader.getController();
             controller.initData(selectedItem);
+            stage.setTitle("Výber položky " + selectedItem.getName());
             stage.showAndWait();
             reloadMainTable();
         }
@@ -195,6 +197,7 @@ public class FXMLMainWindowController implements Initializable {
             stage.initModality(Modality.APPLICATION_MODAL);
             FXMLItemTransactionsDialogController controller = fxmlLoader.getController();
             controller.initData(selectedItem);
+            stage.setTitle("Pohyby položky " + selectedItem.getName());
             stage.showAndWait();
             reloadMainTable();
         }
@@ -214,6 +217,7 @@ public class FXMLMainWindowController implements Initializable {
             stage.initModality(Modality.APPLICATION_MODAL);
             FXMLItemModifyDialogController controller = fxmlLoader.getController();
             controller.initData(selectedItem, selectedItemCustomAttributes);
+            stage.setTitle("Úprava položky " + selectedItem.getName());
             stage.showAndWait();
             reloadMainTable();
         }
@@ -233,6 +237,7 @@ public class FXMLMainWindowController implements Initializable {
         stage.initModality(Modality.APPLICATION_MODAL);
         FXMLItemModifyDialogController controller = fxmlLoader.getController();
         controller.initData(newItem, selectedItemCustomAttributes, true);
+        stage.setTitle("Nová položka");
         stage.showAndWait();
 
         reloadMainTable();
@@ -251,6 +256,7 @@ public class FXMLMainWindowController implements Initializable {
         stage.initModality(Modality.APPLICATION_MODAL);
         FXMLAccountManagementDialogController controller = fxmlLoader.getController();
         controller.initData();
+        stage.setTitle("Používateľské účty");
         stage.showAndWait();
         reloadMainTable();
     }
@@ -266,8 +272,7 @@ public class FXMLMainWindowController implements Initializable {
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));
         stage.initModality(Modality.APPLICATION_MODAL);
-        FXMLCategoryManagementDialogController controller = fxmlLoader.getController();
-        controller.initData();
+        stage.setTitle("Správa kategórií");
         stage.showAndWait();
         reloadMainTable();
     }
@@ -284,6 +289,7 @@ public class FXMLMainWindowController implements Initializable {
         stage.initModality(Modality.APPLICATION_MODAL);
         FXMLCheckExpirationDialogController controller = fxmlLoader.getController();
         controller.initData();
+        stage.setTitle("Expirované položky");
         stage.showAndWait();
         reloadMainTable();
     }
@@ -298,8 +304,7 @@ public class FXMLMainWindowController implements Initializable {
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));
         stage.initModality(Modality.APPLICATION_MODAL);
-        FXMLCheckAmountDialogController controller = fxmlLoader.getController();
-        controller.initData();
+        stage.setTitle("Položky v nedostatočnom množstve");
         stage.showAndWait();
         reloadMainTable();
     }
@@ -314,6 +319,7 @@ public class FXMLMainWindowController implements Initializable {
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));
         stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setTitle("Spotreba - prehľad");
         stage.showAndWait();
     }
 

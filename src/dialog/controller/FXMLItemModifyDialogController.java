@@ -5,25 +5,27 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
-import databaseAccess.CategoryDAO;
-import databaseAccess.ItemDAO;
-import databaseAccess.Login;
+import databaseAccess.*;
 import dialog.DialogFactory;
+import domain.Account;
 import domain.Category;
 import domain.CustomAttribute;
 import domain.Item;
-import databaseAccess.ComplexQueryHandler;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
 /**
  * Dialog for Item modification.
@@ -62,13 +64,12 @@ public class FXMLItemModifyDialogController implements Initializable {
     }
 
     public void initData(Item item, HashSet<CustomAttribute> customAttributes) {
-
         if (item != null) {
-            ComplexQueryHandler qh = ComplexQueryHandler.getInstance();
-
             permanentDeletionButton.setDisable(isNewItem && Login.getInstance().hasAdmin());
-
             this.item = item;
+            this.originalAttributes = customAttributes;
+
+            // load default values
             nameTextField.setText(item.getName());
             codeTextField.setText(item.getBarcode());
             curAmountTextField.setText(Integer.toString(item.getCurAmount()));
@@ -78,15 +79,23 @@ public class FXMLItemModifyDialogController implements Initializable {
             categoryChoiceBox.setValue(CategoryDAO.getInstance().getCategoryMap().get(item.getCategory()));
 
             // custom attributes table
-            TableColumn attributeName = new TableColumn("Atribút");
-            attributeName.setCellValueFactory(new PropertyValueFactory<>("name"));
+            TableColumn nameColumn = new TableColumn("Atribút");
+            nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-            TableColumn attributeValue = new TableColumn("Hodnota");
-            attributeValue.setCellValueFactory(new PropertyValueFactory<>("value"));
+            TableColumn valueColumn = new TableColumn("Hodnota");
+            valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
 
-            tableCustomAttributes.getColumns().addAll(attributeName, attributeValue);
+            TableColumn actionColumn = new TableColumn<>("Akcie");
+            actionColumn.setSortable(false);
 
-            originalAttributes = customAttributes;
+            actionColumn.setCellValueFactory(
+                    (Callback<TableColumn.CellDataFeatures<Account, Boolean>, ObservableValue<Boolean>>)
+                            p -> new SimpleBooleanProperty(p.getValue() != null));
+
+            actionColumn.setCellFactory(p -> new ButtonCell());
+
+            tableCustomAttributes.getColumns().addAll(nameColumn, valueColumn, actionColumn);
+            tableCustomAttributes.setPlaceholder(new Label("Bez ďalších atribútov."));
             populateCustomAttributesTable();
         }
     }
@@ -96,7 +105,6 @@ public class FXMLItemModifyDialogController implements Initializable {
      */
     @FXML
     private void saveButton() {
-        ComplexQueryHandler qh = ComplexQueryHandler.getInstance();
         DialogFactory df = DialogFactory.getInstance();
         try {
             if (isNewItem) {
@@ -172,17 +180,15 @@ public class FXMLItemModifyDialogController implements Initializable {
     @FXML
     private void newCustomAttributeButton() throws IOException {
         mainAnchorPane.setDisable(true);
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/FXMLCustomAttributeCreateDialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/FXMLCustomAttributeModifyDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));
         stage.initModality(Modality.APPLICATION_MODAL);
-        FXMLCustomAttributeCreateDialogController controller = fxmlLoader.getController();
+        FXMLCustomAttributeModifyDialogController controller = fxmlLoader.getController();
         controller.initData(attributesToAdd);
         stage.setTitle("Nový atribút");
         stage.showAndWait();
-        System.out.println(attributesToAdd);
-        System.out.println(attributesToDelete);
         populateCustomAttributesTable();
         mainAnchorPane.setDisable(false);
     }
@@ -197,49 +203,69 @@ public class FXMLItemModifyDialogController implements Initializable {
     }
 
     /**
-     * CustomAttributeChange dialog popup on custom attribute clicked.
-     */
-    @FXML
-    private void showCustomAttributeChangeDialog() throws IOException {
-        mainAnchorPane.setDisable(true);
-        CustomAttribute selected = tableCustomAttributes.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/FXMLCustomAttributeModifyDialog.fxml"));
-            Parent root1 = fxmlLoader.load();
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root1));
-            stage.initModality(Modality.APPLICATION_MODAL);
-            FXMLCustomAttributeModifyDialogController controller = fxmlLoader.getController();
-            controller.initData(selected, attributesToAdd, attributesToDelete);
-            stage.setTitle("Upraviť atribút");
-            stage.showAndWait();
-        }
-        System.out.println(attributesToAdd);
-        System.out.println(attributesToDelete);
-        populateCustomAttributesTable();
-        mainAnchorPane.setDisable(false);
-    }
-
-    /**
      * Populates table with provided CustomAttributes HashSet.
      */
     private void populateCustomAttributesTable() {
-        // todo: add also elements from 2 special dedicated sets of to-delete and to-add
         tableCustomAttributes.getItems().clear();
-        HashSet<CustomAttribute> newAttributes;
-        if (originalAttributes != null) {
-            newAttributes = (HashSet) originalAttributes.clone();
-        } else {
-            newAttributes = new HashSet<>();
-        }
+        HashSet<CustomAttribute> newAttributes = new HashSet<>();
+        if (originalAttributes != null) newAttributes.addAll(originalAttributes);
         newAttributes.removeAll(attributesToDelete);
         newAttributes.addAll(attributesToAdd);
-        if (!newAttributes.isEmpty()) {
-            for (CustomAttribute ca : newAttributes) {
-                tableCustomAttributes.getItems().add(ca);
+        tableCustomAttributes.getItems().addAll(newAttributes);
+    }
+
+    // cell in "Akcie" column
+    private class ButtonCell extends TableCell<CustomAttribute, Boolean> {
+        final Button modifyButton = new Button("Upraviť");
+        final Button deleteButton = new Button("Odstrániť");
+
+        ButtonCell() {
+            modifyButton.setOnAction(t -> {
+                CustomAttribute targetAttribute = getTableView().getItems().get(getIndex());
+                mainAnchorPane.setDisable(true);
+                if (targetAttribute != null) {
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/FXMLCustomAttributeModifyDialog.fxml"));
+                    Parent root1 = null;
+                    try {
+                        root1 = fxmlLoader.load();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    Stage stage = new Stage();
+                    assert root1 != null;
+                    stage.setScene(new Scene(root1));
+                    stage.initModality(Modality.APPLICATION_MODAL);
+                    FXMLCustomAttributeModifyDialogController controller = fxmlLoader.getController();
+                    controller.initData(targetAttribute, attributesToAdd, attributesToDelete);
+                    stage.setTitle("Upraviť atribút");
+                    stage.showAndWait();
+                }
+                populateCustomAttributesTable();
+                mainAnchorPane.setDisable(false);
+            });
+
+            deleteButton.setOnAction(t -> {
+                CustomAttribute targetAttribute = getTableView().getItems().get(getIndex());
+                if (attributesToAdd.contains(targetAttribute)) {
+                    attributesToAdd.remove(targetAttribute);
+                } else {
+                    attributesToDelete.add(targetAttribute);
+                }
+                populateCustomAttributesTable();
+            });
+        }
+
+        HBox pane = new HBox(modifyButton, deleteButton);
+
+        //Display button if the row is not empty
+        @Override
+        protected void updateItem(Boolean t, boolean empty) {
+            super.updateItem(t, empty);
+            if (empty || t == null) {
+                setGraphic(null);
+                return;
             }
-        } else {
-            tableCustomAttributes.setPlaceholder(new Label("Bez ďalších atribútov."));
+            setGraphic(pane);
         }
     }
 
