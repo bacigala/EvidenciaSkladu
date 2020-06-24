@@ -4,6 +4,12 @@
     <list default="true" id="cdb932d9-7e58-4d94-93a9-e7b232ef17da" name="Default" comment="&quot;completed 'customAttributeModifyDialog', now it modifies Sets to signalise desired changes&quot;">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/dialog/controller/FXMLItemOfftakeDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLItemOfftakeDialogController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dialog/controller/FXMLItemSupplyDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLItemSupplyDialogController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dialog/controller/FXMLItemTransactionsDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLItemTransactionsDialogController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dialog/controller/FXMLSimpleChoiceDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLSimpleChoiceDialogController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dialog/controller/FXMLUserLoginDialogController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/controller/FXMLUserLoginDialogController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dialog/fxml/FXMLItemSupplyDialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/fxml/FXMLItemSupplyDialog.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dialog/fxml/FXMLSimpleChoiceDialog.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/dialog/fxml/FXMLSimpleChoiceDialog.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -217,6 +223,18 @@
       </method>
     </configuration>
   </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
+  </component>
   <component name="StructureViewFactory">
     <option name="ACTIVE_ACTIONS" value=",VISIBILITY_SORTER,SHOW_FIELDS" />
   </component>
@@ -252,7 +270,8 @@
       <workItem from="1592812105680" duration="25790000" />
       <workItem from="1592844841283" duration="4913000" />
       <workItem from="1592898688881" duration="8272000" />
-      <workItem from="1592932929954" duration="8265000" />
+      <workItem from="1592932929954" duration="8465000" />
+      <workItem from="1592985717225" duration="3331000" />
     </task>
     <task id="LOCAL-00001" summary="&quot;completed 'customAttributeModifyDialog', now it modifies Sets to signalise desired changes&quot;">
       <created>1589276133406</created>
@@ -310,22 +329,22 @@
       <screen x="0" y="0" width="1600" height="870" />
     </state>
     <state x="506" y="175" key="FileChooserDialogImpl/0.0.1600.870@0.0.1600.870" timestamp="1592748584826" />
-    <state width="1556" height="225" key="GridCell.Tab.0.bottom" timestamp="1592946353396">
+    <state width="1556" height="225" key="GridCell.Tab.0.bottom" timestamp="1592989017344">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state width="1556" height="225" key="GridCell.Tab.0.bottom/0.0.1600.870@0.0.1600.870" timestamp="1592946353396" />
-    <state width="1556" height="225" key="GridCell.Tab.0.center" timestamp="1592946353395">
+    <state width="1556" height="225" key="GridCell.Tab.0.bottom/0.0.1600.870@0.0.1600.870" timestamp="1592989017344" />
+    <state width="1556" height="225" key="GridCell.Tab.0.center" timestamp="1592989017343">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state width="1556" height="225" key="GridCell.Tab.0.center/0.0.1600.870@0.0.1600.870" timestamp="1592946353395" />
-    <state width="1556" height="225" key="GridCell.Tab.0.left" timestamp="1592946353395">
+    <state width="1556" height="225" key="GridCell.Tab.0.center/0.0.1600.870@0.0.1600.870" timestamp="1592989017343" />
+    <state width="1556" height="225" key="GridCell.Tab.0.left" timestamp="1592989017342">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state width="1556" height="225" key="GridCell.Tab.0.left/0.0.1600.870@0.0.1600.870" timestamp="1592946353395" />
-    <state width="1556" height="225" key="GridCell.Tab.0.right" timestamp="1592946353395">
+    <state width="1556" height="225" key="GridCell.Tab.0.left/0.0.1600.870@0.0.1600.870" timestamp="1592989017342" />
+    <state width="1556" height="225" key="GridCell.Tab.0.right" timestamp="1592989017343">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state width="1556" height="225" key="GridCell.Tab.0.right/0.0.1600.870@0.0.1600.870" timestamp="1592946353395" />
+    <state width="1556" height="225" key="GridCell.Tab.0.right/0.0.1600.870@0.0.1600.870" timestamp="1592989017343" />
     <state width="1540" height="268" key="GridCell.Tab.1.bottom" timestamp="1589273637783">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
@@ -358,10 +377,10 @@
       <screen x="0" y="0" width="1600" height="870" />
     </state>
     <state x="542" y="62" key="refactoring.ChangeSignatureDialog/0.0.1600.870@0.0.1600.870" timestamp="1592550752604" />
-    <state x="456" y="192" key="run.anything.popup" timestamp="1592938105011">
+    <state x="456" y="192" key="run.anything.popup" timestamp="1592989053936">
       <screen x="0" y="0" width="1600" height="870" />
     </state>
-    <state x="456" y="192" key="run.anything.popup/0.0.1600.870@0.0.1600.870" timestamp="1592938105011" />
+    <state x="456" y="192" key="run.anything.popup/0.0.1600.870@0.0.1600.870" timestamp="1592989053936" />
     <state x="463" y="186" width="672" height="678" key="search.everywhere.popup" timestamp="1592481905255">
       <screen x="0" y="0" width="1600" height="870" />
     </state>

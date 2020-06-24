@@ -1,23 +1,16 @@
 
 package dialog.controller;
 
-/**
- * User login / logout dialog - requests username and password form the user.
- */
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
-
 import databaseAccess.ConnectionFactory;
 import databaseAccess.Login;
-import databaseAccess.ComplexQueryHandler;
 import dialog.DialogFactory;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
+
+import java.net.URL;
+import java.util.ResourceBundle;
 
 public class FXMLUserLoginDialogController implements Initializable {
 
@@ -26,11 +19,10 @@ public class FXMLUserLoginDialogController implements Initializable {
     @FXML private javafx.scene.control.Button loginButton;
 
     /**
-     * BUTTON "Prihlasit sa" Performs user login.
+     * BUTTON "Prihlasit sa" Performs user login / logoff.
      */
     @FXML
-    private void loginButtonAction(ActionEvent e) {
-        ComplexQueryHandler qh = ComplexQueryHandler.getInstance();
+    private void loginButtonAction() {
         DialogFactory df = DialogFactory.getInstance();
         if (ConnectionFactory.getInstance().hasValidConnectionDetails()) {
             if (Login.getInstance().hasUser()) {
@@ -58,15 +50,12 @@ public class FXMLUserLoginDialogController implements Initializable {
             }                        
         } else {
             // error - no server connection
-            disableInput();
-            loginButton.setDisable(true);
             df.showAlert(Alert.AlertType.ERROR, "Nepodarilo sa pripojiť k databáze.");
         }
     }
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        ComplexQueryHandler qh = ComplexQueryHandler.getInstance();
         DialogFactory df = DialogFactory.getInstance();
         if (ConnectionFactory.getInstance().hasValidConnectionDetails()) {
             if (Login.getInstance().hasUser()) {
@@ -103,7 +92,7 @@ public class FXMLUserLoginDialogController implements Initializable {
      * MENU ITEM "Pripojenie -> Nastavenia" Opens connection details dialog.
      */
     @FXML
-    private void openConnectionDetails(ActionEvent e) throws IOException {
+    private void openConnectionDetails() {
         DialogFactory.getInstance().showConnectionDetailsDialog();
     }
     

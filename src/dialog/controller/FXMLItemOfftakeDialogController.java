@@ -1,29 +1,28 @@
 
 package dialog.controller;
 
-import java.net.URL;
-import java.time.LocalDate;
-import java.util.*;
-import databaseAccess.*;
+import databaseAccess.ItemDAO;
 import dialog.DialogFactory;
-import domain.Account;
 import domain.Item;
 import domain.ItemOfftakeRecord;
-import javafx.beans.Observable;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
-import javafx.scene.control.TableColumn.CellEditEvent;
+
+import java.net.URL;
+import java.time.LocalDate;
+import java.util.ResourceBundle;
 
 /**
  * Dialog for Item offtake.

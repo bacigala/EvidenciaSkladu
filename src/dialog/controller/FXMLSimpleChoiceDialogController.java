@@ -2,12 +2,12 @@
 package dialog.controller;
 
 import dialog.DialogFactory;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
+
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -23,11 +23,9 @@ public class FXMLSimpleChoiceDialogController<Q> implements Initializable {
     private Q theChoice = null;
 
     public void setChoiceList(ObservableList<Q> choiceList) {
-        // use empty choiceList if null is received
-        mainChoiceBox.setItems(choiceList != null ? choiceList : FXCollections.observableArrayList());
+        if (choiceList != null) mainChoiceBox.setItems(choiceList);
         mainChoiceBox.getSelectionModel().selectedIndexProperty().addListener(
-                (ov, value, new_value) -> theChoice = choiceList != null ? choiceList.get(new_value.intValue()) : null
-        );
+                (ov, value, new_value) -> theChoice = choiceList != null ? choiceList.get(new_value.intValue()) : null);
     }
 
     public void setLabelText(String labelText) {
