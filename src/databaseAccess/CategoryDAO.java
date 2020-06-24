@@ -73,6 +73,8 @@ public class CategoryDAO {
      */
     public boolean modifyCategory(Category targetCategory) {
         if (!Login.getInstance().hasAdmin()) return false;
+        if (targetCategory == null) return false;
+        if (targetCategory.getId() == 1) return false; // no change to default category
 
         Connection conn = null;
         PreparedStatement statement = null;

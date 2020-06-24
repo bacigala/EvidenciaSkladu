@@ -121,7 +121,7 @@ public class FXMLCategoryManagementDialogController implements Initializable {
                     categoreis.addAll(CategoryDAO.getInstance().getCategoryMap().values());
 
                     controller.setChoiceList(categoreis);
-                    controller.setLabelText("Vyberte kategóriu pod ktorú budú prevedené položky odstránenej kategoórie.");
+                    controller.setLabelText("Vyberte kategóriu pod ktorú budú prevedené položky odstránenej kategórie.");
 
                     stage.showAndWait();
 
@@ -151,7 +151,9 @@ public class FXMLCategoryManagementDialogController implements Initializable {
                 setGraphic(null);
                 return;
             }
-            setGraphic(pane);
+
+            // no change / delete of the default category
+            if (getTableView().getItems().get(getIndex()).getId() != 1) setGraphic(pane);
         }
     }
 
