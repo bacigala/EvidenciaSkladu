@@ -4,11 +4,10 @@ package mainWindow;
 import databaseAccess.ConnectionFactory;
 import databaseAccess.ItemDAO;
 import databaseAccess.Login;
+import dialog.DialogFactory;
 import dialog.controller.*;
 import domain.CustomAttribute;
 import domain.Item;
-import databaseAccess.ComplexQueryHandler;
-import dialog.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -23,7 +22,8 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.HashSet;
+import java.util.ResourceBundle;
 
 /**
  * The main window of the application.
@@ -58,9 +58,6 @@ public class FXMLMainWindowController implements Initializable {
         //set of columns for default view
         TableColumn catColumn = new TableColumn("Kategória");
         catColumn.setCellValueFactory(new PropertyValueFactory<>("categoryName"));
-        
-        TableColumn idColumn = new TableColumn("Id (debug)");
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 
         TableColumn nameColumn = new TableColumn("Názov");
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -74,7 +71,7 @@ public class FXMLMainWindowController implements Initializable {
         TableColumn unitColumn = new TableColumn("Jednotka");
         unitColumn.setCellValueFactory(new PropertyValueFactory<>("unit"));
 
-        mainTable.getColumns().addAll(catColumn, idColumn, nameColumn, barcodeColumn, curAmountColumn, unitColumn);
+        mainTable.getColumns().addAll(catColumn, nameColumn, barcodeColumn, curAmountColumn, unitColumn);
 
         mainTable.setPlaceholder(new Label("Niet čo zobraziť :("));
 
@@ -89,7 +86,6 @@ public class FXMLMainWindowController implements Initializable {
         selectedItemPropertiesTable.setPlaceholder(new Label("Bez ďalších atribútov."));
 
         // test default connection settings, require login information
-        ComplexQueryHandler queryHandler = ComplexQueryHandler.getInstance();
         if (ConnectionFactory.getInstance().setBasicUserConnectionDetails()) {
             // successfully established database connection
             openLogInSettings();
@@ -105,9 +101,7 @@ public class FXMLMainWindowController implements Initializable {
         clearItemDetails();
         if (ItemDAO.getInstance().reloadItemList()) {
             mainTable.getItems().clear();
-            for (Item i : ItemDAO.getInstance().getItemList()) {
-                mainTable.getItems().add(i);
-            } 
+            mainTable.getItems().addAll(ItemDAO.getInstance().getItemList());
             return true;
         }
         return false;
@@ -121,7 +115,6 @@ public class FXMLMainWindowController implements Initializable {
         // clear previously loaded custom attributes
         selectedItemPropertiesTable.getItems().clear();
 
-        ComplexQueryHandler qh = ComplexQueryHandler.getInstance();
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
             HashSet<CustomAttribute> newCustomAttributes = ItemDAO.getInstance().getItemCustomAttributes(selectedItem.getId());
@@ -151,11 +144,11 @@ public class FXMLMainWindowController implements Initializable {
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLItemSupplyDialog.fxml"));
-            Parent root1 = (Parent) fxmlLoader.load();
+            Parent root1 = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root1));  
             stage.initModality(Modality.APPLICATION_MODAL);
-            FXMLItemSupplyDialogController controller = fxmlLoader.<FXMLItemSupplyDialogController>getController();
+            FXMLItemSupplyDialogController controller = fxmlLoader.getController();
             controller.initData(selectedItem);
             stage.setTitle("Vklad položky " + selectedItem.getName());
             stage.showAndWait();

@@ -2,7 +2,6 @@
 package domain;
 
 import databaseAccess.CategoryDAO;
-import databaseAccess.ComplexQueryHandler;
 
 /**
  * Represents one record in the table "item".
@@ -53,11 +52,11 @@ public class Item {
     public String getUnit() {
         return unit;
     }
-    
+
     public String getNote() {
         return note;
     }
-    
+
     public int getCategory() {
         return category;
     }

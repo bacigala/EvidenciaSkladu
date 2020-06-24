@@ -20,16 +20,6 @@ public class CustomAttribute {
         return value;
     }
 
-    public CustomAttribute copy() { return new CustomAttribute(name, value); }
-
-    @Override
-    public String toString() {
-        return "CustomAttribute{" +
-                "name='" + name + '\'' +
-                ", value='" + value + '\'' +
-                '}';
-    }
-
     public boolean equals(CustomAttribute other) {
         return name.equals(other.getName()) && value.equals(other.getValue());
     }

@@ -316,7 +316,7 @@ public class ItemDAO {
             conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
             statement = conn.prepareStatement(
-                    "SELECT account.name, account.surname, move_item.amount, move.time " +
+                    "SELECT account.name, account.surname, move_item.amount, move.time, move_item.expiration " +
                             "FROM (move_item JOIN move ON (move_item.move_id = move.id)) " +
                             "JOIN account ON (move.account_id = account.id) WHERE move_item.item_id = ? " +
                             "ORDER BY move.time DESC");
@@ -326,7 +326,8 @@ public class ItemDAO {
                 logRecords.add(new ItemMoveLogRecord(
                         result.getDate("time").toString(),
                         ((Integer)result.getInt("amount")).toString(),
-                        result.getString("name") + " " + result.getString("surname")
+                        result.getString("name") + " " + result.getString("surname"),
+                        result.getDate("expiration").toString()
                 ));
             }
         } catch (SQLException e) {

@@ -47,10 +47,13 @@ public class FXMLItemTransactionsDialogController implements Initializable {
         TableColumn<ItemMoveLogRecord, Integer> transAmount = new TableColumn<>("Množstvo");
         transAmount.setCellValueFactory(new PropertyValueFactory<>("amount"));
 
+        TableColumn<ItemMoveLogRecord, Date> itemExpirationColumn = new TableColumn<>("Expirácia");
+        itemExpirationColumn.setCellValueFactory(new PropertyValueFactory<>("expiration"));
+
         TableColumn<ItemMoveLogRecord, String> transUsername = new TableColumn<>("Používateľ");
         transUsername.setCellValueFactory(new PropertyValueFactory<>("username"));
 
-        mainTable.getColumns().addAll(transDate, transAmount, transUsername);
+        mainTable.getColumns().addAll(transDate, transAmount, itemExpirationColumn, transUsername);
         mainTable.setPlaceholder(new Label("Zatiaľ žiadne pohyby."));
 
         ArrayList<ItemMoveLogRecord> logRecords = ItemDAO.getInstance().getItemTransactions(item.getId());
