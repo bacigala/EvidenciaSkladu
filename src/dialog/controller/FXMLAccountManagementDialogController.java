@@ -149,7 +149,8 @@ public class FXMLAccountManagementDialogController implements Initializable {
                 setGraphic(null);
                 return;
             }
-            setGraphic(pane);
+            // no change to 'trash' user
+            if (getTableView().getItems().get(getIndex()).getId() != 1) setGraphic(pane);
         }
     }
 

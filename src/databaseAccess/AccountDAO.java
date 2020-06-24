@@ -138,6 +138,8 @@ public class AccountDAO {
      */
     public boolean modifyAccount(Account targetAccount) {
         if (!Login.getInstance().hasUser()) return false;
+        if (targetAccount == null) return false;
+        if (targetAccount.getId() == 1) return false; // no change to 'trash' user
         // non-admin restrictions
         if (!Login.getInstance().hasAdmin()) {
             // non-admin cannot modify foreign account
@@ -259,6 +261,7 @@ public class AccountDAO {
     public boolean deleteAccount(Account accountToDelete, Account accountToTakeOver) {
         if (!Login.getInstance().hasAdmin()) return false;
         if (accountToDelete == null) return false;
+        if (accountToDelete.getId() == 1) return false; // no change to 'trash' user
 
         Connection conn = null;
         PreparedStatement statement = null;
