@@ -1,4 +1,4 @@
 # evidenciaskladu
 Evidencia inventáru v sklade.
 
-The aim of the project is to create an application for storage inventory tracking.
+http://davinci.fmph.uniba.sk/~stolarik6/rocnikovy-projekt/index.html
