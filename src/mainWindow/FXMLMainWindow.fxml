@@ -87,7 +87,7 @@
                   <Insets bottom="12.0" top="12.0" />
                </VBox.margin>
             </Separator>
-            <Label text="Databáza">
+            <Label text="Načítanie dát">
                <VBox.margin>
                   <Insets bottom="10.0" />
                </VBox.margin>
@@ -95,11 +95,17 @@
                   <Font name="System Bold" size="13.0" />
                </font>
             </Label>
-            <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0">
+            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
                <children>
-                  <Button fx:id="databaseRefreshButton" mnemonicParsing="false" onAction="#reloadMainTable" text="Obnoviť" />
+                  <Button fx:id="databaseRefreshButton" mnemonicParsing="false" onAction="#autoRefreshResume" text="Načítaj" />
+                  <CheckBox fx:id="autoRefreshCheckBox" mnemonicParsing="false" onAction="#autoRefreshCheckBoxAction" text="auto" />
                </children>
             </HBox>
+            <Label fx:id="lastRefreshLabel">
+               <VBox.margin>
+                  <Insets bottom="10.0" top="10.0" />
+               </VBox.margin>
+            </Label>
          </children>
       </VBox>
    </children>

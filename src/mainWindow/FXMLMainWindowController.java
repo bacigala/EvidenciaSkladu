@@ -8,6 +8,7 @@ import dialog.DialogFactory;
 import dialog.controller.*;
 import domain.CustomAttribute;
 import domain.Item;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -17,11 +18,14 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.paint.Paint;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.ResourceBundle;
 
@@ -39,9 +43,15 @@ public class FXMLMainWindowController implements Initializable {
     @FXML private javafx.scene.control.Button itemMoveHistoryButton;
     @FXML private javafx.scene.control.Button databaseRefreshButton;
     @FXML private javafx.scene.control.Menu adminMenu;
+    @FXML private javafx.scene.control.Label lastRefreshLabel;
+    @FXML private javafx.scene.control.CheckBox autoRefreshCheckBox;
+
 
     //stores currently selected item custom attributes
     private HashSet<CustomAttribute> selectedItemCustomAttributes;
+
+    // thread for table auto-refresh
+    private TableRefreshThread tableRefreshThread;
 
     @FXML
     private void openLogInSettings() {
@@ -94,14 +104,21 @@ public class FXMLMainWindowController implements Initializable {
                     "v nastaveniach.";
             DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, message);
         }
-    }   
+    }
     
     @FXML
     private boolean reloadMainTable() {
         clearItemDetails();
         if (ItemDAO.getInstance().reloadItemList()) {
-            mainTable.getItems().clear();
-            mainTable.getItems().addAll(ItemDAO.getInstance().getItemList());
+
+            Platform.runLater(() -> {
+                mainTable.getItems().clear();
+                mainTable.getItems().addAll(ItemDAO.getInstance().getItemList());
+                Calendar cal = Calendar.getInstance();
+                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+                lastRefreshLabel.setText("Aktualizované " + sdf.format(cal.getTime()));
+            });
+
             return true;
         }
         return false;
@@ -117,6 +134,7 @@ public class FXMLMainWindowController implements Initializable {
 
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
+            autoRefreshPause();
             HashSet<CustomAttribute> newCustomAttributes = ItemDAO.getInstance().getItemCustomAttributes(selectedItem.getId());
             if (newCustomAttributes != null) {
                 for (CustomAttribute ca : newCustomAttributes) {
@@ -132,6 +150,8 @@ public class FXMLMainWindowController implements Initializable {
                 itemDetailsChangeButton.setDisable(false);
                 itemMoveHistoryButton.setDisable(false);
             }
+        } else {
+            autoRefreshResume();
         }
     }
 
@@ -143,6 +163,7 @@ public class FXMLMainWindowController implements Initializable {
     private void itemSupply() throws IOException {
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
+            autoRefreshPause();
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLItemSupplyDialog.fxml"));
             Parent root1 = fxmlLoader.load();
             Stage stage = new Stage();
@@ -152,7 +173,7 @@ public class FXMLMainWindowController implements Initializable {
             controller.initData(selectedItem);
             stage.setTitle("Vklad položky " + selectedItem.getName());
             stage.showAndWait();
-            reloadMainTable();
+            autoRefreshResume();
         }
     }
 
@@ -163,6 +184,7 @@ public class FXMLMainWindowController implements Initializable {
     private void itemRequest() throws IOException {
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
+            autoRefreshPause();
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLItemOfftakeDialog.fxml"));
             Parent root1 = fxmlLoader.load();
             Stage stage = new Stage();
@@ -172,7 +194,7 @@ public class FXMLMainWindowController implements Initializable {
             controller.initData(selectedItem);
             stage.setTitle("Výber položky " + selectedItem.getName());
             stage.showAndWait();
-            reloadMainTable();
+            autoRefreshResume();
         }
     }
 
@@ -183,6 +205,7 @@ public class FXMLMainWindowController implements Initializable {
     private void itemTransactions() throws IOException {
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
+            autoRefreshPause();
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLItemTransactionsDialog.fxml"));
             Parent root1 = fxmlLoader.load();
             Stage stage = new Stage();
@@ -192,7 +215,7 @@ public class FXMLMainWindowController implements Initializable {
             controller.initData(selectedItem);
             stage.setTitle("Pohyby položky " + selectedItem.getName());
             stage.showAndWait();
-            reloadMainTable();
+            autoRefreshResume();
         }
     }
 
@@ -201,8 +224,10 @@ public class FXMLMainWindowController implements Initializable {
      */
     @FXML
     private void itemModify() throws IOException {
+
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
+            autoRefreshPause();
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLItemModifyDialog.fxml"));
             Parent root1 = fxmlLoader.load();
             Stage stage = new Stage();
@@ -212,7 +237,7 @@ public class FXMLMainWindowController implements Initializable {
             controller.initData(selectedItem, selectedItemCustomAttributes);
             stage.setTitle("Úprava položky " + selectedItem.getName());
             stage.showAndWait();
-            reloadMainTable();
+            autoRefreshResume();
         }
     }
 
@@ -222,6 +247,7 @@ public class FXMLMainWindowController implements Initializable {
      */
     @FXML
     private void openNewItemDialog() throws IOException {
+        autoRefreshPause();
         Item newItem = new Item(0, "", "", 0, 0, "", "", 1);
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLItemModifyDialog.fxml"));
         Parent root1 = fxmlLoader.load();
@@ -232,8 +258,7 @@ public class FXMLMainWindowController implements Initializable {
         controller.initData(newItem, selectedItemCustomAttributes, true);
         stage.setTitle("Nová položka");
         stage.showAndWait();
-
-        reloadMainTable();
+        autoRefreshResume();
     }
 
     /**
@@ -242,6 +267,7 @@ public class FXMLMainWindowController implements Initializable {
      */
     @FXML
     private void openAccountManagement() throws IOException {
+        autoRefreshPause();
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLAccountManagementDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
@@ -251,7 +277,7 @@ public class FXMLMainWindowController implements Initializable {
         controller.initData();
         stage.setTitle("Používateľské účty");
         stage.showAndWait();
-        reloadMainTable();
+        autoRefreshResume();
     }
 
     /**
@@ -260,6 +286,7 @@ public class FXMLMainWindowController implements Initializable {
      */
     @FXML
     private void openCategoryManagement() throws IOException {
+        autoRefreshPause();
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLCategoryManagementDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
@@ -267,7 +294,7 @@ public class FXMLMainWindowController implements Initializable {
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle("Správa kategórií");
         stage.showAndWait();
-        reloadMainTable();
+        autoRefreshResume();
     }
 
     /**
@@ -275,6 +302,7 @@ public class FXMLMainWindowController implements Initializable {
      */
     @FXML
     private void expiryDateCheckAction() throws IOException {
+        autoRefreshPause();
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLCheckExpirationDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
@@ -284,7 +312,7 @@ public class FXMLMainWindowController implements Initializable {
         controller.initData();
         stage.setTitle("Expirované položky");
         stage.showAndWait();
-        reloadMainTable();
+        autoRefreshResume();
     }
 
     /**
@@ -292,6 +320,7 @@ public class FXMLMainWindowController implements Initializable {
      */
     @FXML
     private void StockCheckAction() throws IOException {
+        autoRefreshPause();
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLCheckAmountDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
@@ -299,7 +328,7 @@ public class FXMLMainWindowController implements Initializable {
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle("Položky v nedostatočnom množstve");
         stage.showAndWait();
-        reloadMainTable();
+        autoRefreshResume();
     }
 
     /**
@@ -307,6 +336,7 @@ public class FXMLMainWindowController implements Initializable {
      */
     @FXML
     private void ConsumptionCheckAction() throws IOException {
+        autoRefreshPause();
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLConsumptionOverviewDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
@@ -314,6 +344,7 @@ public class FXMLMainWindowController implements Initializable {
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle("Spotreba - prehľad");
         stage.showAndWait();
+        autoRefreshResume();
     }
 
     /**
@@ -322,16 +353,25 @@ public class FXMLMainWindowController implements Initializable {
     private void userLogoutState() {
         clearItemDetails();
         mainTable.getItems().clear();
-        databaseRefreshButton.setDisable(true);
         adminMenu.setDisable(true);
+
+        // auto-refresh
+        databaseRefreshButton.setDisable(true);
+        autoRefreshCheckBox.setDisable(true);
+        tableRefreshThread.requestStop();
     }
 
     /**
      * Enables GUI functions for logged-in user.
      */
     private void userLoginState() {
-        databaseRefreshButton.setDisable(false);
         adminMenu.setDisable(!Login.getInstance().hasAdmin());
+
+        // auto-refresh
+        databaseRefreshButton.setDisable(false);
+        autoRefreshCheckBox.setDisable(false);
+        autoRefreshCheckBox.setSelected(true);
+        autoRefreshStart();
     }
 
     /**
@@ -346,14 +386,90 @@ public class FXMLMainWindowController implements Initializable {
         itemMoveHistoryButton.setDisable(true);
     }
 
-    /**
-     * Closes application.
-     */
+    // menu option
     @FXML
     private void closeApplicationAction(){
-        Login.getInstance().logOut();
         Stage stage = (Stage) mainTable.getScene().getWindow();
         stage.close();
+    }
+
+    // called after last application window has been closed
+    public void applicationClose() {
+        autoRefreshStop();
+        Login.getInstance().logOut();
+    }
+
+
+    // AUTOMATIC TABLE REFRESHING
+
+    // thread for main table refresh
+    private class TableRefreshThread extends Thread {
+        public boolean canRun = true;
+        private boolean stopRequest = false;
+
+        @Override
+        public void run() {
+            while (!stopRequest) {
+                if (canRun) reloadMainTable();
+                try {
+                    sleep(600000);
+                } catch (InterruptedException ignored) {
+
+                }
+            }
+        }
+
+        public void requestStop() {
+            stopRequest = true;
+            tableRefreshThread = null;
+        }
+    }
+
+    // checkbox for auto refresh toogled
+    @FXML
+    private void autoRefreshCheckBoxAction() {
+        if (autoRefreshCheckBox.isSelected()) {
+            autoRefreshStart();
+        } else {
+            autoRefreshStop();
+        }
+    }
+
+    // called after user-action on refreshed data || user checks auto-refresh CheckBox
+    private void autoRefreshStart() {
+        if (tableRefreshThread == null) {
+            tableRefreshThread = new TableRefreshThread();
+            tableRefreshThread.setDaemon(true);
+            tableRefreshThread.start();
+            autoRefreshCheckBox.setTextFill(Paint.valueOf("green"));
+        } else {
+            autoRefreshResume();
+        }
+    }
+
+    // called when user performs actions - no need to reload
+    private void autoRefreshPause() {
+        if (tableRefreshThread != null) {
+            tableRefreshThread.canRun = false;
+            autoRefreshCheckBox.setTextFill(Paint.valueOf("red"));
+        }
+    }
+
+    @FXML
+    private void autoRefreshResume() {
+        if (tableRefreshThread != null) {
+            tableRefreshThread.canRun = true;
+            autoRefreshCheckBox.setTextFill(Paint.valueOf("green"));
+        }
+        reloadMainTable();
+    }
+
+    // no more auto-refresh expected e.g. auto-refresh CheckBox was unchecked
+    private void autoRefreshStop() {
+        if (tableRefreshThread != null) {
+            tableRefreshThread.requestStop();
+            autoRefreshCheckBox.setTextFill(Paint.valueOf("red"));
+        }
     }
 
 }
