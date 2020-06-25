@@ -38,18 +38,17 @@ public class ComplexQueryHandler {
             conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
             statement = conn.prepareStatement(
-                    "SELECT item.id, item.name, SUM(move_item.amount) AS expiry_amount, move_item.expiration " +
-                            "FROM (move_item JOIN item ON (move_item.item_id = item.id)) " +
-                            "WHERE move_item.expiration < NOW() - 10 " +
-                            "GROUP BY move_item.expiration, item.id " +
-                            "HAVING expiry_amount > 0 " +
+                    "SELECT item.id, item.name, SUM(move_item.amount) AS expiry_amount \n" +
+                            "FROM (move_item JOIN item ON (move_item.item_id = item.id)) JOIN move ON move.id = move_item.move_id\n" +
+                            "WHERE move_item.expiration < NOW() \n" +
+                            "GROUP BY item.id\n" +
+                            "HAVING expiry_amount > 0\n" +
                             "ORDER BY item.name ASC, move_item.expiration ASC");
             result = statement.executeQuery();
             while (result.next()) {
                 ExpiryDateWarningRecord logRecord =  new ExpiryDateWarningRecord(
                         result.getInt("id"),
                         result.getString("name"),
-                        result.getDate("expiration"),
                         result.getInt("expiry_amount")
                 );
                 logRecords.add(logRecord);

@@ -15,7 +15,6 @@
                   <MenuItem mnemonicParsing="false" onAction="#closeApplicationAction" text="Ukončiť" />
             </items>
           </Menu>
-          <Menu mnemonicParsing="false" text="Zobrazenie" />
             <Menu fx:id="adminMenu" mnemonicParsing="false" text="Správa databázy">
                <items>
                   <MenuItem mnemonicParsing="false" onAction="#openNewItemDialog" text="Nová položka" />

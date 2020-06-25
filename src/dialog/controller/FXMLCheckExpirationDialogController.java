@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import databaseAccess.*;
-import domain.Account;
 import domain.ExpiryDateWarningRecord;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -47,9 +46,6 @@ public class FXMLCheckExpirationDialogController implements Initializable {
         TableColumn itemCurrentAmountColumn = new TableColumn<ExpiryDateWarningRecord, String>("Počet");
         itemCurrentAmountColumn.setCellValueFactory(new PropertyValueFactory<>("expiryAmount"));
 
-        TableColumn itemExpiryDateColumn = new TableColumn<ExpiryDateWarningRecord, String>("Expirácia");
-        itemExpiryDateColumn.setCellValueFactory(new PropertyValueFactory<>("expiryDate"));
-
         TableColumn itemDetailButtonColumn = new TableColumn<>("Detail");
         itemDetailButtonColumn.setSortable(false);
 
@@ -60,7 +56,7 @@ public class FXMLCheckExpirationDialogController implements Initializable {
         itemDetailButtonColumn.setCellFactory(
                 (Callback<TableColumn<ExpiryDateWarningRecord, Boolean>, TableCell<ExpiryDateWarningRecord, Boolean>>) p -> new ButtonCell());
 
-        mainTable.getColumns().addAll(itemNameColumn, itemCurrentAmountColumn, itemExpiryDateColumn, itemDetailButtonColumn);
+        mainTable.getColumns().addAll(itemNameColumn, itemCurrentAmountColumn, itemDetailButtonColumn);
         mainTable.setPlaceholder(new Label("Žiadne záznamy."));
         Property<ObservableList<ExpiryDateWarningRecord>> listProperty = new SimpleObjectProperty<>(itemList);
         mainTable.itemsProperty().bind(listProperty);
@@ -69,10 +65,10 @@ public class FXMLCheckExpirationDialogController implements Initializable {
 
     // cell in action column
     private class ButtonCell extends TableCell<ExpiryDateWarningRecord, Boolean> {
-        final Button detailButton = new Button("Výber");
+        final Button trashButton = new Button("Vyhodiť");
 
         ButtonCell() {
-            detailButton.setOnAction(t -> {
+            trashButton.setOnAction(t -> {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/FXMLItemOfftakeDialog.fxml"));
                 Parent root1;
                 try {
@@ -85,23 +81,25 @@ public class FXMLCheckExpirationDialogController implements Initializable {
                 stage.setScene(new Scene(root1));
                 stage.initModality(Modality.APPLICATION_MODAL);
                 FXMLItemOfftakeDialogController controller = fxmlLoader.getController();
-                controller.initData(getTableView().getItems().get(getIndex()));
-                stage.setTitle("Výber položky.");
+                controller.initData(getTableView().getItems().get(getIndex()), true);
+                stage.setTitle("Odstránenie expirovaných položiek");
                 stage.showAndWait();
 
                 populateTable();
             });
         }
 
-        HBox pane = new HBox(detailButton);
+        HBox pane = new HBox(trashButton);
 
         //Display button if the row is not empty
         @Override
         protected void updateItem(Boolean t, boolean empty) {
             super.updateItem(t, empty);
-            if(!empty){
-                setGraphic(pane);
+            if (empty || t == null) {
+                setGraphic(null);
+                return;
             }
+            setGraphic(pane);
         }
     }
 

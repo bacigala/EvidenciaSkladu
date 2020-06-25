@@ -3,6 +3,7 @@ package dialog.controller;
 
 import databaseAccess.ItemDAO;
 import dialog.DialogFactory;
+import domain.ExpiryDateWarningRecord;
 import domain.Item;
 import domain.ItemOfftakeRecord;
 import javafx.beans.property.Property;
@@ -38,6 +39,7 @@ public class FXMLItemOfftakeDialogController implements Initializable {
 
     private Item item;
     private final ObservableList<ItemOfftakeRecord> requestList = FXCollections.observableArrayList();
+    private boolean isTrash = false;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -49,6 +51,11 @@ public class FXMLItemOfftakeDialogController implements Initializable {
      * Setups default values.
      */
     public void initData(Item item) {
+        initData(item, false);
+    }
+
+    public void initData(Item item, boolean isTrash) {
+        this.isTrash = isTrash;
         if (item == null) {
             // error - invalid initialization data received
             DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Údaje sa nepodarilo načítať.");
@@ -86,6 +93,11 @@ public class FXMLItemOfftakeDialogController implements Initializable {
         Property<ObservableList<ItemOfftakeRecord>> listProperty = new SimpleObjectProperty<>(requestList);
         mainTable.setPlaceholder(new Label("Pre túto položku neexistujú záznamy."));
         mainTable.itemsProperty().bind(listProperty);
+
+        if (isTrash) {
+            amountRequestTextField.setText(String.valueOf((((ExpiryDateWarningRecord) item).getExpiryAmount())));
+            optimiseButtonAction();
+        }
     }
 
     /**
@@ -96,8 +108,9 @@ public class FXMLItemOfftakeDialogController implements Initializable {
         rootAnchorPane.setDisable(true);
         DialogFactory df = DialogFactory.getInstance();
         try {
-            if (ItemDAO.getInstance().itemOfftake(item, requestList)) {
-                DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Výber položky prebehla úspešne.");
+            if (isTrash ? ItemDAO.getInstance().itemTrash(item, requestList) : ItemDAO.getInstance().itemOfftake(item, requestList)) {
+                DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION,
+                        isTrash ? "Položky úspešne odstránené." : "Výber položky prebehla úspešne.");
                 cancelButtonAction();
             } else {
                 df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");

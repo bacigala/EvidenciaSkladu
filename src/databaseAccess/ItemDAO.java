@@ -401,13 +401,28 @@ public class ItemDAO {
     }
 
     /**
-     * Tries 'take off' stated Items.
+     * Tries to 'trash' stated Items as 'trash user'.
+     * @param item         item to be taken.
+     * @param requestList  list of desired varieties (different expiry dates) of item.
+     * @return true on success.
+     */
+    public boolean itemTrash (Item item, ObservableList<ItemOfftakeRecord> requestList) {
+        return itemOfftake (item, requestList, true);
+    }
+
+    /**
+     * Tries to 'take off' stated Items in name of loggedIn user.
      * @param item         item to be taken.
      * @param requestList  list of desired varieties (different expiry dates) of item.
      * @return true on success.
      */
     public boolean itemOfftake (Item item, ObservableList<ItemOfftakeRecord> requestList) {
+        return itemOfftake (item, requestList, false);
+    }
+
+    private boolean itemOfftake (Item item, ObservableList<ItemOfftakeRecord> requestList, boolean isTrash) {
         if (!Login.getInstance().hasUser()) return false;
+        if (isTrash && !Login.getInstance().hasAdmin()) return false; // only admin can trash
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
@@ -470,7 +485,7 @@ public class ItemDAO {
             int moveId;
             statement = conn.prepareStatement(
                     "INSERT INTO move SET account_id = ?, time = ?", Statement.RETURN_GENERATED_KEYS);
-            statement.setInt(1, Login.getInstance().getLoggedUserId());
+            statement.setInt(1, isTrash ? 1 : Login.getInstance().getLoggedUserId());
             statement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
             if (statement.executeUpdate() != 1) throw new SQLException();
             ResultSet rs = statement.getGeneratedKeys();

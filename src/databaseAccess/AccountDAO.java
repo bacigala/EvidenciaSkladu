@@ -33,7 +33,8 @@ public class AccountDAO {
             conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
             statement = conn.prepareStatement(
-                    "SELECT id, name, surname, login, admin FROM `account` ORDER BY admin DESC, surname ASC");
+                    "SELECT id, name, surname, login, admin FROM `account` WHERE id <> 1 " +
+                            "ORDER BY admin DESC, surname ASC");
             result = statement.executeQuery();
             while (result.next()) {
                 accounts.add(new Account(
