@@ -28,6 +28,7 @@ public class AccountDAO {
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
+        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
@@ -48,7 +49,7 @@ public class AccountDAO {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            success = false;
         } finally {
             try {
                 if (result != null) result.close();
@@ -58,7 +59,7 @@ public class AccountDAO {
                 e.printStackTrace();
             }
         }
-        return true;
+        return success;
     }
 
     /**
@@ -77,6 +78,7 @@ public class AccountDAO {
         PreparedStatement statement = null;
         ResultSet result = null;
         Savepoint savepoint1 = null;
+        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
@@ -119,7 +121,7 @@ public class AccountDAO {
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-            return false;
+            success = false;
         } finally {
             try {
                 if (result != null) result.close();
@@ -129,7 +131,7 @@ public class AccountDAO {
                 e.printStackTrace();
             }
         }
-        return true;
+        return success;
     }
 
     /**
@@ -153,6 +155,7 @@ public class AccountDAO {
         PreparedStatement statement = null;
         ResultSet result = null;
         Savepoint savepoint1 = null;
+        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
@@ -202,7 +205,7 @@ public class AccountDAO {
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-            return false;
+            success = false;
         } finally {
             try {
                 if (result != null) result.close();
@@ -212,7 +215,7 @@ public class AccountDAO {
                 e.printStackTrace();
             }
         }
-        return true;
+        return success;
     }
 
     /**
@@ -227,7 +230,7 @@ public class AccountDAO {
         PreparedStatement statement = null;
         ResultSet result = null;
 
-        boolean answer;
+        boolean answer = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
@@ -240,7 +243,6 @@ public class AccountDAO {
             answer = result.next();
         } catch (Exception e) {
             e.printStackTrace();
-            return true;
         } finally {
             try {
                 if (result != null) result.close();
@@ -268,6 +270,7 @@ public class AccountDAO {
         PreparedStatement statement = null;
         ResultSet result = null;
         Savepoint savepoint1 = null;
+        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
@@ -324,7 +327,7 @@ public class AccountDAO {
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-            return false;
+            success = false;
         } finally {
             try {
                 if (result != null) result.close();
@@ -334,7 +337,7 @@ public class AccountDAO {
                 e.printStackTrace();
             }
         }
-        return true;
+        return success;
     }
 
 }

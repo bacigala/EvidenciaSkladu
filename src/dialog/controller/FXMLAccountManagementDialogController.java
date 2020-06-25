@@ -44,9 +44,6 @@ public class FXMLAccountManagementDialogController implements Initializable {
         TableColumn<Account, String> fullNameColumn = new TableColumn<>("meno");
         fullNameColumn.setCellValueFactory(new PropertyValueFactory<>("fullName"));
 
-        TableColumn<Account, String> loginColumn = new TableColumn<>("login");
-        loginColumn.setCellValueFactory(new PropertyValueFactory<>("login"));
-
         TableColumn<Account, String> isAdminTextColumn = new TableColumn<>("administrátor");
         isAdminTextColumn.setCellValueFactory(new PropertyValueFactory<>("isAdminText"));
 
@@ -59,7 +56,7 @@ public class FXMLAccountManagementDialogController implements Initializable {
 
         accountModifyButtonColumn.setCellFactory(p -> new ButtonCell());
 
-        mainTable.getColumns().addAll(fullNameColumn, loginColumn, isAdminTextColumn, accountModifyButtonColumn);
+        mainTable.getColumns().addAll(fullNameColumn, isAdminTextColumn, accountModifyButtonColumn);
         mainTable.setPlaceholder(new Label("Žiadne používateľské kontá."));
         Property<ObservableList<Account>> accountListProperty = new SimpleObjectProperty<>(accountList);
         mainTable.itemsProperty().bind(accountListProperty);

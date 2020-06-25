@@ -185,6 +185,7 @@ public class FXMLCategoryManagementDialogController implements Initializable {
      */
     private void tableRefresh() {
         categoryList.clear();
+        CategoryDAO.getInstance().reloadCatList();
         categoryList.addAll(CategoryDAO.getInstance().getCategoryMap().values());
     }
 

@@ -24,8 +24,6 @@ public class FXMLSimpleChoiceDialogController<Q> implements Initializable {
 
     public void setChoiceList(ObservableList<Q> choiceList) {
         if (choiceList != null) mainChoiceBox.setItems(choiceList);
-        mainChoiceBox.getSelectionModel().selectedIndexProperty().addListener(
-                (ov, value, new_value) -> theChoice = choiceList != null ? choiceList.get(new_value.intValue()) : null);
     }
 
     public void setLabelText(String labelText) {
@@ -39,6 +37,7 @@ public class FXMLSimpleChoiceDialogController<Q> implements Initializable {
     @FXML
     private void choiceButtonAction() {
         disableInput();
+        theChoice = mainChoiceBox.getValue();
         if (theChoice == null) {
             DialogFactory df = DialogFactory.getInstance();
             df.showAlert(Alert.AlertType.ERROR, "Vyberte prosím zo zoznamu.");
@@ -51,6 +50,7 @@ public class FXMLSimpleChoiceDialogController<Q> implements Initializable {
     @FXML
     private void cancelButtonAction() {
         disableInput();
+        theChoice = null;
         closeDialog();
     }
 

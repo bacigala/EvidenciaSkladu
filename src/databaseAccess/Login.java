@@ -36,6 +36,7 @@ public class Login {
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
+        boolean answer = true;
 
         try {
             conn = connFactory.getConnection();
@@ -51,11 +52,11 @@ public class Login {
                 loggedUserAdmin = result.getBoolean("admin");
                 loggedUserUsername = username;
             } else {
-                return false;
+                answer = false;
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
+            answer = false;
         } finally {
             try {
                 if (result != null) result.close();
@@ -67,8 +68,9 @@ public class Login {
         }
 
         // if logged in user is an admin, switch to ADMIN database access
-        return loggedUserAdmin ?
+        if (answer) return loggedUserAdmin ?
                 connFactory.setAdminUserConnectionDetails() : connFactory.setBasicUserConnectionDetails();
+        return false;
     }
 
     /**

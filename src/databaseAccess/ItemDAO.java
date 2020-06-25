@@ -104,6 +104,7 @@ public class ItemDAO {
         Savepoint savepoint1 = null;
         int curAmount;
         int moveId;
+        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
@@ -151,6 +152,7 @@ public class ItemDAO {
             statement.setInt(3, supplyAmount);
             statement.setDate(4, java.sql.Date.valueOf(expiration));
             if (statement.executeUpdate() != 1) throw new SQLException();
+
             conn.commit();
 
         } catch (Exception e) {
@@ -161,7 +163,7 @@ public class ItemDAO {
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-            return false;
+            success = false;
         } finally {
             try {
                 if (result != null) result.close();
@@ -171,7 +173,7 @@ public class ItemDAO {
                 ex.printStackTrace();
             }
         }
-        return true;
+        return success;
     }
 
     /**
@@ -202,7 +204,7 @@ public class ItemDAO {
                 ));
             }
         } catch (SQLException e) {
-            return null;
+            customAttributes = null;
         } finally {
             try {
                 if (result != null) result.close();
@@ -229,6 +231,7 @@ public class ItemDAO {
         Connection conn = null;
         PreparedStatement statement = null;
         Savepoint savepoint1 = null;
+        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
@@ -287,7 +290,7 @@ public class ItemDAO {
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-            return false;
+            success = false;
         } finally {
             try {
                 if (statement != null) statement.close();
@@ -296,7 +299,7 @@ public class ItemDAO {
                 e.printStackTrace();
             }
         }
-        return true;
+        return success;
     }
 
     /**
@@ -331,7 +334,7 @@ public class ItemDAO {
                 ));
             }
         } catch (SQLException e) {
-            return null;
+            logRecords = null;
         } finally {
             try {
                 if (result != null) result.close();
@@ -356,14 +359,10 @@ public class ItemDAO {
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
-        Savepoint savepoint1 = null;
+        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
-            assert conn != null;
-            conn.setAutoCommit(false);
-            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-            savepoint1 = conn.setSavepoint("Savepoint1");
 
             // load current amount of items present
             statement = conn.prepareStatement(
@@ -377,17 +376,10 @@ public class ItemDAO {
                         result.getInt("sum")
                 ));
             }
-            conn.commit();
 
         } catch (Exception e) {
             e.printStackTrace();
-            try {
-                assert conn != null;
-                conn.rollback(savepoint1);
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-            return false;
+            success = false;
         } finally {
             try {
                 if (result != null) result.close();
@@ -397,7 +389,7 @@ public class ItemDAO {
                 e.printStackTrace();
             }
         }
-        return true;
+        return success;
     }
 
     /**
@@ -427,6 +419,7 @@ public class ItemDAO {
         PreparedStatement statement = null;
         ResultSet result = null;
         Savepoint savepoint1 = null;
+        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
@@ -517,7 +510,7 @@ public class ItemDAO {
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-            return false;
+            success = false;
         } finally {
             try {
                 if (result != null) result.close();
@@ -527,7 +520,7 @@ public class ItemDAO {
                 e.printStackTrace();
             }
         }
-        return true;
+        return success;
     }
 
     /**
@@ -542,6 +535,7 @@ public class ItemDAO {
         PreparedStatement statement = null;
         ResultSet result = null;
         Savepoint savepoint1 = null;
+        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
@@ -590,7 +584,7 @@ public class ItemDAO {
             } catch (SQLException ex) {
                 e.printStackTrace();
             }
-            return false;
+            success = false;
         } finally {
             try {
                 if (result != null) result.close();
@@ -600,7 +594,7 @@ public class ItemDAO {
                 e.printStackTrace();
             }
         }
-        return true;
+        return success;
     }
 
     /**
@@ -613,6 +607,7 @@ public class ItemDAO {
         Connection conn = null;
         PreparedStatement statement = null;
         Savepoint savepoint1 = null;
+        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
@@ -634,7 +629,7 @@ public class ItemDAO {
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-            return false;
+            success = false;
         } finally {
             try {
                 if (statement != null) statement.close();
@@ -643,7 +638,7 @@ public class ItemDAO {
                 e.printStackTrace();
             }
         }
-        return true;
+        return success;
     }
 
 }

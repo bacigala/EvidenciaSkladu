@@ -30,6 +30,7 @@ public class CategoryDAO {
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
+        boolean success = true;
 
         HashMap<Integer, Category> newCategoryMap = new HashMap<>();
         try {
@@ -48,7 +49,7 @@ public class CategoryDAO {
                 newCategoryMap.put(cat.getId(), cat);
             }
         } catch (SQLException e) {
-            return false;
+            success = false;
         } finally {
             try {
                 if (result != null) result.close();
@@ -58,8 +59,8 @@ public class CategoryDAO {
                 e.printStackTrace();
             }
         }
-        categoryMap = newCategoryMap;
-        return true;
+        if (success) categoryMap = newCategoryMap;
+        return success;
     }
 
     // returns lastly retrieved list of Categories form database
@@ -80,6 +81,7 @@ public class CategoryDAO {
         PreparedStatement statement = null;
         ResultSet result = null;
         Savepoint savepoint1 = null;
+        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
@@ -116,7 +118,7 @@ public class CategoryDAO {
             } catch (SQLException ex) {
                 e.printStackTrace();
             }
-            return false;
+            success = false;
         } finally {
             try {
                 if (result != null) result.close();
@@ -126,7 +128,7 @@ public class CategoryDAO {
                 e.printStackTrace();
             }
         }
-        return true;
+        return success;
     }
 
     /**
@@ -179,6 +181,7 @@ public class CategoryDAO {
         PreparedStatement statement = null;
         ResultSet result = null;
         Savepoint savepoint1 = null;
+        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
@@ -219,7 +222,7 @@ public class CategoryDAO {
             } catch (SQLException ex) {
                 e.printStackTrace();
             }
-            return false;
+            success = false;
         } finally {
             try {
                 if (result != null) result.close();
@@ -229,7 +232,7 @@ public class CategoryDAO {
                 e.printStackTrace();
             }
         }
-        return true;
+        return success;
     }
 
     /**
@@ -245,6 +248,7 @@ public class CategoryDAO {
         PreparedStatement statement = null;
         ResultSet result = null;
         Savepoint savepoint1 = null;
+        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
@@ -283,7 +287,7 @@ public class CategoryDAO {
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-            return false;
+            success = false;
         } finally {
             try {
                 if (result != null) result.close();
@@ -293,7 +297,7 @@ public class CategoryDAO {
                 e.printStackTrace();
             }
         }
-        return true;
+        return success;
     }
 
 }

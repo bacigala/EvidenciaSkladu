@@ -33,6 +33,7 @@ public class ComplexQueryHandler {
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
+        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
@@ -54,7 +55,7 @@ public class ComplexQueryHandler {
                 logRecords.add(logRecord);
             }
         } catch (SQLException e) {
-            return false;
+            success = false;
         } finally {
             try {
                 if (result != null) result.close();
@@ -64,7 +65,7 @@ public class ComplexQueryHandler {
                 e.printStackTrace();
             }
         }
-        return true;
+        return success;
     }
 
     /**
@@ -78,6 +79,7 @@ public class ComplexQueryHandler {
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
+        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
@@ -99,7 +101,7 @@ public class ComplexQueryHandler {
                 ));
             }
         } catch (SQLException e) {
-            return false;
+            success = false;
         } finally {
             try {
                 if (result != null) result.close();
@@ -109,7 +111,7 @@ public class ComplexQueryHandler {
                 e.printStackTrace();
             }
         }
-        return true;
+        return success;
     }
 
     /**
@@ -124,6 +126,7 @@ public class ComplexQueryHandler {
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
+        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
@@ -184,7 +187,7 @@ public class ComplexQueryHandler {
                 ));
             }
         } catch (SQLException e) {
-            return false;
+            success = false;
         } finally {
             try {
                 if (result != null) result.close();
@@ -194,6 +197,6 @@ public class ComplexQueryHandler {
                 e.printStackTrace();
             }
         }
-        return true;
+        return success;
     }
 }
