@@ -358,7 +358,7 @@ public class FXMLMainWindowController implements Initializable {
         // auto-refresh
         databaseRefreshButton.setDisable(true);
         autoRefreshCheckBox.setDisable(true);
-        tableRefreshThread.requestStop();
+        autoRefreshStop();
     }
 
     /**
