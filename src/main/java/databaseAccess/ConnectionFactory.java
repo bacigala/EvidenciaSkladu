@@ -14,6 +14,8 @@ import java.util.List;
 /**
  * Creates, manages and closes all connections to DB server.
  * Singleton. Connection pool.
+ *
+ * todo: connection pool is not used - current implementation uses max. 2 connections at time
  */
 
 public class ConnectionFactory {
@@ -72,15 +74,20 @@ public class ConnectionFactory {
     void releaseConnection(Connection connection) {
         if (connection == null) return;
         usedConnections.remove(connection);
-        if (connectionPool.size() < MAX_POOL_SIZE) {
-            connectionPool.add(connection);
-        } else {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+//        if (connectionPool.size() < MAX_POOL_SIZE) {
+//            connectionPool.add(connection);
+//        } else {
+//            try {
+//                connection.close();
+//            } catch (SQLException e) {
+//                e.printStackTrace();
+//            }
+//        }
     }
 
     /**

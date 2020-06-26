@@ -1,10 +1,13 @@
 package databaseAccess;
 
+import databaseAccess.CustomExceptions.SQLWarningException;
+import dialog.DialogFactory;
 import domain.CustomAttribute;
 import domain.Item;
 import domain.ItemMoveLogRecord;
 import domain.ItemOfftakeRecord;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Alert;
 
 import java.io.IOException;
 import java.sql.*;
@@ -461,7 +464,7 @@ public class ItemDAO {
                 if (!currentRecords.containsKey(request.getExpiration())
                         || currentRecords.get(request.getExpiration()) < Integer.parseInt(request.getRequestedAmount())) {
                     // a request cannot be fulfilled -> fail
-                    throw new IOException(); // todo: special FAIL exception?
+                    throw new SQLWarningException("Požadovaná kombinácia (už) nie je dostupná.");
                 }
                 noOfRequestedItems += Integer.parseInt(request.getRequestedAmount());
             }
@@ -501,8 +504,9 @@ public class ItemDAO {
             }
 
             conn.commit();
-
         } catch (Throwable e) {
+            String message = e instanceof SQLWarningException ? e.getMessage() : "Neočakávaná chyba";
+            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, message);
             e.printStackTrace();
             try {
                 assert conn != null;

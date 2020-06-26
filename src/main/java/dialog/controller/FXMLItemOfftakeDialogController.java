@@ -23,6 +23,7 @@ import javafx.stage.Stage;
 
 import java.net.URL;
 import java.time.LocalDate;
+import java.util.GregorianCalendar;
 import java.util.ResourceBundle;
 
 /**
@@ -106,17 +107,14 @@ public class FXMLItemOfftakeDialogController implements Initializable {
     @FXML
     private void offtakeButtonAction() {
         rootAnchorPane.setDisable(true);
-        DialogFactory df = DialogFactory.getInstance();
-        try {
-            if (isTrash ? ItemDAO.getInstance().itemTrash(item, requestList) : ItemDAO.getInstance().itemOfftake(item, requestList)) {
-                DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION,
-                        isTrash ? "Položky úspešne odstránené." : "Výber položky prebehla úspešne.");
-                cancelButtonAction();
-            } else {
-                df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");
-            }
-        } catch (Exception e) {
-            df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Chyba spojenia s databázou.");
+        if (isTrash ? ItemDAO.getInstance().itemTrash(item, requestList) : ItemDAO.getInstance().itemOfftake(item, requestList)) {
+            DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION,
+                    isTrash ? "Položky úspešne odstránené." : "Výber položky prebehla úspešne.");
+            cancelButtonAction();
+        } else {
+            // refresh the table
+            requestList.clear();
+            ItemDAO.getInstance().getItemVarieties(item.getId(), requestList);
         }
         rootAnchorPane.setDisable(false);
     }
