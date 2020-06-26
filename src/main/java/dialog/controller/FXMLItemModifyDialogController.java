@@ -13,8 +13,6 @@ import domain.CustomAttribute;
 import domain.Item;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -180,7 +178,7 @@ public class FXMLItemModifyDialogController implements Initializable {
     @FXML
     private void newCustomAttributeButton() throws IOException {
         mainAnchorPane.setDisable(true);
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/FXMLCustomAttributeModifyDialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLCustomAttributeModifyDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));
@@ -224,7 +222,7 @@ public class FXMLItemModifyDialogController implements Initializable {
                 CustomAttribute targetAttribute = getTableView().getItems().get(getIndex());
                 mainAnchorPane.setDisable(true);
                 if (targetAttribute != null) {
-                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/FXMLCustomAttributeModifyDialog.fxml"));
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLCustomAttributeModifyDialog.fxml"));
                     Parent root1 = null;
                     try {
                         root1 = fxmlLoader.load();

@@ -1,7 +1,6 @@
 
 package mainWindow;
 
-import dialog.controller.FXMLCheckExpirationDialogController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -14,7 +13,7 @@ public class EvidenciaSkladu extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLMainWindow.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(EvidenciaSkladu.class.getResource("/fxml/FXMLMainWindow.fxml"));
         Parent root = fxmlLoader.load();
         mainWindowController = fxmlLoader.getController();
         Scene scene = new Scene(root);         

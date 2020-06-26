@@ -74,7 +74,7 @@ public class FXMLCategoryManagementDialogController implements Initializable {
             modifyButton.setOnAction(t -> {
                 Category targetCategory = getTableView().getItems().get(getIndex());
 
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/FXMLCategoryModifyDialog.fxml"));
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLCategoryModifyDialog.fxml"));
                 Parent root1 = null;
                 try {
                     root1 = fxmlLoader.load();
@@ -103,7 +103,7 @@ public class FXMLCategoryManagementDialogController implements Initializable {
 
                 if (CategoryDAO.getInstance().hasItems(targetCategory.getId())) {
                     // v kategorii su nejake polozky
-                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/FXMLSimpleChoiceDialog.fxml"));
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLSimpleChoiceDialog.fxml"));
                     Parent root1 = null;
                     try {
                         root1 = fxmlLoader.load();
@@ -166,7 +166,7 @@ public class FXMLCategoryManagementDialogController implements Initializable {
     private void newCategoryButtonAction() throws IOException {
         Category newCategory = new Category(0, 0, "", "", "");
 
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/FXMLCategoryModifyDialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLCategoryModifyDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));

@@ -72,7 +72,7 @@ public class FXMLAccountManagementDialogController implements Initializable {
             modifyButton.setOnAction(t -> {
                 Account targetAccount = getTableView().getItems().get(getIndex());
 
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/FXMLAccountModifyDialog.fxml"));
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLAccountModifyDialog.fxml"));
                 Parent root1 = null;
                 try {
                     root1 = fxmlLoader.load();
@@ -99,7 +99,7 @@ public class FXMLAccountManagementDialogController implements Initializable {
 
                 if (AccountDAO.getInstance().hasTransactions(targetAccount.getId())) {
                     // na pouzivatela su napisane nejake transakcie
-                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/FXMLSimpleChoiceDialog.fxml"));
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLSimpleChoiceDialog.fxml"));
                     Parent root1 = null;
                     try {
                         root1 = fxmlLoader.load();
@@ -171,7 +171,7 @@ public class FXMLAccountManagementDialogController implements Initializable {
     private void newAccountButtonAction() throws IOException {
         Account newAccount = new Account(0, "", "", "", "", false);
 
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/FXMLAccountModifyDialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLAccountModifyDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));

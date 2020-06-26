@@ -164,7 +164,7 @@ public class FXMLMainWindowController implements Initializable {
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
             autoRefreshPause();
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLItemSupplyDialog.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLItemSupplyDialog.fxml"));
             Parent root1 = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root1));  
@@ -185,7 +185,7 @@ public class FXMLMainWindowController implements Initializable {
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
             autoRefreshPause();
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLItemOfftakeDialog.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLItemOfftakeDialog.fxml"));
             Parent root1 = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root1));
@@ -206,7 +206,7 @@ public class FXMLMainWindowController implements Initializable {
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
             autoRefreshPause();
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLItemTransactionsDialog.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLItemTransactionsDialog.fxml"));
             Parent root1 = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root1));
@@ -228,7 +228,7 @@ public class FXMLMainWindowController implements Initializable {
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
             autoRefreshPause();
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLItemModifyDialog.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLItemModifyDialog.fxml"));
             Parent root1 = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setScene(new Scene(root1));
@@ -249,7 +249,7 @@ public class FXMLMainWindowController implements Initializable {
     private void openNewItemDialog() throws IOException {
         autoRefreshPause();
         Item newItem = new Item(0, "", "", 0, 0, "", "", 1);
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLItemModifyDialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLItemModifyDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));
@@ -268,7 +268,7 @@ public class FXMLMainWindowController implements Initializable {
     @FXML
     private void openAccountManagement() throws IOException {
         autoRefreshPause();
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLAccountManagementDialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLAccountManagementDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));
@@ -287,7 +287,7 @@ public class FXMLMainWindowController implements Initializable {
     @FXML
     private void openCategoryManagement() throws IOException {
         autoRefreshPause();
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLCategoryManagementDialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLCategoryManagementDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));
@@ -303,7 +303,7 @@ public class FXMLMainWindowController implements Initializable {
     @FXML
     private void expiryDateCheckAction() throws IOException {
         autoRefreshPause();
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLCheckExpirationDialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLCheckExpirationDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));
@@ -321,7 +321,7 @@ public class FXMLMainWindowController implements Initializable {
     @FXML
     private void StockCheckAction() throws IOException {
         autoRefreshPause();
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLCheckAmountDialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLCheckAmountDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));
@@ -337,7 +337,7 @@ public class FXMLMainWindowController implements Initializable {
     @FXML
     private void ConsumptionCheckAction() throws IOException {
         autoRefreshPause();
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../dialog/fxml/FXMLConsumptionOverviewDialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLConsumptionOverviewDialog.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(root1));
