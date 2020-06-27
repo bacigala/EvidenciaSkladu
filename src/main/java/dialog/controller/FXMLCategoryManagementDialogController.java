@@ -175,8 +175,6 @@ public class FXMLCategoryManagementDialogController implements Initializable {
         controller.initData(newCategory);
         stage.setTitle("Nová kategória");
         stage.showAndWait();
-
-        ItemDAO.getInstance().reloadItemList();
         tableRefresh();
     }
 

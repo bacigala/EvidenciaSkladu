@@ -1,6 +1,7 @@
 
 package dialog.controller;
 
+import databaseAccess.CustomExceptions.UserWarningException;
 import databaseAccess.ItemDAO;
 import dialog.DialogFactory;
 import domain.Item;
@@ -40,14 +41,14 @@ public class FXMLItemSupplyDialogController implements Initializable {
     private void supplyButton() {
         DialogFactory df = DialogFactory.getInstance();
         try {
-            if (ItemDAO.getInstance().itemSupply(item.getId(), Integer.parseInt(newAmountTextField.getText()), newExpirationDatePicker.getValue())) {
-                DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Vklad položky prebehol úspešne.");
-                cancelButton();
-            } else {
-                df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");
-            }
+            ItemDAO.getInstance().itemSupply(item.getId(), Integer.parseInt(newAmountTextField.getText()), newExpirationDatePicker.getValue());
+            DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Vklad položky prebehol úspešne.");
+        } catch (UserWarningException e) {
+            df.showAlert(Alert.AlertType.WARNING, e.getMessage());
         } catch (Exception e) {
-            df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");
+            df.showAlert(Alert.AlertType.ERROR, "Neočakávaná chyba.");
+        } finally {
+            cancelButton();
         }
     }
     

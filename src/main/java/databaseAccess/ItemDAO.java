@@ -1,15 +1,13 @@
 package databaseAccess;
 
-import databaseAccess.CustomExceptions.SQLWarningException;
-import dialog.DialogFactory;
+import databaseAccess.CustomExceptions.ConcurrentModificationException;
+import databaseAccess.CustomExceptions.UserWarningException;
 import domain.CustomAttribute;
 import domain.Item;
 import domain.ItemMoveLogRecord;
 import domain.ItemOfftakeRecord;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Alert;
 
-import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -33,24 +31,21 @@ public class ItemDAO {
 
     /**
      * Reloads possessed list of Items.
-     * @return true on success
      */
-    public boolean reloadItemList() {
-        if (!Login.getInstance().hasUser()) return false;
+    public void reloadItemList() throws Exception {
+        if (!Login.getInstance().hasUser()) throw new UserWarningException("Prihláste sa prosím.");
 
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
-
         ArrayList<Item> newItemList = new ArrayList<>();
-        boolean exceptionThrown = false;
         try {
             conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
             statement = conn.prepareStatement(
                     "SELECT * FROM item");
             result = statement.executeQuery();
-            while (result.next()) {
+            while (result.next())
                 newItemList.add(new Item(
                         result.getInt("id"),
                         result.getString("name"),
@@ -61,33 +56,29 @@ public class ItemDAO {
                         result.getString("note"),
                         result.getInt("category")
                 ));
-            }
         } catch (SQLException e) {
-            exceptionThrown = true;
+            throw new UserWarningException("Položky sa nepodarilo načítať.");
         } finally {
-            try {
-                if (result != null) result.close();
-                if (statement != null) statement.close();
-                if (conn != null) ConnectionFactory.getInstance().releaseConnection(conn);
-            } catch (SQLException e) {
-                exceptionThrown = true;
-            }
+            if (result != null) result.close();
+            if (statement != null) statement.close();
+            if (conn != null) ConnectionFactory.getInstance().releaseConnection(conn);
         }
-        if (exceptionThrown) return false;
-        itemList = newItemList;
 
-        return CategoryDAO.getInstance().reloadCatList();
+        itemList = newItemList;
+        CategoryDAO.getInstance().reloadCatList();
     }
 
     /**
-     * @return current list of Items.
+     * @return current list of Items
      */
     public ArrayList<Item> getItemList() {
         return itemList;
     }
 
-    // remove all cached records (on logoff)
-    static void dropItemList() {
+    /**
+     * Removes all cached records (e.g. on logoff).
+     */
+    public static void dropItemList() {
         itemList.clear();
     }
 
@@ -96,10 +87,10 @@ public class ItemDAO {
      * @param itemId ID of the supplied item.
      * @param supplyAmount amount of items supplied.
      * @param expiration expiration date of the item supplied.
-     * @return true if supply was successful.
      */
-    public boolean itemSupply(int itemId, int supplyAmount, LocalDate expiration) {
-        if (!Login.getInstance().hasUser()) return false;
+    public void itemSupply(int itemId, int supplyAmount, LocalDate expiration) throws Exception {
+        if (itemId <= 0 || supplyAmount <= 0) throw new IllegalArgumentException();
+        if (!Login.getInstance().hasUser()) throw new UserWarningException("Prihláste sa prosím.");
 
         Connection conn = null;
         PreparedStatement statement = null;
@@ -107,7 +98,6 @@ public class ItemDAO {
         Savepoint savepoint1 = null;
         int curAmount;
         int moveId;
-        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
@@ -124,7 +114,7 @@ public class ItemDAO {
             if (result.next()) {
                 curAmount = result.getInt("cur_amount");
             } else {
-                throw new SQLException();
+                throw new UserWarningException("Neexistujúca položka.");
             }
 
             // increment no. of items present
@@ -136,9 +126,8 @@ public class ItemDAO {
 
             // create move record
             statement = conn.prepareStatement(
-                    "INSERT INTO move SET account_id = ?, time = ?", Statement.RETURN_GENERATED_KEYS);
+                    "INSERT INTO move SET account_id = ?, time = NOW()", Statement.RETURN_GENERATED_KEYS);
             statement.setInt(1, Login.getInstance().getLoggedUserId());
-            statement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
             if (statement.executeUpdate() != 1) throw new SQLException();
             ResultSet rs = statement.getGeneratedKeys();
             if (rs != null && rs.next()) {
@@ -159,40 +148,31 @@ public class ItemDAO {
             conn.commit();
 
         } catch (Exception e) {
-            e.printStackTrace();
-            try {
-                assert conn != null;
-                conn.rollback(savepoint1);
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-            success = false;
+            assert conn != null;
+            conn.rollback(savepoint1);
+            throw e;
         } finally {
-            try {
-                if (result != null) result.close();
-                if (statement != null) statement.close();
-                if (conn != null) ConnectionFactory.getInstance().releaseConnection(conn);
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
+            if (result != null) result.close();
+            if (statement != null) statement.close();
+            if (conn != null) ConnectionFactory.getInstance().releaseConnection(conn);
         }
-        return success;
     }
 
     /**
      * Retrieves all custom attributes of item with 'itemId'.
      * @param itemId ID of the supplied item.
-     * @return list of custom attributes, null on fail.
+     * @return list of custom attributes.
      */
-    public HashSet<CustomAttribute> getItemCustomAttributes(int itemId) {
-        if (!Login.getInstance().hasUser()) return null;
+    public HashSet<CustomAttribute> getItemCustomAttributes(int itemId) throws Exception {
+        if (itemId <= 0) throw new IllegalArgumentException();
+        if (!Login.getInstance().hasUser()) throw new UserWarningException("Prihláste sa prosím.");
 
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
-
-        // READ ATTRIBUTES FROM DB
         HashSet<CustomAttribute> customAttributes = new HashSet<>();
+
+        // read attributes from DB
         try {
             conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
@@ -200,49 +180,58 @@ public class ItemDAO {
                     "SELECT * FROM attribute WHERE item_id = ?");
             statement.setInt(1, itemId);
             result = statement.executeQuery();
-            while (result.next()) {
+            while (result.next())
                 customAttributes.add(new CustomAttribute(
                         result.getString("name"),
                         result.getString("content")
                 ));
-            }
         } catch (SQLException e) {
-            customAttributes = null;
+            throw new UserWarningException("Atribúty položky sa nepodarilo načítať.");
         } finally {
-            try {
-                if (result != null) result.close();
-                if (statement != null) statement.close();
-                if (conn != null) ConnectionFactory.getInstance().releaseConnection(conn);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            if (result != null) result.close();
+            if (statement != null) statement.close();
+            if (conn != null) ConnectionFactory.getInstance().releaseConnection(conn);
         }
         return customAttributes;
     }
 
     /**
      * Updates item details and inserts / deletes custom attributes.
-     * @param originalItem       original item.
-     * @param newBasicValues     new compulsory values for the item
-     * @param attributesToAdd    new custom attributes (to be inserted)
+     * @param originalItem original item.
+     * @param newBasicValues new compulsory values for the item
+     * @param attributesToAdd new custom attributes (to be inserted)
      * @param attributesToDelete custom attributes to be deleted
-     * @return true on success.
      */
-    public boolean itemUpdate(Item originalItem, HashMap<String, String> newBasicValues,
-                              HashSet<CustomAttribute> attributesToAdd, HashSet<CustomAttribute> attributesToDelete) {
-        if (!Login.getInstance().hasUser()) return false;
+    public void itemUpdate(Item originalItem, HashMap<String, String> newBasicValues,
+                              HashSet<CustomAttribute> attributesToAdd, HashSet<CustomAttribute> attributesToDelete)
+            throws Exception {
+        if (originalItem == null || newBasicValues == null || attributesToAdd == null || attributesToDelete == null)
+            throw new IllegalArgumentException();
+        if (!Login.getInstance().hasUser()) throw new UserWarningException("Prihláste sa prosím.");
+
         Connection conn = null;
         PreparedStatement statement = null;
         Savepoint savepoint1 = null;
-        boolean success = true;
+        ResultSet result = null;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
-            assert conn != null;
             conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             savepoint1 = conn.setSavepoint("Savepoint1");
 
-            //todo: check whether the item was not changed concurrently
+            //check whether the item exists and was not changed concurrently
+            statement = conn.prepareStatement(
+                    "SELECT * FROM item WHERE id = ?");
+            statement.setInt(1, originalItem.getId());
+            result = statement.executeQuery();
+            if (!result.next()) throw new UserWarningException("Položka, ktorú sa snažíte aktualizovať, neexistuje.");
+            if (!result.getString("name").equals(originalItem.getName())
+                    || !result.getString("barcode").equals(originalItem.getBarcode())
+                    || result.getInt("min_amount") != originalItem.getMinAmount()
+                    || !result.getString("unit").equals(originalItem.getUnit())
+                    || result.getInt("category") != originalItem.getCategory()
+                ) throw new ConcurrentModificationException();
 
             // update basic info about the item
             statement = conn.prepareStatement(
@@ -260,7 +249,6 @@ public class ItemDAO {
                     newBasicValues.containsKey("category") ?
                             Integer.parseInt(newBasicValues.get("category")) : originalItem.getCategory());
             statement.setInt(6, originalItem.getId());
-
             if (statement.executeUpdate() != 1) throw new SQLException();
 
             // create custom attributes records
@@ -270,7 +258,7 @@ public class ItemDAO {
                 statement.setInt(1, originalItem.getId());
                 statement.setString(2, newAttribute.getName());
                 statement.setString(3, newAttribute.getValue());
-                if (statement.executeUpdate() != 1) throw new SQLException();
+                if (statement.executeUpdate() != 1) throw new ConcurrentModificationException();
             }
 
             // remove custom attributes records
@@ -280,38 +268,30 @@ public class ItemDAO {
                 statement.setInt(1, originalItem.getId());
                 statement.setString(2, newAttribute.getName());
                 statement.setString(3, newAttribute.getValue());
-                if (statement.executeUpdate() != 1) throw new SQLException();
+                if (statement.executeUpdate() != 1) throw new ConcurrentModificationException();
             }
 
             conn.commit();
 
         } catch (Exception e) {
-            e.printStackTrace();
-            try {
-                assert conn != null;
-                conn.rollback(savepoint1);
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-            success = false;
+            assert conn != null;
+            conn.rollback(savepoint1);
+            throw e;
         } finally {
-            try {
-                if (statement != null) statement.close();
-                if (conn != null) ConnectionFactory.getInstance().releaseConnection(conn);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            if (statement != null) statement.close();
+            if (result != null) result.close();
+            if (conn != null) ConnectionFactory.getInstance().releaseConnection(conn);
         }
-        return success;
     }
 
     /**
      * Retrieves transaction log for specified item.
-     * @param itemId ID of the requested Item log.
-     * @return list of log records.
+     * @param itemId ID of the requested Item log
+     * @return list of log records
      */
-    public ArrayList<ItemMoveLogRecord> getItemTransactions(int itemId) {
-        if (!Login.getInstance().hasAdmin()) return null;
+    public ArrayList<ItemMoveLogRecord> getItemTransactions(int itemId) throws Exception {
+        if (itemId <= 0) throw new IllegalArgumentException();
+        if (!Login.getInstance().hasAdmin()) throw new UserWarningException("Prihláste sa prosím.");
 
         Connection conn = null;
         PreparedStatement statement = null;
@@ -320,7 +300,6 @@ public class ItemDAO {
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
-            assert conn != null;
             statement = conn.prepareStatement(
                     "SELECT account.name, account.surname, move_item.amount, move.time, move_item.expiration " +
                             "FROM (move_item JOIN move ON (move_item.move_id = move.id)) " +
@@ -328,105 +307,89 @@ public class ItemDAO {
                             "ORDER BY move.time DESC");
             statement.setInt(1, itemId);
             result = statement.executeQuery();
-            while (result.next()) {
+            while (result.next())
                 logRecords.add(new ItemMoveLogRecord(
                         result.getDate("time").toString(),
                         ((Integer)result.getInt("amount")).toString(),
                         result.getString("name") + " " + result.getString("surname"),
                         result.getDate("expiration").toString()
                 ));
-            }
-        } catch (SQLException e) {
-            logRecords = null;
         } finally {
-            try {
-                if (result != null) result.close();
-                if (statement != null) statement.close();
-                if (conn != null) ConnectionFactory.getInstance().releaseConnection(conn);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            if (result != null) result.close();
+            if (statement != null) statement.close();
+            if (conn != null) ConnectionFactory.getInstance().releaseConnection(conn);
         }
         return logRecords;
     }
 
     /**
-     * Request all currently stored varieties of specified item.
-     * @param itemId ID of the requested item.
-     * @param records list to be filled with retrieved varieties.
-     * @return true on success.
+     * Request all currently stored varieties (differ in expiration date) of specified item.
+     * @param itemId ID of the requested item
+     * @param records list to be filled with retrieved varieties
      */
-    public boolean getItemVarieties(int itemId, ObservableList<ItemOfftakeRecord> records) {
-        if (!Login.getInstance().hasUser()) return false;
+    public void getItemVarieties(int itemId, ObservableList<ItemOfftakeRecord> records) throws Exception {
+        if (itemId <= 0 || records == null) throw new IllegalArgumentException();
+        if (!Login.getInstance().hasUser()) throw new UserWarningException("Prihláste sa prosím.");
 
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
-        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
 
-            // load current amount of items present
             statement = conn.prepareStatement(
                     "SELECT SUM(amount) AS sum, expiration " +
                             "FROM `move_item` WHERE item_id = ? GROUP BY expiration HAVING sum > 0");
             statement.setInt(1, itemId);
             result = statement.executeQuery();
-            while (result.next()) {
+            while (result.next())
                 records.add(new ItemOfftakeRecord(
                         result.getDate("expiration").toLocalDate(),
                         result.getInt("sum")
                 ));
-            }
 
         } catch (Exception e) {
             e.printStackTrace();
-            success = false;
+            throw e;
         } finally {
-            try {
-                if (result != null) result.close();
-                if (statement != null) statement.close();
-                if (conn != null) ConnectionFactory.getInstance().releaseConnection(conn);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            if (result != null) result.close();
+            if (statement != null) statement.close();
+            if (conn != null) ConnectionFactory.getInstance().releaseConnection(conn);
         }
-        return success;
     }
 
     /**
-     * Tries to 'trash' stated Items as 'trash user'.
-     * @param item         item to be taken.
-     * @param requestList  list of desired varieties (different expiry dates) of item.
-     * @return true on success.
+     * Tries to 'trash' stated Items (= take off as 'trash user'.)
+     * @param item item to be taken
+     * @param requestList  list of desired varieties (different expiry dates) of item
      */
-    public boolean itemTrash (Item item, ObservableList<ItemOfftakeRecord> requestList) {
-        return itemOfftake (item, requestList, true);
+    public void itemTrash (Item item, ObservableList<ItemOfftakeRecord> requestList) throws Exception {
+        itemOfftake(item, requestList, true);
     }
 
     /**
      * Tries to 'take off' stated Items in name of loggedIn user.
-     * @param item         item to be taken.
-     * @param requestList  list of desired varieties (different expiry dates) of item.
-     * @return true on success.
+     * @param item item to be taken
+     * @param requestList list of desired varieties (different expiry dates) of item
      */
-    public boolean itemOfftake (Item item, ObservableList<ItemOfftakeRecord> requestList) {
-        return itemOfftake (item, requestList, false);
+    public void itemOfftake (Item item, ObservableList<ItemOfftakeRecord> requestList) throws Exception {
+        itemOfftake(item, requestList, false);
     }
 
-    private boolean itemOfftake (Item item, ObservableList<ItemOfftakeRecord> requestList, boolean isTrash) {
-        if (!Login.getInstance().hasUser()) return false;
-        if (isTrash && !Login.getInstance().hasAdmin()) return false; // only admin can trash
+    private void itemOfftake (Item item, ObservableList<ItemOfftakeRecord> requestList, boolean isTrash)
+            throws Exception {
+        if (item == null || requestList == null) throw new IllegalArgumentException();
+        if (!Login.getInstance().hasUser()) throw new UserWarningException("Prihláste sa prosím.");
+        if (isTrash && !Login.getInstance().hasAdmin()) throw new UserWarningException("Nemáte dostatočné oprávnenia.");
+
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
         Savepoint savepoint1 = null;
-        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
-            assert conn != null;
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             conn.setAutoCommit(false);
             savepoint1 = conn.setSavepoint("Savepoint1");
@@ -444,19 +407,18 @@ public class ItemDAO {
                 throw new SQLException();
             }
 
-            // load content of DB once again - prevent concurrent offtake
+            // load present varieties - prevent concurrent offtake
             HashMap<LocalDate, Integer> currentRecords = new HashMap<>();
             statement = conn.prepareStatement(
                     "SELECT SUM(amount) AS sum, expiration " +
                             "FROM `move_item` WHERE item_id = ? GROUP BY expiration HAVING sum > 0");
             statement.setInt(1, item.getId());
             result = statement.executeQuery();
-            while (result.next()) {
+            while (result.next())
                 currentRecords.put(
                         result.getDate("expiration").toLocalDate(),
                         result.getInt("sum")
                 );
-            }
 
             // check whether all of requested takeoffs can be fulfilled
             int noOfRequestedItems = 0;
@@ -464,7 +426,7 @@ public class ItemDAO {
                 if (!currentRecords.containsKey(request.getExpiration())
                         || currentRecords.get(request.getExpiration()) < Integer.parseInt(request.getRequestedAmount())) {
                     // a request cannot be fulfilled -> fail
-                    throw new SQLWarningException("Požadovaná kombinácia (už) nie je dostupná.");
+                    throw new UserWarningException("Požadovaná kombinácia (už) nie je dostupná.");
                 }
                 noOfRequestedItems += Integer.parseInt(request.getRequestedAmount());
             }
@@ -504,46 +466,33 @@ public class ItemDAO {
             }
 
             conn.commit();
-        } catch (Throwable e) {
-            String message = e instanceof SQLWarningException ? e.getMessage() : "Neočakávaná chyba";
-            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, message);
-            e.printStackTrace();
-            try {
-                assert conn != null;
-                conn.rollback(savepoint1);
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-            success = false;
+
+        } catch (Exception e) {
+            assert conn != null;
+            conn.rollback(savepoint1);
+            throw e;
         } finally {
-            try {
-                if (result != null) result.close();
-                if (statement != null) statement.close();
-                if (conn != null) ConnectionFactory.getInstance().releaseConnection(conn);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            if (result != null) result.close();
+            if (statement != null) statement.close();
+            if (conn != null) ConnectionFactory.getInstance().releaseConnection(conn);
         }
-        return success;
     }
 
     /**
      * Inserts new item with custom attributes.
-     * @param newItem           item to be inserted
-     * @param attributesToAdd   new custom attributes
-     * @return true on success.
+     * @param newItem item to be inserted
+     * @param attributesToAdd new custom attributes
      */
-    public boolean itemInsert(Item newItem, HashSet<CustomAttribute> attributesToAdd) {
-        if (!Login.getInstance().hasAdmin()) return false;
+    public void itemInsert(Item newItem, HashSet<CustomAttribute> attributesToAdd) throws Exception {
+        if (!Login.getInstance().hasAdmin()) throw new UserWarningException("Prihláste sa prosím.");
+
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
         Savepoint savepoint1 = null;
-        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
-            assert conn != null;
             conn.setAutoCommit(false);
             savepoint1 = conn.setSavepoint("Savepoint1");
 
@@ -556,7 +505,6 @@ public class ItemDAO {
             statement.setInt(3, newItem.getMinAmount());
             statement.setString(4, newItem.getUnit());
             statement.setInt(5, newItem.getCategory());
-
             if (statement.executeUpdate() != 1) throw new SQLException();
 
             // get ID of the new Item
@@ -581,68 +529,43 @@ public class ItemDAO {
             conn.commit();
 
         } catch (Exception e) {
-            e.printStackTrace();
-            try {
-                assert conn != null;
-                conn.rollback(savepoint1);
-            } catch (SQLException ex) {
-                e.printStackTrace();
-            }
-            success = false;
+            assert conn != null;
+            conn.rollback(savepoint1);
+            throw e;
         } finally {
-            try {
-                if (result != null) result.close();
-                if (statement != null) statement.close();
-                if (conn != null) ConnectionFactory.getInstance().releaseConnection(conn);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            if (result != null) result.close();
+            if (statement != null) statement.close();
+            if (conn != null) ConnectionFactory.getInstance().releaseConnection(conn);
         }
-        return success;
     }
 
     /**
-     * Deletes item  from DB.
-     * @param item  item to be deleted.
-     * @return true on success.
+     * Deletes item from DB.
+     * @param item item to be deleted.
      */
-    public static boolean itemDelete(Item item) {
-        if (!Login.getInstance().hasAdmin()) return false;
+    public static void itemDelete(Item item) throws Exception {
+        if (item == null) throw new IllegalArgumentException();
+        if (!Login.getInstance().hasAdmin()) throw new UserWarningException("Prihláste sa prosím.");
+
         Connection conn = null;
         PreparedStatement statement = null;
         Savepoint savepoint1 = null;
-        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
-            assert conn != null;
             savepoint1 = conn.setSavepoint("Savepoint1");
 
             statement = conn.prepareStatement("DELETE FROM item WHERE id = ?");
             statement.setInt(1, item. getId());
-
             if (statement.executeUpdate() != 1) throw new SQLException();
-
-            // todo: v tabulke 'move' mozno zostal redundantny zaznam ak to bol prave zmazany posledny 'move_item' zaznam...
-
         } catch (Exception e) {
-            e.printStackTrace();
-            try {
-                assert conn != null;
-                conn.rollback(savepoint1);
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-            success = false;
+            assert conn != null;
+            conn.rollback(savepoint1);
+            throw e;
         } finally {
-            try {
-                if (statement != null) statement.close();
-                if (conn != null) ConnectionFactory.getInstance().releaseConnection(conn);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            if (statement != null) statement.close();
+            if (conn != null) ConnectionFactory.getInstance().releaseConnection(conn);
         }
-        return success;
     }
 
 }

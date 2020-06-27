@@ -1,7 +1,6 @@
 package databaseAccess;
 
-import dialog.DialogFactory;
-import javafx.scene.control.Alert;
+import databaseAccess.CustomExceptions.UserWarningException;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -39,7 +38,7 @@ public class ConnectionFactory {
     /**
      * @return connection from the pool or a new if the pool is empty
       */
-    Connection getConnection() {
+    Connection getConnection() throws SQLException {
         Connection connection;
         if (!connectionPool.isEmpty()) {
             // use connection from the pool
@@ -52,16 +51,11 @@ public class ConnectionFactory {
             connection = DriverManager.getConnection("jdbc:mysql://" + databaseIp + ":" + databasePort + "/"
                     + databaseName, databaseUsername, databasePassword);
         } catch (SQLException e) {
-            e.printStackTrace();
-            DialogFactory.getInstance().showAlert(Alert.AlertType.WARNING, "Server je nedostupný.");
-            return null;
+            throw new UserWarningException("Server je nedostupný.");
         }
         usedConnections.add(connection);
-        try {
-            connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+
         return connection;
     }
 
@@ -94,10 +88,17 @@ public class ConnectionFactory {
      * @return true if valid connection details are present and connection can be established.
      */
     public boolean hasValidConnectionDetails() {
-        Connection connection = getConnection();
-        boolean result = connection != null;
-        releaseConnection(connection);
-        return result;
+        Connection connection = null;
+        boolean result;
+        try {
+            connection = getConnection();
+            result = connection != null;
+            return result;
+        } catch (Exception e) {
+            return false;
+        } finally {
+            if (connection != null) releaseConnection(connection);
+        }
     }
 
     /**

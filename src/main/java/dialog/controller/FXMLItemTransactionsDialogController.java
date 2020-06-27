@@ -1,6 +1,7 @@
 
 package dialog.controller;
 
+import databaseAccess.CustomExceptions.UserWarningException;
 import databaseAccess.ItemDAO;
 import dialog.DialogFactory;
 import domain.Item;
@@ -56,8 +57,17 @@ public class FXMLItemTransactionsDialogController implements Initializable {
         mainTable.getColumns().addAll(transDate, transAmount, itemExpirationColumn, transUsername);
         mainTable.setPlaceholder(new Label("Zatiaľ žiadne pohyby."));
 
-        ArrayList<ItemMoveLogRecord> logRecords = ItemDAO.getInstance().getItemTransactions(item.getId());
-        if (logRecords != null) mainTable.getItems().addAll(logRecords);
+        try {
+            ArrayList<ItemMoveLogRecord> logRecords = ItemDAO.getInstance().getItemTransactions(item.getId());
+            mainTable.getItems().addAll(logRecords);
+        } catch (UserWarningException e) {
+            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, e.getMessage());
+            closeDialog();
+        } catch (Exception e) {
+            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Neočakávaná chyba.");
+            e.printStackTrace();
+            closeDialog();
+        }
     }
 
     private void closeDialog() {

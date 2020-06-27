@@ -1,6 +1,7 @@
 
 package dialog.controller;
 
+import databaseAccess.CustomExceptions.UserWarningException;
 import databaseAccess.ItemDAO;
 import dialog.DialogFactory;
 import domain.ExpiryDateWarningRecord;
@@ -23,7 +24,6 @@ import javafx.stage.Stage;
 
 import java.net.URL;
 import java.time.LocalDate;
-import java.util.GregorianCalendar;
 import java.util.ResourceBundle;
 
 /**
@@ -89,8 +89,7 @@ public class FXMLItemOfftakeDialogController implements Initializable {
         );
 
         mainTable.getColumns().addAll(expirationColumn, currentAmountColumn, requestedAmountColumn);
-        //todo: use return value to show appropriate error
-        ItemDAO.getInstance().getItemVarieties(item.getId(), requestList);
+        refreshTable();
         Property<ObservableList<ItemOfftakeRecord>> listProperty = new SimpleObjectProperty<>(requestList);
         mainTable.setPlaceholder(new Label("Pre túto položku neexistujú záznamy."));
         mainTable.itemsProperty().bind(listProperty);
@@ -107,14 +106,22 @@ public class FXMLItemOfftakeDialogController implements Initializable {
     @FXML
     private void offtakeButtonAction() {
         rootAnchorPane.setDisable(true);
-        if (isTrash ? ItemDAO.getInstance().itemTrash(item, requestList) : ItemDAO.getInstance().itemOfftake(item, requestList)) {
+
+        try {
+            if (isTrash) {
+                ItemDAO.getInstance().itemTrash(item, requestList);
+            } else {
+                ItemDAO.getInstance().itemOfftake(item, requestList);
+            }
             DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION,
                     isTrash ? "Položky úspešne odstránené." : "Výber položky prebehla úspešne.");
             cancelButtonAction();
-        } else {
-            // refresh the table
-            requestList.clear();
-            ItemDAO.getInstance().getItemVarieties(item.getId(), requestList);
+        } catch (UserWarningException e) {
+            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, e.getMessage());
+            refreshTable();
+        } catch (Exception e) {
+            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Neočakávaná chyba.");
+            cancelButtonAction();
         }
         rootAnchorPane.setDisable(false);
     }
@@ -146,6 +153,17 @@ public class FXMLItemOfftakeDialogController implements Initializable {
         if (requestedAmount > 0) {
             String message = "Požadované množstvo žiaľ nie je dostupné. (chýba " + requestedAmount + " MJ)";
             DialogFactory.getInstance().showAlert(Alert.AlertType.WARNING, message);
+        }
+    }
+
+    private void refreshTable() {
+        requestList.clear();
+        try {
+            ItemDAO.getInstance().getItemVarieties(item.getId(), requestList);
+        } catch (UserWarningException e) {
+            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, e.getMessage());
+        } catch (Exception e) {
+            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Neočakávaná chyba.");
         }
     }
 

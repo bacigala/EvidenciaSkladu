@@ -2,6 +2,7 @@
 package mainWindow;
 
 import databaseAccess.ConnectionFactory;
+import databaseAccess.CustomExceptions.UserWarningException;
 import databaseAccess.ItemDAO;
 import databaseAccess.Login;
 import dialog.DialogFactory;
@@ -15,6 +16,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -24,6 +26,8 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLClientInfoException;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashSet;
@@ -105,12 +109,15 @@ public class FXMLMainWindowController implements Initializable {
             DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, message);
         }
     }
-    
-    @FXML
-    private boolean reloadMainTable() {
-        clearItemDetails();
-        if (ItemDAO.getInstance().reloadItemList()) {
 
+    /**
+     * Requests update of item list in ItemDAO and reloads main table.
+     */
+    @FXML
+    private void reloadMainTable() {
+        clearItemDetails();
+        try {
+            ItemDAO.getInstance().reloadItemList();
             Platform.runLater(() -> {
                 mainTable.getItems().clear();
                 mainTable.getItems().addAll(ItemDAO.getInstance().getItemList());
@@ -118,10 +125,11 @@ public class FXMLMainWindowController implements Initializable {
                 SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
                 lastRefreshLabel.setText("Aktualizované " + sdf.format(cal.getTime()));
             });
-
-            return true;
+        } catch (SQLClientInfoException e) {
+            DialogFactory.getInstance().showAlert(Alert.AlertType.WARNING, e.getMessage());
+        } catch (Exception e) {
+            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Neočakávaná chyba.");
         }
-        return false;
     }
 
     /**
@@ -135,13 +143,17 @@ public class FXMLMainWindowController implements Initializable {
         Item selectedItem = mainTable.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
             autoRefreshPause();
-            HashSet<CustomAttribute> newCustomAttributes = ItemDAO.getInstance().getItemCustomAttributes(selectedItem.getId());
-            if (newCustomAttributes != null) {
-                for (CustomAttribute ca : newCustomAttributes) {
-                    selectedItemPropertiesTable.getItems().add(ca);
-                }
+
+            // load custom attributes
+            try {
+                HashSet<CustomAttribute> newCustomAttributes = ItemDAO.getInstance().getItemCustomAttributes(selectedItem.getId());
+                selectedItemPropertiesTable.getItems().addAll(newCustomAttributes);
+                selectedItemCustomAttributes = newCustomAttributes;
+            } catch (UserWarningException e) {
+                DialogFactory.getInstance().showAlert(Alert.AlertType.WARNING, e.getMessage());
+            } catch (Exception e) {
+                DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Neočakávaná chyba.");
             }
-            selectedItemCustomAttributes = newCustomAttributes;
 
             //enable buttons for item manipulation
             itemSupplyButton.setDisable(false);

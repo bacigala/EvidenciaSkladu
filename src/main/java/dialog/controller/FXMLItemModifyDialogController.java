@@ -1,11 +1,11 @@
 
 package dialog.controller;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.*;
-
-import databaseAccess.*;
+import databaseAccess.CategoryDAO;
+import databaseAccess.ComplexQueryHandler;
+import databaseAccess.CustomExceptions.UserWarningException;
+import databaseAccess.ItemDAO;
+import databaseAccess.Login;
 import dialog.DialogFactory;
 import domain.Account;
 import domain.Category;
@@ -24,6 +24,12 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.ResourceBundle;
 
 /**
  * Dialog for Item modification.
@@ -104,51 +110,59 @@ public class FXMLItemModifyDialogController implements Initializable {
     @FXML
     private void saveButton() {
         DialogFactory df = DialogFactory.getInstance();
-        try {
-            if (isNewItem) {
-                if (nameTextField.getText().equals("")) {
-                    df.showAlert(Alert.AlertType.WARNING, "Prosím, zadajte názov položky.");
-                    return;
-                }
-                int minAmount = 0;
-                if (!minAmountTextField.getText().equals("")) {
-                    minAmount = Integer.parseInt(minAmountTextField.getText());
-                }
-                Item newItem = new Item(0, nameTextField.getText(), codeTextField.getText(), minAmount,
-                        0, unitTextField.getText(), "", categoryChoiceBox.getValue().getId());
-                if (ItemDAO.getInstance().itemInsert(newItem, attributesToAdd)) {
-                    DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Nová položka bola úspešne vytvorená.");
-                    cancelButton();
-                } else {
-                    throw new IOException();
-                }
-            } else {
-                HashMap<String, String> newBasicValues = new HashMap<>();
-                //check whether attribute was changed -> add to hashMap
-                if (!nameTextField.getText().equals(item.getName())) {
-                    newBasicValues.put("name", nameTextField.getText());
-                }
-                if (!codeTextField.getText().equals(item.getBarcode())) {
-                   newBasicValues.put("barcode", codeTextField.getText());
-                }
-                if (!minAmountTextField.getText().equals(item.getMinAmount())) {
-                    newBasicValues.put("min_amount", minAmountTextField.getText());
-                }
-                if (!unitTextField.getText().equals(item.getUnit())) {
-                    newBasicValues.put("unit", unitTextField.getText());
-                }
-                if (!categoryChoiceBox.getValue().getName().equals(item.getCategoryName())) {
-                    newBasicValues.put("category", Integer.toString(categoryChoiceBox.getValue().getId()));
-                }
-                if (ItemDAO.getInstance().itemUpdate(item, newBasicValues, attributesToAdd, attributesToDelete)) {
-                    DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Úprava položky prebehla úspešne.");
-                    cancelButton();
-                } else {
-                    throw new IOException();
-                }
+        if (isNewItem) {
+            if (nameTextField.getText().equals("")) {
+                df.showAlert(Alert.AlertType.WARNING, "Prosím, zadajte názov položky.");
+                return;
             }
-        } catch (Exception e) {
-            df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");
+            int minAmount = 0;
+            if (!minAmountTextField.getText().equals("")) {
+                minAmount = Integer.parseInt(minAmountTextField.getText());
+            }
+            Item newItem = new Item(0, nameTextField.getText(), codeTextField.getText(), minAmount,
+                    0, unitTextField.getText(), "", categoryChoiceBox.getValue().getId());
+            try {
+                ItemDAO.getInstance().itemInsert(newItem, attributesToAdd);
+                df.showAlert(Alert.AlertType.INFORMATION, "Nová položka bola úspešne vytvorená.");
+                cancelButton();
+            } catch (UserWarningException e) {
+                    df.showAlert(Alert.AlertType.ERROR, e.getMessage());
+            } catch (Exception e) {
+                df.showAlert(Alert.AlertType.ERROR,
+                        "Akciu sa nepodarilo vykonať. Skontrolujte prosím zadané hodnoty.");
+            }
+        } else {
+            HashMap<String, String> newBasicValues = new HashMap<>();
+            //check whether attribute was changed -> add to hashMap
+            if (!nameTextField.getText().equals(item.getName())) {
+                newBasicValues.put("name", nameTextField.getText());
+            }
+            if (!codeTextField.getText().equals(item.getBarcode())) {
+               newBasicValues.put("barcode", codeTextField.getText());
+            }
+            if (Integer.parseInt(minAmountTextField.getText()) != item.getMinAmount()) {
+                newBasicValues.put("min_amount", minAmountTextField.getText());
+            }
+            if (!unitTextField.getText().equals(item.getUnit())) {
+                newBasicValues.put("unit", unitTextField.getText());
+            }
+            if (!categoryChoiceBox.getValue().getName().equals(item.getCategoryName())) {
+                newBasicValues.put("category", Integer.toString(categoryChoiceBox.getValue().getId()));
+            }
+            try {
+                ItemDAO.getInstance().itemUpdate(item, newBasicValues, attributesToAdd, attributesToDelete);
+                df.showAlert(Alert.AlertType.INFORMATION, "Úprava položky prebehla úspešne.");
+            } catch (databaseAccess.CustomExceptions.ConcurrentModificationException e) {
+                // todo: moznost pozriet si konkurentne zmeny a eventualne ich prepisat aj tak
+                df.showAlert(Alert.AlertType.ERROR, "Položka bola medzičasom zmenená niekým iným.");
+            } catch (UserWarningException e) {
+                df.showAlert(Alert.AlertType.ERROR, e.getMessage());
+            } catch (Exception e) {
+                df.showAlert(Alert.AlertType.ERROR, "Neočakávaná chyba.");
+                e.printStackTrace();
+            } finally {
+                cancelButton();
+            }
         }
     }
 
@@ -156,19 +170,18 @@ public class FXMLItemModifyDialogController implements Initializable {
      * Button 'Trvalo odstrániť' requests item deleto from DB - admin only.
      */
     @FXML
-    private void permanentDeleteButtonAction() throws IOException {
-        ComplexQueryHandler qh = ComplexQueryHandler.getInstance();
+    private void permanentDeleteButtonAction() {
         DialogFactory df = DialogFactory.getInstance();
         // todo: extra warning before delete
         try {
-            if (ItemDAO.itemDelete(item)) {
-                DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Položka bola úspešne odstránená z databázy.");
-                cancelButton();
-            } else {
-                df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať.");
-            }
+            ItemDAO.itemDelete(item);
+            df.showAlert(Alert.AlertType.INFORMATION, "Položka bola úspešne odstránená z databázy.");
+        } catch (UserWarningException e) {
+            df.showAlert(Alert.AlertType.ERROR, e.getMessage());
         } catch (Exception e) {
             df.showAlert(Alert.AlertType.ERROR, "Akciu sa nepodarilo vykonať.");
+        } finally {
+            cancelButton();
         }
     }
 
