@@ -2,6 +2,7 @@
 package dialog.controller;
 
 import databaseAccess.AccountDAO;
+import databaseAccess.CustomExceptions.UserWarningException;
 import dialog.DialogFactory;
 import domain.Account;
 import javafx.beans.property.Property;
@@ -97,38 +98,38 @@ public class FXMLAccountManagementDialogController implements Initializable {
 
                 Account newTransactionOwnerAccount = null;
 
-                if (AccountDAO.getInstance().hasTransactions(targetAccount.getId())) {
-                    // na pouzivatela su napisane nejake transakcie
-                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLSimpleChoiceDialog.fxml"));
-                    Parent root1 = null;
-                    try {
-                        root1 = fxmlLoader.load();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                try {
+                    if (AccountDAO.getInstance().hasTransactions(targetAccount.getId())) {
+                        // na pouzivatela su napisane nejake transakcie
+                        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLSimpleChoiceDialog.fxml"));
+                        Parent root1 = null;
+                        try {
+                            root1 = fxmlLoader.load();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        Stage stage = new Stage();
+                        assert root1 != null;
+                        stage.setScene(new Scene(root1));
+                        stage.initModality(Modality.APPLICATION_MODAL);
+                        FXMLSimpleChoiceDialogController<Account> controller = fxmlLoader.getController();
+                        stage.setTitle("Prevod transakcii");
+
+                        controller.setChoiceList(accountList);
+                        controller.setLabelText("Transkakcie previesť pod konto:");
+
+                        stage.showAndWait();
+
+                        newTransactionOwnerAccount = controller.getChoice();
+                        if (newTransactionOwnerAccount == null) return;
                     }
-                    Stage stage = new Stage();
-                    assert root1 != null;
-                    stage.setScene(new Scene(root1));
-                    stage.initModality(Modality.APPLICATION_MODAL);
-                    FXMLSimpleChoiceDialogController<Account> controller = fxmlLoader.getController();
-                    stage.setTitle("Prevod transakcii");
 
-                    ObservableList<Account> accounts = FXCollections.observableArrayList();
-                    AccountDAO.getInstance().getAccounts(accounts);
-
-                    controller.setChoiceList(accounts);
-                    controller.setLabelText("Transkakcie previesť pod konto:");
-
-                    stage.showAndWait();
-
-                    newTransactionOwnerAccount = controller.getChoice();
-                    if (newTransactionOwnerAccount == null) return;
-                }
-
-                // pokusime sa odstranit vybrany ucet
-                if(AccountDAO.getInstance().deleteAccount(targetAccount, newTransactionOwnerAccount)) {
+                    // pokusime sa odstranit vybrany ucet
+                    AccountDAO.getInstance().deleteAccount(targetAccount, newTransactionOwnerAccount);
                     df.showAlert(Alert.AlertType.INFORMATION, "Konto bolo úspešne odstránené.");
-                } else {
+                } catch (UserWarningException e) {
+                    df.showAlert(Alert.AlertType.ERROR, e.getMessage());
+                } catch (Exception e) {
                     df.showAlert(Alert.AlertType.ERROR, "Konto sa nepodarilo odstrániť");
                 }
 
@@ -189,7 +190,11 @@ public class FXMLAccountManagementDialogController implements Initializable {
      */
     private void populateTable() {
         accountList.clear();
-        AccountDAO.getInstance().getAccounts(accountList);
+        try {
+            AccountDAO.getInstance().getAccounts(accountList);
+        } catch (Exception e) {
+            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Nepodarilo sa načítať.");
+        }
     }
 
 }

@@ -1,5 +1,6 @@
 package databaseAccess;
 
+import databaseAccess.CustomExceptions.UserWarningException;
 import domain.Category;
 
 import java.sql.*;
@@ -22,17 +23,15 @@ public class CategoryDAO {
 
     /**
      * Reloads map of current categories from DB.
-     * @return true on success
      */
-    public boolean reloadCatList() {
-        if (!Login.getInstance().hasUser()) return false;
+    public void reloadCatList() throws Exception {
+        if (!Login.getInstance().hasUser()) throw new UserWarningException("Prihláste sa prosím.");
 
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
-        boolean success = true;
-
         HashMap<Integer, Category> newCategoryMap = new HashMap<>();
+
         try {
             conn = ConnectionFactory.getInstance().getConnection();
             statement = conn.prepareStatement(
@@ -48,8 +47,6 @@ public class CategoryDAO {
                 );
                 newCategoryMap.put(cat.getId(), cat);
             }
-        } catch (SQLException e) {
-            success = false;
         } finally {
             try {
                 if (result != null) result.close();
@@ -59,11 +56,12 @@ public class CategoryDAO {
                 e.printStackTrace();
             }
         }
-        if (success) categoryMap = newCategoryMap;
-        return success;
+        categoryMap = newCategoryMap;
     }
 
-    // returns lastly retrieved list of Categories form database
+    /**
+     * @return lastly retrieved map of categories
+     */
     public HashMap<Integer,Category> getCategoryMap() {
         return categoryMap;
     }
@@ -79,32 +77,29 @@ public class CategoryDAO {
      * Tries to modify a category record.
      * @param targetCategory - category to be modified.
      */
-    public boolean modifyCategory(Category targetCategory) {
-        if (!Login.getInstance().hasAdmin()) return false;
-        if (targetCategory == null) return false;
-        if (targetCategory.getId() == 1) return false; // no change to default category
+    public void modifyCategory(Category targetCategory) throws Exception {
+        if (!Login.getInstance().hasAdmin()) throw new UserWarningException("Prihláste sa prosím.");
+        if (targetCategory == null) throw new NullPointerException();
+        if (targetCategory.getId() == 1) throw new IllegalArgumentException(); // no change to default category
 
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
         Savepoint savepoint1 = null;
-        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
-            assert conn != null;
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             savepoint1 = conn.setSavepoint("Savepoint1");
 
-            // verify whether catogory still exists / is not being modified
+            // verify whether category still exists / is not being modified
             statement = conn.prepareStatement(
                     "SELECT * FROM category WHERE id = ?");
             statement.setInt(1, targetCategory.getId());
             result = statement.executeQuery();
             if (!result.next()) {
-                // todo: error - kategoria (medzicasom) neexistuje
-                throw new SQLException();
+                throw new UserWarningException("Kategória (už) neexistuje.");
             }
 
             // modify the category
@@ -112,20 +107,18 @@ public class CategoryDAO {
             statement.setString(1, targetCategory.getName());
             statement.setString(2, targetCategory.getNote());
             statement.setInt(3, targetCategory.getId());
-
             if (statement.executeUpdate() != 1) throw new SQLException();
 
             conn.commit();
 
         } catch (Exception e) {
-            e.printStackTrace();
             try {
                 assert conn != null;
                 conn.rollback(savepoint1);
-            } catch (SQLException ex) {
-                e.printStackTrace();
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
-            success = false;
+            throw e;
         } finally {
             try {
                 if (result != null) result.close();
@@ -135,7 +128,6 @@ public class CategoryDAO {
                 e.printStackTrace();
             }
         }
-        return success;
     }
 
     /**
@@ -143,24 +135,22 @@ public class CategoryDAO {
      * @param categoryId - category to be checked.
      * @return true if there are items assigned to the category.
      */
-    public boolean hasItems(int categoryId) {
-        if (!Login.getInstance().hasUser()) return false;
+    public boolean hasItems(int categoryId) throws Exception {
+        if (categoryId < 1) throw new IllegalArgumentException();
+        if (!Login.getInstance().hasUser()) throw new UserWarningException("Prihláste sa prosím.");
 
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
-        boolean answer = true;
+        boolean answer;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
-            assert conn != null;
             statement = conn.prepareStatement(
                     "SELECT 1 FROM item WHERE category = ?");
             statement.setInt(1, categoryId);
             result = statement.executeQuery();
             answer = result.next();
-        } catch (Exception e) {
-            e.printStackTrace();
         } finally {
             try {
                 if (result != null) result.close();
@@ -177,25 +167,29 @@ public class CategoryDAO {
      * Tries to delete the category.
      * @param categoryToDelete - category to be deleted.
      * @param categoryToTakeOver - category that takes all items from deleted one.
-     * @return true on success.
      */
-    public boolean deleteCategory(Category categoryToDelete, Category categoryToTakeOver) {
-        if (!Login.getInstance().hasAdmin()) return false;
-        if (categoryToDelete == null) return false;
-        if (categoryToDelete.getId() == 1) return false; // default category cannot be deleted
+    public void deleteCategory(Category categoryToDelete, Category categoryToTakeOver) throws Exception {
+        if (!Login.getInstance().hasAdmin()) throw new UserWarningException("Prihláste sa prosím.");
+        if (categoryToDelete == null) throw new IllegalArgumentException();
+        if (categoryToDelete.getId() == 1) throw new IllegalArgumentException(); // default category cannot be deleted
 
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
         Savepoint savepoint1 = null;
-        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
-            assert conn != null;
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             savepoint1 = conn.setSavepoint("Savepoint1");
+
+            // check whether category to be deleted still exists
+            statement = conn.prepareStatement(
+                    "SELECT 1 FROM category WHERE id = ?");
+            statement.setInt(1, categoryToDelete.getId());
+            result = statement.executeQuery();
+            if (!result.next()) throw new UserWarningException("Zvolená kategoria (už) neexistuje.");
 
             // check whether category to be deleted contains some items
             statement = conn.prepareStatement(
@@ -204,7 +198,7 @@ public class CategoryDAO {
             result = statement.executeQuery();
             if (result.next()) {
                 // category to be deleted is not empty
-                if (categoryToTakeOver == null) throw new IllegalArgumentException();
+                if (categoryToTakeOver == null) throw new NullPointerException();
 
                 // set new category for affected items
                 statement = conn.prepareStatement(
@@ -222,14 +216,13 @@ public class CategoryDAO {
             conn.commit();
 
         } catch (Throwable e) {
-            e.printStackTrace();
             try {
                 assert conn != null;
                 conn.rollback(savepoint1);
             } catch (SQLException ex) {
                 e.printStackTrace();
             }
-            success = false;
+            throw e;
         } finally {
             try {
                 if (result != null) result.close();
@@ -239,27 +232,23 @@ public class CategoryDAO {
                 e.printStackTrace();
             }
         }
-        return success;
     }
 
     /**
      * Tries to add a new category.
      * @param newCategory - category to be added.
-     * @return true on success.
      */
-    public boolean createCategory(Category newCategory) {
-        if (!Login.getInstance().hasUser()) return false;
-        if (newCategory == null) return false;
+    public void createCategory(Category newCategory) throws Exception {
+        if (!Login.getInstance().hasUser()) throw new UserWarningException("Prihláste sa prosím.");
+        if (newCategory == null) throw new NullPointerException();
 
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
         Savepoint savepoint1 = null;
-        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
-            assert conn != null;
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             savepoint1 = conn.setSavepoint("Savepoint1");
@@ -270,8 +259,7 @@ public class CategoryDAO {
             statement.setString(1, newCategory.getName());
             result = statement.executeQuery();
             if (result.next()) {
-                // todo: error - nazov uz existuje
-                throw new SQLException();
+                throw new UserWarningException("Rovnomenná kategoória už existuje.");
             }
 
             // create new category
@@ -281,20 +269,18 @@ public class CategoryDAO {
             statement.setString(2, newCategory.getNote());
             statement.setString(3, newCategory.getColor());
             statement.setInt(4, newCategory.getSubCatOf());
-
             if (statement.executeUpdate() != 1) throw new SQLException();
 
             conn.commit();
 
         } catch (Exception e) {
-            e.printStackTrace();
             try {
                 assert conn != null;
                 conn.rollback(savepoint1);
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-            success = false;
+            throw e;
         } finally {
             try {
                 if (result != null) result.close();
@@ -304,7 +290,6 @@ public class CategoryDAO {
                 e.printStackTrace();
             }
         }
-        return success;
     }
 
 }

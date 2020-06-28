@@ -1,5 +1,6 @@
 package databaseAccess;
 
+import databaseAccess.CustomExceptions.UserWarningException;
 import domain.Account;
 import javafx.collections.ObservableList;
 
@@ -18,26 +19,23 @@ public class AccountDAO {
 
     /**
      * Returns current records in DB table 'account'.
-     * @param accounts  list to be filled with retrieved records
-     * @return          true on success.
+     * @param accounts list to be filled with retrieved records
      */
-    public boolean getAccounts(ObservableList<Account> accounts) {
-        if (!Login.getInstance().hasUser()) return false;
-        if (accounts == null) return false;
+    public void getAccounts(ObservableList<Account> accounts) throws Exception {
+        if (!Login.getInstance().hasUser()) throw new UserWarningException("Prihláste sa prosím.");
+        if (accounts == null) throw new  NullPointerException();
 
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
-        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
-            assert conn != null;
             statement = conn.prepareStatement(
                     "SELECT id, name, surname, login, admin FROM `account` WHERE id <> 1 " +
                             "ORDER BY admin DESC, surname ASC");
             result = statement.executeQuery();
-            while (result.next()) {
+            while (result.next())
                 accounts.add(new Account(
                         result.getInt("id"),
                         result.getString("name"),
@@ -46,10 +44,6 @@ public class AccountDAO {
                         "", // password in not retrieved from DB
                         result.getBoolean("admin")
                 ));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            success = false;
         } finally {
             try {
                 if (result != null) result.close();
@@ -59,30 +53,26 @@ public class AccountDAO {
                 e.printStackTrace();
             }
         }
-        return success;
     }
 
     /**
      * Tries to add a new user account.
      * @param newAccount account to be added
-     * @return           true on success
      */
-    public boolean createAccount(Account newAccount) {
-        if (!Login.getInstance().hasAdmin()) return false;
-        if (newAccount == null) return false;
+    public void createAccount(Account newAccount) throws Exception {
+        if (!Login.getInstance().hasAdmin()) throw new UserWarningException("Prihláste sa prosím.");
+        if (newAccount == null) throw new NullPointerException();
 
         // blank password not allowed
-        if (newAccount.getPassword().equals("")) return false;
+        if (newAccount.getPassword().equals("")) throw new UserWarningException("Prosím vyplňte heslo.");
 
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
         Savepoint savepoint1 = null;
-        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
-            assert conn != null;
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             savepoint1 = conn.setSavepoint("Savepoint1");
@@ -93,8 +83,9 @@ public class AccountDAO {
             statement.setString(1, newAccount.getLogin());
             result = statement.executeQuery();
             if (result.next()) {
-                // todo: login je obsadeny
-                throw new SQLException();
+                String name = result.getString("name");
+                String surname = result.getString("surname");
+                throw new UserWarningException("Login je už obsadený. (" + name + " " + surname + ")");
             }
 
             // create new account
@@ -106,22 +97,18 @@ public class AccountDAO {
             statement.setString(4, newAccount.getPassword());
             statement.setBoolean(5, newAccount.isAdmin());
 
-            if (statement.executeUpdate() != 1) {
-                // todo: nepodarilo sa vytvorit konto
-                throw new SQLException();
-            }
+            if (statement.executeUpdate() != 1) throw new SQLException();
 
             conn.commit();
 
         } catch (Exception e) {
-            e.printStackTrace();
             try {
                 assert conn != null;
                 conn.rollback(savepoint1);
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-            success = false;
+            throw e;
         } finally {
             try {
                 if (result != null) result.close();
@@ -131,35 +118,34 @@ public class AccountDAO {
                 e.printStackTrace();
             }
         }
-        return success;
     }
 
     /**
      * Tries to modify a user account.
      * @param targetAccount account to be modified
-     * @return true on success
      */
-    public boolean modifyAccount(Account targetAccount) {
-        if (!Login.getInstance().hasUser()) return false;
-        if (targetAccount == null) return false;
-        if (targetAccount.getId() == 1) return false; // no change to 'trash' user
+    public void modifyAccount(Account targetAccount) throws Exception {
+        if (!Login.getInstance().hasAdmin()) throw new UserWarningException("Prihláste sa prosím.");
+        if (targetAccount == null) throw new NullPointerException();
+        // no change to 'trash' user
+        if (targetAccount.getId() == 1) throw new UserWarningException("Toto konto nemožno upraviť.");
         // non-admin restrictions
         if (!Login.getInstance().hasAdmin()) {
             // non-admin cannot modify foreign account
-            if (targetAccount.getId() != Login.getInstance().getLoggedUserId()) return false;
+            if (targetAccount.getId() != Login.getInstance().getLoggedUserId())
+                throw new UserWarningException("Nemáte dostatočné oprávnenia.");
             // non-admin cannot modify own name
-            if (!targetAccount.getFullName().equals(Login.getInstance().getLoggedUserFullName())) return false;
+            if (!targetAccount.getFullName().equals(Login.getInstance().getLoggedUserFullName()))
+                throw new UserWarningException("Mená vie meniť len administrátor.");
         }
 
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
         Savepoint savepoint1 = null;
-        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
-            assert conn != null;
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             savepoint1 = conn.setSavepoint("Savepoint1");
@@ -170,8 +156,7 @@ public class AccountDAO {
             statement.setInt(1, targetAccount.getId());
             result = statement.executeQuery();
             if (!result.next()) {
-                // todo: error - konto neexistuje
-                throw new SQLException();
+                throw new UserWarningException("Zvolené konto (už) neexistuje.");
             }
 
             // modify account
@@ -191,21 +176,18 @@ public class AccountDAO {
             statement.setString(3, targetAccount.getLogin());
             statement.setBoolean(4, targetAccount.isAdmin());
 
-            if (statement.executeUpdate() != 1) {
-                throw new SQLException();
-            }
+            if (statement.executeUpdate() != 1) throw new SQLException();
 
             conn.commit();
 
         } catch (Exception e) {
-            e.printStackTrace();
             try {
                 assert conn != null;
                 conn.rollback(savepoint1);
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-            success = false;
+            throw e;
         } finally {
             try {
                 if (result != null) result.close();
@@ -215,7 +197,6 @@ public class AccountDAO {
                 e.printStackTrace();
             }
         }
-        return success;
     }
 
     /**
@@ -223,26 +204,24 @@ public class AccountDAO {
      * @param accountId - account to be checked.
      * @return true if there are transactions assigned to the accountId.
      */
-    public boolean hasTransactions(int accountId) {
-        if (!Login.getInstance().hasUser()) return false;
+    public boolean hasTransactions(int accountId) throws Exception {
+        if (!Login.getInstance().hasUser()) throw new UserWarningException("Prihláste sa prosím.");
+        if (accountId <= 0) throw new IllegalArgumentException();
 
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
 
-        boolean answer = true;
+        boolean answer;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
-
             statement = conn.prepareStatement(
                     "SELECT 1 FROM move WHERE account_id = ?");
             statement.setInt(1, accountId);
             result = statement.executeQuery();
             answer = result.next();
-        } catch (Exception e) {
-            e.printStackTrace();
         } finally {
             try {
                 if (result != null) result.close();
@@ -259,22 +238,20 @@ public class AccountDAO {
      * Tries to delete the user account.
      * @param accountToDelete - account to be deleted.
      * @param accountToTakeOver - account that takes all transactions from deleted one.
-     * @return true on success.
      */
-    public boolean deleteAccount(Account accountToDelete, Account accountToTakeOver) {
-        if (!Login.getInstance().hasAdmin()) return false;
-        if (accountToDelete == null) return false;
-        if (accountToDelete.getId() == 1) return false; // no change to 'trash' user
+    public void deleteAccount(Account accountToDelete, Account accountToTakeOver) throws Exception {
+        if (!Login.getInstance().hasUser()) throw new UserWarningException("Prihláste sa prosím.");
+        if (!Login.getInstance().hasAdmin()) throw new UserWarningException("Nemáte dostatočné oprávnenia.");
+        if (accountToDelete == null) throw new NullPointerException();
+        if (accountToDelete.getId() == 1) throw new IllegalArgumentException(); // no change to 'trash' user
 
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
         Savepoint savepoint1 = null;
-        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
-            assert conn != null;
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             savepoint1 = conn.setSavepoint("Savepoint1");
@@ -284,7 +261,7 @@ public class AccountDAO {
                     "SELECT 1 FROM account WHERE id = ?");
             statement.setInt(1, accountToDelete.getId());
             result = statement.executeQuery();
-            if (!result.next()) throw new IllegalArgumentException();
+            if (!result.next()) throw new UserWarningException("Zvolené konto (už) neexistuje.");
 
             // verify whether transactions with given userId exist
             statement = conn.prepareStatement(
@@ -292,24 +269,21 @@ public class AccountDAO {
             statement.setInt(1, accountToDelete.getId());
             result = statement.executeQuery();
             if (result.next()) {
-                // som transactions are associated with the account
-                if (accountToTakeOver == null) throw new IllegalArgumentException();
-                // verify that account to take over the transactions exists
+                // some transactions are associated with account to be deleted
+                if (accountToTakeOver == null) throw new NullPointerException();
+                // verify that account to take over exists
                 statement = conn.prepareStatement(
                         "SELECT 1 FROM account WHERE id = ?");
                 statement.setInt(1, accountToTakeOver.getId());
                 result = statement.executeQuery();
-                if (!result.next()) throw new IllegalArgumentException();
+                if (!result.next()) throw new UserWarningException("Konto na prevzatie transakcii (už) neexistuje.");
 
                 // 'move' transactions to the other account
                 statement = conn.prepareStatement(
                         "UPDATE move SET account_id = ? WHERE account_id = ?");
                 statement.setInt(1, accountToTakeOver.getId());
                 statement.setInt(2, accountToDelete.getId());
-                if (statement.executeUpdate() < 1) {
-                    // todo error
-                    throw new SQLException();
-                }
+                if (statement.executeUpdate() < 1) throw new SQLException();
             }
 
             // delete account record
@@ -327,7 +301,7 @@ public class AccountDAO {
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-            success = false;
+            throw e;
         } finally {
             try {
                 if (result != null) result.close();
@@ -337,7 +311,6 @@ public class AccountDAO {
                 e.printStackTrace();
             }
         }
-        return success;
     }
 
 }

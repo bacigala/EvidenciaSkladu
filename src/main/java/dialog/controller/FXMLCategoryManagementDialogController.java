@@ -2,6 +2,7 @@
 package dialog.controller;
 
 import databaseAccess.CategoryDAO;
+import databaseAccess.CustomExceptions.UserWarningException;
 import databaseAccess.ItemDAO;
 import dialog.DialogFactory;
 import domain.Category;
@@ -101,40 +102,43 @@ public class FXMLCategoryManagementDialogController implements Initializable {
 
                 Category selectedCategory = null;
 
-                if (CategoryDAO.getInstance().hasItems(targetCategory.getId())) {
-                    // v kategorii su nejake polozky
-                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLSimpleChoiceDialog.fxml"));
-                    Parent root1 = null;
-                    try {
-                        root1 = fxmlLoader.load();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                try {
+                    if (CategoryDAO.getInstance().hasItems(targetCategory.getId())) {
+                        // v kategorii su nejake polozky
+                        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/FXMLSimpleChoiceDialog.fxml"));
+                        Parent root1 = null;
+                        try {
+                            root1 = fxmlLoader.load();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        Stage stage = new Stage();
+                        assert root1 != null;
+                        stage.setScene(new Scene(root1));
+                        stage.initModality(Modality.APPLICATION_MODAL);
+                        FXMLSimpleChoiceDialogController<Category> controller = fxmlLoader.getController();
+                        stage.setTitle("Prevod položiek");
+
+                        ObservableList<Category> categoreis = FXCollections.observableArrayList();
+                        categoreis.addAll(CategoryDAO.getInstance().getCategoryMap().values());
+
+                        controller.setChoiceList(categoreis);
+                        controller.setLabelText("Vyberte kategóriu pod ktorú budú prevedené položky odstránenej kategórie.");
+
+                        stage.showAndWait();
+
+                        selectedCategory = controller.getChoice();
+                        if (selectedCategory == null) return;
+                        if (selectedCategory.getId() == targetCategory.getId()) return;
                     }
-                    Stage stage = new Stage();
-                    assert root1 != null;
-                    stage.setScene(new Scene(root1));
-                    stage.initModality(Modality.APPLICATION_MODAL);
-                    FXMLSimpleChoiceDialogController<Category> controller = fxmlLoader.getController();
-                    stage.setTitle("Prevod položiek");
 
-                    ObservableList<Category> categoreis = FXCollections.observableArrayList();
-                    categoreis.addAll(CategoryDAO.getInstance().getCategoryMap().values());
-
-                    controller.setChoiceList(categoreis);
-                    controller.setLabelText("Vyberte kategóriu pod ktorú budú prevedené položky odstránenej kategórie.");
-
-                    stage.showAndWait();
-
-                    selectedCategory = controller.getChoice();
-                    if (selectedCategory == null) return;
-                    if (selectedCategory.getId() == targetCategory.getId()) return;
-                }
-
-                // pokusime sa odstranit vybranu kategoriu
-                if(CategoryDAO.getInstance().deleteCategory(targetCategory, selectedCategory)) {
+                    // pokusime sa odstranit vybranu kategoriu
+                    CategoryDAO.getInstance().deleteCategory(targetCategory, selectedCategory);
                     df.showAlert(Alert.AlertType.INFORMATION, "Kategória bola úspešne odstránená");
-                } else {
-                    df.showAlert(Alert.AlertType.ERROR, "Kategóriu sa nepodarilo odstrániť");
+                } catch (UserWarningException e) {
+                    df.showAlert(Alert.AlertType.ERROR, e.getMessage());
+                } catch (Exception e) {
+                    df.showAlert(Alert.AlertType.ERROR, "Neočakávaná chyba.");
                 }
 
                 tableRefresh();
@@ -183,7 +187,13 @@ public class FXMLCategoryManagementDialogController implements Initializable {
      */
     private void tableRefresh() {
         categoryList.clear();
-        CategoryDAO.getInstance().reloadCatList();
+        try {
+            CategoryDAO.getInstance().reloadCatList();
+        } catch (UserWarningException e) {
+            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, e.getMessage());
+        } catch (Exception e) {
+            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Neočakávaná chyba.");
+        }
         categoryList.addAll(CategoryDAO.getInstance().getCategoryMap().values());
     }
 

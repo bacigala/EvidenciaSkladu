@@ -2,6 +2,7 @@
 package dialog.controller;
 
 import databaseAccess.AccountDAO;
+import databaseAccess.CustomExceptions.UserWarningException;
 import dialog.DialogFactory;
 import domain.Account;
 import javafx.fxml.FXML;
@@ -97,15 +98,21 @@ public class FXMLAccountModifyDialogController implements Initializable {
         account.setAdmin(adminCheckBox.isSelected());
 
         if (newAccount) {
-            if (AccountDAO.getInstance().createAccount(account)) {
+            try {
+                AccountDAO.getInstance().createAccount(account);
                 df.showAlert(Alert.AlertType.INFORMATION, "Nové konto bolo úspešne vytvorené.");
-            } else {
-                df.showAlert(Alert.AlertType.ERROR, "Konto sa nepodarilo vytvoriť.");
+            } catch (UserWarningException e) {
+                    df.showAlert(Alert.AlertType.ERROR, e.getMessage());
+            } catch (Exception e) {
+                    df.showAlert(Alert.AlertType.ERROR, "Konto sa nepodarilo vytvoriť.");
             }
         } else {
-            if (AccountDAO.getInstance().modifyAccount(account)) {
+            try {
+                AccountDAO.getInstance().modifyAccount(account);
                 df.showAlert(Alert.AlertType.INFORMATION, "Konto bolo úspešne upravené.");
-            } else {
+            } catch (UserWarningException e) {
+                df.showAlert(Alert.AlertType.ERROR, e.getMessage());
+            } catch (Exception e) {
                 df.showAlert(Alert.AlertType.ERROR, "Konto sa nepodarilo upraviť.");
             }
         }

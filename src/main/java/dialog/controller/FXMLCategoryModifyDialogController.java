@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.*;
 
 import databaseAccess.CategoryDAO;
+import databaseAccess.CustomExceptions.UserWarningException;
 import dialog.DialogFactory;
 import domain.Category;
 import javafx.fxml.FXML;
@@ -67,18 +68,18 @@ public class FXMLCategoryModifyDialogController implements Initializable {
             category.setName(nameTextField.getText());
             category.setNote(noteTextField.getText());
 
-            if (newCategory) {
-                if(CategoryDAO.getInstance().createCategory(category)) {
+            try {
+                if (newCategory) {
+                    CategoryDAO.getInstance().createCategory(category);
                     df.showAlert(Alert.AlertType.INFORMATION, "Kategória úspešne vytvorená.");
                 } else {
-                    df.showAlert(Alert.AlertType.WARNING, "Kategóriu sa nepodarilo vytvoriť.");
-                }
-            } else {
-                if(CategoryDAO.getInstance().modifyCategory(category)) {
+                    CategoryDAO.getInstance().modifyCategory(category);
                     df.showAlert(Alert.AlertType.INFORMATION, "Kategória úspešne modifikovaná.");
-                } else {
-                    df.showAlert(Alert.AlertType.WARNING, "Kategóriu sa nepodarilo upraviť.");
                 }
+            } catch (UserWarningException e) {
+                df.showAlert(Alert.AlertType.WARNING, e.getMessage());
+            } catch (Exception e) {
+                df.showAlert(Alert.AlertType.WARNING, "Operáciu as nepodarilo vykonať.");
             }
         }
         closeStage();
