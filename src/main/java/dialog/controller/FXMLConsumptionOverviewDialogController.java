@@ -4,6 +4,8 @@ package dialog.controller;
 import java.net.URL;
 import java.util.*;
 import databaseAccess.*;
+import databaseAccess.CustomExceptions.UserWarningException;
+import dialog.DialogFactory;
 import domain.ConsumptionOverviewRecord;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -64,7 +66,13 @@ public class FXMLConsumptionOverviewDialogController implements Initializable {
      */
     private void populateTable() {
         itemList.clear();
-        ComplexQueryHandler.getInstance().getConsumptionOverviewRecords(itemList);
+        try {
+            ComplexQueryHandler.getInstance().getConsumptionOverviewRecords(itemList);
+        } catch (UserWarningException e) {
+            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, e.getMessage());
+        } catch (Exception e) {
+            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Neočakávaná chyba.");
+        }
     }
 
 }

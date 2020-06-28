@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import databaseAccess.*;
+import databaseAccess.CustomExceptions.UserWarningException;
+import dialog.DialogFactory;
 import domain.ExpiryDateWarningRecord;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -120,7 +122,13 @@ public class FXMLCheckExpirationDialogController implements Initializable {
      */
     private void populateTable() {
         itemList.clear();
-        ComplexQueryHandler.getInstance().getSoonExpiryItems(itemList);
+        try {
+            ComplexQueryHandler.getInstance().getSoonExpiryItems(itemList);
+        } catch (UserWarningException e) {
+            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, e.getMessage());
+        } catch (Exception e) {
+            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Neočakávaná chyba.");
+        }
     }
 
 }

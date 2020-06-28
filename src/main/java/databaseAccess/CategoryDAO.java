@@ -69,6 +69,13 @@ public class CategoryDAO {
     }
 
     /**
+     * Removes all cached records (e.g. on logoff).
+     */
+    public void dropCategoryMap() {
+        categoryMap.clear();
+    }
+
+    /**
      * Tries to modify a category record.
      * @param targetCategory - category to be modified.
      */

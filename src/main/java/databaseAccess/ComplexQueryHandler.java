@@ -1,6 +1,7 @@
 
 package databaseAccess;
 
+import databaseAccess.CustomExceptions.UserWarningException;
 import domain.ConsumptionOverviewRecord;
 import domain.ExpiryDateWarningRecord;
 import domain.Item;
@@ -25,19 +26,17 @@ public class ComplexQueryHandler {
     /**
      * Retrieves all soon expiry Items from DB.
      * @param logRecords list to store retrieved data in.
-     * @return true on success.
      */
-    public boolean getSoonExpiryItems(ObservableList<ExpiryDateWarningRecord> logRecords) {
-        if (!Login.getInstance().hasUser()) return false;
+    public void getSoonExpiryItems(ObservableList<ExpiryDateWarningRecord> logRecords) throws Exception {
+        if (logRecords == null) throw new NullPointerException();
+        if (!Login.getInstance().hasUser()) throw new UserWarningException("Prihláste sa prosím.");
 
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
-        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
-            assert conn != null;
             statement = conn.prepareStatement(
                     "SELECT item.id, item.name, SUM(move_item.amount) AS expiry_amount \n" +
                             "FROM (move_item JOIN item ON (move_item.item_id = item.id)) JOIN move ON move.id = move_item.move_id\n" +
@@ -46,16 +45,12 @@ public class ComplexQueryHandler {
                             "HAVING expiry_amount > 0\n" +
                             "ORDER BY item.name ASC, move_item.expiration ASC");
             result = statement.executeQuery();
-            while (result.next()) {
-                ExpiryDateWarningRecord logRecord =  new ExpiryDateWarningRecord(
+            while (result.next())
+                logRecords.add(new ExpiryDateWarningRecord(
                         result.getInt("id"),
                         result.getString("name"),
                         result.getInt("expiry_amount")
-                );
-                logRecords.add(logRecord);
-            }
-        } catch (SQLException e) {
-            success = false;
+                ));
         } finally {
             try {
                 if (result != null) result.close();
@@ -65,30 +60,26 @@ public class ComplexQueryHandler {
                 e.printStackTrace();
             }
         }
-        return success;
     }
 
     /**
      * Retrieves all low on stock items.
      * @param items list to store retrieved data in.
-     * @return true on success.
      */
-    public boolean getLowStockItems(ObservableList<Item> items) {
-        if (!Login.getInstance().hasUser()) return false;
+    public void getLowStockItems(ObservableList<Item> items) throws Exception {
+        if (items == null) throw new NullPointerException();
+        if (!Login.getInstance().hasUser()) throw new UserWarningException("Prihláste sa prosím.");
 
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
-        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
-            assert conn != null;
-
             statement = conn.prepareStatement(
                     "SELECT * FROM item WHERE item.cur_amount <= item.min_amount");
             result = statement.executeQuery();
-            while (result.next()) {
+            while (result.next())
                 items.add(new Item(
                         result.getInt("id"),
                         result.getString("name"),
@@ -99,9 +90,6 @@ public class ComplexQueryHandler {
                         result.getString("note"),
                         result.getInt("category")
                 ));
-            }
-        } catch (SQLException e) {
-            success = false;
         } finally {
             try {
                 if (result != null) result.close();
@@ -111,27 +99,22 @@ public class ComplexQueryHandler {
                 e.printStackTrace();
             }
         }
-        return success;
     }
 
     /**
      * Retrieves average consumption and trash of all items.
      * @param records list to store retrieved data in.
-     * @return true on success.
      */
-    public boolean getConsumptionOverviewRecords(ObservableList<ConsumptionOverviewRecord> records) {
-        if (!Login.getInstance().hasUser()) return false;
-        if (records == null) return false;
+    public void getConsumptionOverviewRecords(ObservableList<ConsumptionOverviewRecord> records) throws Exception {
+        if (records == null) throw new NullPointerException();
+        if (!Login.getInstance().hasUser()) throw new UserWarningException("Prihláste sa prosím.");
 
         Connection conn = null;
         PreparedStatement statement = null;
         ResultSet result = null;
-        boolean success = true;
 
         try {
             conn = ConnectionFactory.getInstance().getConnection();
-            assert conn != null;
-
             statement = conn.prepareStatement(
                     "WITH month_use AS (\n" +
                             "    SELECT item.id AS ids, SUM(move_item.amount) AS month_amount, FLOOR(ABS(DATEDIFF(NOW(), move.time))/30) AS months_back\n" +
@@ -177,7 +160,7 @@ public class ComplexQueryHandler {
                             "WHERE 1"
             );
             result = statement.executeQuery();
-            while (result.next()) {
+            while (result.next())
                 records.add(new ConsumptionOverviewRecord(
                         result.getInt("id"),
                         result.getString("name"),
@@ -185,9 +168,6 @@ public class ComplexQueryHandler {
                         result.getDouble("avg_month"),
                         result.getDouble("avg_trash")
                 ));
-            }
-        } catch (SQLException e) {
-            success = false;
         } finally {
             try {
                 if (result != null) result.close();
@@ -197,6 +177,5 @@ public class ComplexQueryHandler {
                 e.printStackTrace();
             }
         }
-        return success;
     }
 }

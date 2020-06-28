@@ -11,7 +11,10 @@ import java.sql.SQLException;
  */
 
 public class Login {
-    ConnectionFactory connFactory = ConnectionFactory.getInstance();
+    // singleton
+    private Login() {}
+    private static final Login login = new Login();
+    public static Login getInstance() { return login; }
 
     // logged in user info
     private boolean loggedUserAdmin = false;
@@ -19,10 +22,7 @@ public class Login {
     private String loggedUserFullName = "";
     private int loggedUserId = 0;
 
-    // singleton
-    private Login() {}
-    private static final Login login = new Login();
-    public static Login getInstance() { return login; }
+    ConnectionFactory connFactory = ConnectionFactory.getInstance();
 
     /**
      * Verifies username and password.
@@ -57,11 +57,12 @@ public class Login {
         } catch (SQLException e) {
             e.printStackTrace();
             answer = false;
+            logOut();
         } finally {
             try {
                 if (result != null) result.close();
                 if (statement != null) statement.close();
-                connFactory.releaseConnection(conn);
+                if (conn != null) connFactory.releaseConnection(conn);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -83,9 +84,9 @@ public class Login {
         loggedUserFullName = "";
         loggedUserId = 0;
 
-//        todo: delete login-required access content
+        //delete login-required access content
         ItemDAO.dropItemList();
-//        categoryMap.clear();
+        CategoryDAO.getInstance().dropCategoryMap();
     }
 
 

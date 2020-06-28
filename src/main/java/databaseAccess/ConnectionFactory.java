@@ -18,6 +18,11 @@ import java.util.List;
  */
 
 public class ConnectionFactory {
+    // singleton
+    private ConnectionFactory() {}
+    private static final ConnectionFactory connectionFactory = new ConnectionFactory();
+    public static ConnectionFactory getInstance() { return connectionFactory; }
+
     // (default) connection details
     private String databaseIp = "192.168.0.10";
     private String databasePort = "3306";
@@ -30,14 +35,9 @@ public class ConnectionFactory {
     private HashSet<Connection> usedConnections = new HashSet<>();
     private static int MAX_POOL_SIZE = 10;
 
-    // singleton
-    private ConnectionFactory() {}
-    private static final ConnectionFactory connectionFactory = new ConnectionFactory();
-    public static ConnectionFactory getInstance() { return connectionFactory; }
-
     /**
      * @return connection from the pool or a new if the pool is empty
-      */
+     */
     Connection getConnection() throws SQLException {
         Connection connection;
         if (!connectionPool.isEmpty()) {
@@ -55,6 +55,7 @@ public class ConnectionFactory {
         }
         usedConnections.add(connection);
         connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        connection.setAutoCommit(true);
 
         return connection;
     }
@@ -68,11 +69,15 @@ public class ConnectionFactory {
     void releaseConnection(Connection connection) {
         if (connection == null) return;
         usedConnections.remove(connection);
+
+        // pool disabled
         try {
             connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        // pool enabled
 //        if (connectionPool.size() < MAX_POOL_SIZE) {
 //            connectionPool.add(connection);
 //        } else {
@@ -93,28 +98,32 @@ public class ConnectionFactory {
         try {
             connection = getConnection();
             result = connection != null;
-            return result;
         } catch (Exception e) {
-            return false;
+            result = false;
         } finally {
             if (connection != null) releaseConnection(connection);
         }
+        return result;
     }
 
     /**
      * Closes all connections.
      */
     private void closeAllConnections() {
+        Iterator<Connection> iterator;
+        Connection connection;
         try {
-            Iterator<Connection> iterator = usedConnections.iterator();
+            iterator = usedConnections.iterator();
             while (iterator.hasNext()) {
-                iterator.next().close();
-                iterator.remove();
+                connection = iterator.next();
+                connection.close();
+                usedConnections.remove(connection);
             }
             iterator = connectionPool.iterator();
             while (iterator.hasNext()) {
-                iterator.next().close();
-                iterator.remove();
+                connection = iterator.next();
+                connection.close();
+                connectionPool.remove(connection);
             }
         } catch (Exception e) {
             e.printStackTrace();

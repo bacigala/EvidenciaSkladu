@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import databaseAccess.*;
+import databaseAccess.CustomExceptions.UserWarningException;
+import dialog.DialogFactory;
 import domain.Item;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -119,7 +121,13 @@ public class FXMLCheckAmountDialogController implements Initializable {
      */
     private void populateTable() {
         itemList.clear();
-        ComplexQueryHandler.getInstance().getLowStockItems(itemList);
+        try {
+            ComplexQueryHandler.getInstance().getLowStockItems(itemList);
+        } catch (UserWarningException e) {
+            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, e.getMessage());
+        } catch (Exception e) {
+            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Neočakávaná chyba.");
+        }
     }
 
 }
