@@ -25,6 +25,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
+import java.awt.*;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.ResourceBundle;
@@ -85,9 +86,18 @@ public class FXMLItemOfftakeDialogController implements Initializable {
                 new EventHandler<TableColumn.CellEditEvent<ItemOfftakeRecord, String>>() {
                     @Override
                     public void handle(CellEditEvent<ItemOfftakeRecord, String> t) {
+                        // verify input
+                        int requestedAmount;
+                        try {
+                            requestedAmount = Integer.parseInt(t.getNewValue());
+                        } catch (Exception e) {
+                            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Prosím vyplňte platné množstvo.");
+                            return;
+                        }
+
                         (t.getTableView().getItems().get(
                                 t.getTablePosition().getRow())
-                        ).setRequestedAmount(Integer.parseInt(t.getNewValue()));
+                        ).setRequestedAmount(requestedAmount);
                     }
                 }
         );
@@ -113,11 +123,17 @@ public class FXMLItemOfftakeDialogController implements Initializable {
 
         // check whether selection was made
         boolean hasRequest = false;
-        for (ItemOfftakeRecord record : requestList) {
-            if (Integer.parseInt(record.getRequestedAmount()) > 0) {
-                hasRequest = true;
-                break;
+        try {
+            for (ItemOfftakeRecord record : requestList) {
+                if (Integer.parseInt(record.getRequestedAmount()) > 0) {
+                    hasRequest = true;
+                    break;
+                }
             }
+        } catch (Exception e) {
+            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Vyplňte prosím platné hodnoty.");
+            rootAnchorPane.setDisable(false);
+            return;
         }
 
         if (hasRequest) {
@@ -163,7 +179,17 @@ public class FXMLItemOfftakeDialogController implements Initializable {
      */
     @FXML
     private void optimiseButtonAction() {
-        int requestedAmount = Integer.parseInt(amountRequestTextField.getText());
+        // verify input
+        int requestedAmount;
+        try {
+            if (amountRequestTextField.getText().equals("")) throw new IllegalArgumentException();
+            requestedAmount = Integer.parseInt(amountRequestTextField.getText());
+        } catch (Exception e) {
+            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Prosím vyplňte platné množstvo.");
+            Platform.runLater(() -> amountRequestTextField.requestFocus());
+            return;
+        }
+
         for (ItemOfftakeRecord record : requestList.sorted()) {
             int toBeTaken = Math.min(record.getCurrentAmount(), requestedAmount);
             requestList.remove(record);

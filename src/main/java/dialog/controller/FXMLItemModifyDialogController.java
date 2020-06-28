@@ -2,7 +2,6 @@
 package dialog.controller;
 
 import databaseAccess.CategoryDAO;
-import databaseAccess.ComplexQueryHandler;
 import databaseAccess.CustomExceptions.UserWarningException;
 import databaseAccess.ItemDAO;
 import databaseAccess.Login;
@@ -11,6 +10,7 @@ import domain.Account;
 import domain.Category;
 import domain.CustomAttribute;
 import domain.Item;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -110,15 +110,23 @@ public class FXMLItemModifyDialogController implements Initializable {
     @FXML
     private void saveButton() {
         DialogFactory df = DialogFactory.getInstance();
+
+        // verify input
+        if (nameTextField.getText().equals("")) {
+            df.showAlert(Alert.AlertType.WARNING, "Prosím, zadajte názov položky.");
+            Platform.runLater(() -> nameTextField.requestFocus());
+            return;
+        }
+        int minAmount;
+        try {
+            minAmount = Integer.parseInt(minAmountTextField.getText());
+        } catch (Exception e) {
+            df.showAlert(Alert.AlertType.WARNING, "Prosím, zadajte platné minimálne množstvo.");
+            Platform.runLater(() -> minAmountTextField.requestFocus());
+            return;
+        }
+
         if (isNewItem) {
-            if (nameTextField.getText().equals("")) {
-                df.showAlert(Alert.AlertType.WARNING, "Prosím, zadajte názov položky.");
-                return;
-            }
-            int minAmount = 0;
-            if (!minAmountTextField.getText().equals("")) {
-                minAmount = Integer.parseInt(minAmountTextField.getText());
-            }
             Item newItem = new Item(0, nameTextField.getText(), codeTextField.getText(), minAmount,
                     0, unitTextField.getText(), "", categoryChoiceBox.getValue().getId());
             try {
@@ -148,6 +156,12 @@ public class FXMLItemModifyDialogController implements Initializable {
             }
             if (!categoryChoiceBox.getValue().getName().equals(item.getCategoryName())) {
                 newBasicValues.put("category", Integer.toString(categoryChoiceBox.getValue().getId()));
+            }
+            if (attributesToAdd.isEmpty() && attributesToDelete.isEmpty() && newBasicValues.isEmpty()) {
+                // no changes made
+                df.showAlert(Alert.AlertType.INFORMATION, "Položka nebola zmenená.");
+                cancelButton();
+                return;
             }
             try {
                 ItemDAO.getInstance().itemUpdate(item, newBasicValues, attributesToAdd, attributesToDelete);

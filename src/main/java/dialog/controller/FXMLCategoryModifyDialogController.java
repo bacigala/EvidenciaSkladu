@@ -8,6 +8,7 @@ import databaseAccess.CategoryDAO;
 import databaseAccess.CustomExceptions.UserWarningException;
 import dialog.DialogFactory;
 import domain.Category;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -28,7 +29,7 @@ public class FXMLCategoryModifyDialogController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-
+        Platform.runLater(() -> nameTextField.requestFocus());
     }
 
     /**
@@ -61,6 +62,7 @@ public class FXMLCategoryModifyDialogController implements Initializable {
             // verify input
             if (nameTextField.getText().equals("")) {
                 df.showAlert(Alert.AlertType.WARNING, "Prosím, vyplňte názov.");
+                Platform.runLater(() -> nameTextField.requestFocus());
                 return;
             }
 

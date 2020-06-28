@@ -131,6 +131,8 @@ public class FXMLCategoryManagementDialogController implements Initializable {
                         if (selectedCategory.getId() == targetCategory.getId()) return;
                     }
 
+                    // todo: extra warning a porvrdenie odstranenia
+
                     // pokusime sa odstranit vybranu kategoriu
                     CategoryDAO.getInstance().deleteCategory(targetCategory, selectedCategory);
                     df.showAlert(Alert.AlertType.INFORMATION, "Kategória bola úspešne odstránená");

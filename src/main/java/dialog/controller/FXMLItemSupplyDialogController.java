@@ -5,12 +5,15 @@ import databaseAccess.CustomExceptions.UserWarningException;
 import databaseAccess.ItemDAO;
 import dialog.DialogFactory;
 import domain.Item;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
 import java.net.URL;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.ResourceBundle;
 
 public class FXMLItemSupplyDialogController implements Initializable {
@@ -40,9 +43,32 @@ public class FXMLItemSupplyDialogController implements Initializable {
     @FXML
     private void supplyButton() {
         DialogFactory df = DialogFactory.getInstance();
+
+        // verify input
+        int itemAmouunt;
         try {
-            ItemDAO.getInstance().itemSupply(item.getId(), Integer.parseInt(newAmountTextField.getText()), newExpirationDatePicker.getValue());
-            DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Vklad položky prebehol úspešne.");
+            if (newAmountTextField.getText().equals("")) throw new IllegalArgumentException();
+            itemAmouunt = Integer.parseInt(newAmountTextField.getText());
+        } catch (Exception e) {
+            df.showAlert(Alert.AlertType.ERROR, "Prosím, vyplňte platné množstvo.");
+            Platform.runLater(() -> newAmountTextField.requestFocus());
+            return;
+        }
+
+        LocalDate expiration;
+        try {
+            if (newExpirationDatePicker.getValue().toString().equals("")) throw new IllegalArgumentException();
+            expiration = newExpirationDatePicker.getValue();
+        } catch (Exception e) {
+            df.showAlert(Alert.AlertType.ERROR, "Prosím, vyplňte platný dátm expirácie.");
+            Platform.runLater(() -> newExpirationDatePicker.requestFocus());
+            return;
+        }
+
+
+        try {
+            ItemDAO.getInstance().itemSupply(item.getId(), itemAmouunt, expiration);
+            df.showAlert(Alert.AlertType.INFORMATION, "Vklad položky prebehol úspešne.");
         } catch (UserWarningException e) {
             df.showAlert(Alert.AlertType.WARNING, e.getMessage());
         } catch (Exception e) {

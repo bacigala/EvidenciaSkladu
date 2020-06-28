@@ -36,6 +36,19 @@ public class FXMLUserLoginDialogController implements Initializable {
             } else {
                 String username = usernameTextField.getText();
                 String password = passwordTextField.getText();
+
+                // verify input
+                if (username.equals("") || username.length() > 50) {
+                    df.showAlert(Alert.AlertType.ERROR, "Prosím, vyplňte platné prihlasovacie meno.");
+                    Platform.runLater(() -> usernameTextField.requestFocus());
+                    return;
+                }
+                if (password.equals("") || password.length() > 50) {
+                    df.showAlert(Alert.AlertType.ERROR, "Prosím, vyplňte platné heslo.");
+                    Platform.runLater(() -> passwordTextField.requestFocus());
+                    return;
+                }
+
                 if (Login.getInstance().logIn(username, password)) {
                     // successful login
                     disableInput();

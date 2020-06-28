@@ -29,8 +29,8 @@
             </VBox>
             <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
                <children>
-                  <Button fx:id="cancelButton" cancelButton="true" mnemonicParsing="false" onAction="#cancelButtonAction" text="Zrušiť" textFill="#a80e0e" />
-                  <Button fx:id="saveButton" defaultButton="true" layoutX="91.0" layoutY="10.0" mnemonicParsing="false" onAction="#saveButtonAction" text="Uložiť" textFill="#19d041" />
+                  <Button cancelButton="true" mnemonicParsing="false" onAction="#cancelButtonAction" text="Zrušiť" textFill="#a80e0e" />
+                  <Button defaultButton="true" layoutX="91.0" layoutY="10.0" mnemonicParsing="false" onAction="#saveButtonAction" text="Uložiť" textFill="#19d041" />
                </children>
             </HBox>
          </children>

@@ -5,6 +5,7 @@ import databaseAccess.AccountDAO;
 import databaseAccess.CustomExceptions.UserWarningException;
 import dialog.DialogFactory;
 import domain.Account;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -32,7 +33,7 @@ public class FXMLAccountModifyDialogController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-
+        Platform.runLater(() -> nameTextField.requestFocus());
     }
 
     /**
@@ -61,32 +62,40 @@ public class FXMLAccountModifyDialogController implements Initializable {
      */
     @FXML
     private void saveButtonAction() {
+        DialogFactory df = DialogFactory.getInstance();
         if (!changesMade()) {
+            df.showAlert(Alert.AlertType.INFORMATION,
+                    newAccount ? "Konto nebolo vytvorené." : "Konto nebolo upravené.");
             closeStage();
             return;
         }
 
-        // check user input
-        DialogFactory df = DialogFactory.getInstance();
+        // verify input
         if (nameTextField.getText().equals("")) {
             df.showAlert(Alert.AlertType.WARNING, "Prosím, vyplňte meno.");
+            Platform.runLater(() -> nameTextField.requestFocus());
             return;
         }
         if (surnameTextField.getText().equals("")) {
             df.showAlert(Alert.AlertType.WARNING, "Prosím, vyplňte priezvisko.");
+            Platform.runLater(() -> surnameTextField.requestFocus());
             return;
         }
         if (loginTextField.getText().equals("")) {
             df.showAlert(Alert.AlertType.WARNING, "Prosím, vyplňte prihlasovacie meno.");
+            Platform.runLater(() -> loginTextField.requestFocus());
             return;
         }
         // check password fields
         if (!psw1PasswordField.getText().equals(psw2PasswordField.getText())) {
             df.showAlert(Alert.AlertType.WARNING, "Heslo a overenie hesla sa nezhodujú.");
+            psw2PasswordField.setText("");
+            Platform.runLater(() -> psw1PasswordField.requestFocus());
             return;
         }
         if (newAccount && psw1PasswordField.getText().equals("")) {
             df.showAlert(Alert.AlertType.WARNING, "Prosím vypňte heslo.");
+            Platform.runLater(() -> psw1PasswordField.requestFocus());
             return;
         }
 

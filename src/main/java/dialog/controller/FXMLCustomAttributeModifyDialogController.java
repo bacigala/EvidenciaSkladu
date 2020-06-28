@@ -1,28 +1,27 @@
 
 package dialog.controller;
 
-/**
- * Custom attribute modification dialog.
- */
-
 import java.net.URL;
 import java.util.HashSet;
 import java.util.ResourceBundle;
 
 import dialog.DialogFactory;
 import domain.CustomAttribute;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
+/**
+ * Custom attribute modification dialog.
+ */
+
 public class FXMLCustomAttributeModifyDialogController implements Initializable {
 
     @FXML private javafx.scene.control.TextField nameTextField;
     @FXML private javafx.scene.control.TextField valueTextField;
-    @FXML private javafx.scene.control.Button saveButton;
-    @FXML private javafx.scene.control.Button cancelButton;
 
     private CustomAttribute originalAttribute;
     private HashSet<CustomAttribute> attributesToAdd, attributesToDelete;
@@ -67,7 +66,7 @@ public class FXMLCustomAttributeModifyDialogController implements Initializable 
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-
+        Platform.runLater(() -> nameTextField.requestFocus());
     }
 
     /**
