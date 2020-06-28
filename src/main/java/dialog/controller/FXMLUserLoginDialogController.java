@@ -4,6 +4,7 @@ package dialog.controller;
 import databaseAccess.ConnectionFactory;
 import databaseAccess.Login;
 import dialog.DialogFactory;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -76,6 +77,8 @@ public class FXMLUserLoginDialogController implements Initializable {
             loginButton.setDisable(true);
             df.showAlert(Alert.AlertType.ERROR, "Nepodarilo sa pripojiť k databáze.");
         }
+
+        Platform.runLater(() -> usernameTextField.requestFocus());
     }   
     
     private void enableInput() {

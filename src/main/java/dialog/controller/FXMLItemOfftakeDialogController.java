@@ -7,6 +7,7 @@ import dialog.DialogFactory;
 import domain.ExpiryDateWarningRecord;
 import domain.Item;
 import domain.ItemOfftakeRecord;
+import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -20,6 +21,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
 import java.net.URL;
@@ -37,6 +40,7 @@ public class FXMLItemOfftakeDialogController implements Initializable {
     @FXML private javafx.scene.control.TableView<ItemOfftakeRecord> mainTable;
     @FXML private javafx.scene.control.TextField amountRequestTextField;
     @FXML private javafx.scene.layout.AnchorPane rootAnchorPane;
+    @FXML private javafx.scene.control.Button saveButton;
 
     private Item item;
     private final ObservableList<ItemOfftakeRecord> requestList = FXCollections.observableArrayList();
@@ -44,7 +48,7 @@ public class FXMLItemOfftakeDialogController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-
+        Platform.runLater(() -> amountRequestTextField.requestFocus());
     }
 
     /**
@@ -107,22 +111,41 @@ public class FXMLItemOfftakeDialogController implements Initializable {
     private void offtakeButtonAction() {
         rootAnchorPane.setDisable(true);
 
-        try {
-            if (isTrash) {
-                ItemDAO.getInstance().itemTrash(item, requestList);
-            } else {
-                ItemDAO.getInstance().itemOfftake(item, requestList);
+        // check whether selection was made
+        boolean hasRequest = false;
+        for (ItemOfftakeRecord record : requestList) {
+            if (Integer.parseInt(record.getRequestedAmount()) > 0) {
+                hasRequest = true;
+                break;
             }
-            DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION,
-                    isTrash ? "Položky úspešne odstránené." : "Výber položky prebehla úspešne.");
-            cancelButtonAction();
-        } catch (UserWarningException e) {
-            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, e.getMessage());
-            refreshTable();
-        } catch (Exception e) {
-            DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Neočakávaná chyba.");
-            cancelButtonAction();
         }
+
+        if (hasRequest) {
+            try {
+                if (isTrash) {
+                    ItemDAO.getInstance().itemTrash(item, requestList);
+                } else {
+                    ItemDAO.getInstance().itemOfftake(item, requestList);
+                }
+                DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION,
+                        isTrash ? "Položky úspešne odstránené." : "Výber položky prebehla úspešne.");
+                cancelButtonAction();
+                return;
+            } catch (UserWarningException e) {
+                DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, e.getMessage());
+                refreshTable();
+            } catch (Exception e) {
+                DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Neočakávaná chyba.");
+                cancelButtonAction();
+                return;
+            }
+        } else {
+            DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION,
+                    isTrash ? "Položka nebola vyhodená." : "Položka nebola vybraná.");
+            cancelButtonAction();
+            return;
+        }
+
         rootAnchorPane.setDisable(false);
     }
 
@@ -153,6 +176,9 @@ public class FXMLItemOfftakeDialogController implements Initializable {
         if (requestedAmount > 0) {
             String message = "Požadované množstvo žiaľ nie je dostupné. (chýba " + requestedAmount + " MJ)";
             DialogFactory.getInstance().showAlert(Alert.AlertType.WARNING, message);
+            Platform.runLater(() -> amountRequestTextField.requestFocus());
+        } else {
+            Platform.runLater(() -> saveButton.requestFocus());
         }
     }
 
@@ -164,6 +190,14 @@ public class FXMLItemOfftakeDialogController implements Initializable {
             DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, e.getMessage());
         } catch (Exception e) {
             DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Neočakávaná chyba.");
+        }
+    }
+
+    @FXML
+    private void optimiseInputFocusMove(KeyEvent keyEvent) {
+        if (keyEvent.getCode() == KeyCode.ENTER) {
+            optimiseButtonAction();
+            Platform.runLater(() -> saveButton.requestFocus());
         }
     }
 

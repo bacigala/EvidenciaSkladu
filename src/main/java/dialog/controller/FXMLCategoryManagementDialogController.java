@@ -3,7 +3,6 @@ package dialog.controller;
 
 import databaseAccess.CategoryDAO;
 import databaseAccess.CustomExceptions.UserWarningException;
-import databaseAccess.ItemDAO;
 import dialog.DialogFactory;
 import domain.Category;
 import javafx.beans.property.Property;

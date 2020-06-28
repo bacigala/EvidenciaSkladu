@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
 
-<AnchorPane id="AnchorPane" prefHeight="151.0" prefWidth="191.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dialog.controller.FXMLUserLoginDialogController">
+<AnchorPane id="AnchorPane" prefHeight="151.0" prefWidth="191.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dialog.controller.FXMLUserLoginDialogController">
    <children>
       <MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <menus>
@@ -32,7 +39,7 @@
                   <PasswordField fx:id="passwordTextField" alignment="CENTER" promptText="heslo" />
                </children>
             </VBox>
-            <Button fx:id="loginButton" mnemonicParsing="false" onAction="#loginButtonAction" text="Prihlásiť sa" />
+            <Button fx:id="loginButton" defaultButton="true" mnemonicParsing="false" onAction="#loginButtonAction" text="Prihlásiť sa" />
          </children>
       </VBox>
    </children>
