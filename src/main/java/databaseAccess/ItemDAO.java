@@ -33,6 +33,10 @@ public class ItemDAO {
      * Reloads possessed list of Items.
      */
     public void reloadItemList() throws Exception {
+        reloadItemList("");
+    }
+
+    public void reloadItemList(String searchPattern) throws Exception {
         if (!Login.getInstance().hasUser()) throw new UserWarningException("Prihláste sa prosím.");
 
         Connection conn = null;
@@ -42,8 +46,10 @@ public class ItemDAO {
         try {
             conn = ConnectionFactory.getInstance().getConnection();
             assert conn != null;
+            String searchOption = "";
+            if (!searchPattern.equals("")) searchOption = " WHERE item.name LIKE '%" + searchPattern + "%'";
             statement = conn.prepareStatement(
-                    "SELECT * FROM item");
+                    "SELECT * FROM item" + searchOption + " ORDER BY name ASC");
             result = statement.executeQuery();
             while (result.next())
                 newItemList.add(new Item(
@@ -57,6 +63,7 @@ public class ItemDAO {
                         result.getInt("category")
                 ));
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new UserWarningException("Položky sa nepodarilo načítať.");
         } finally {
             if (result != null) result.close();

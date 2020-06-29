@@ -16,18 +16,17 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Paint;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.SQLClientInfoException;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashSet;
@@ -46,6 +45,8 @@ public class FXMLMainWindowController implements Initializable {
     @FXML private javafx.scene.control.Button itemDetailsChangeButton;
     @FXML private javafx.scene.control.Button itemMoveHistoryButton;
     @FXML private javafx.scene.control.Button databaseRefreshButton;
+    @FXML private javafx.scene.control.Button searchButton;
+    @FXML private javafx.scene.control.TextField searchTextField;
     @FXML private javafx.scene.control.Menu adminMenu;
     @FXML private javafx.scene.control.Label lastRefreshLabel;
     @FXML private javafx.scene.control.CheckBox autoRefreshCheckBox;
@@ -115,9 +116,17 @@ public class FXMLMainWindowController implements Initializable {
      */
     @FXML
     private void reloadMainTable() {
+        reloadMainTable("");
+    }
+
+    private void reloadMainTable(String searchPattern) {
         clearItemDetails();
         try {
-            ItemDAO.getInstance().reloadItemList();
+            if (searchPattern.equals("")) {
+                ItemDAO.getInstance().reloadItemList();
+            } else {
+                ItemDAO.getInstance().reloadItemList(searchPattern);
+            }
             Platform.runLater(() -> {
                 mainTable.getItems().clear();
                 mainTable.getItems().addAll(ItemDAO.getInstance().getItemList());
@@ -125,10 +134,11 @@ public class FXMLMainWindowController implements Initializable {
                 SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
                 lastRefreshLabel.setText("Aktualizované " + sdf.format(cal.getTime()));
             });
-        } catch (SQLClientInfoException e) {
+        } catch (UserWarningException e) {
             DialogFactory.getInstance().showAlert(Alert.AlertType.WARNING, e.getMessage());
         } catch (Exception e) {
             DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Neočakávaná chyba.");
+            e.printStackTrace();
         }
     }
 
@@ -481,6 +491,28 @@ public class FXMLMainWindowController implements Initializable {
         if (tableRefreshThread != null) {
             tableRefreshThread.requestStop();
             autoRefreshCheckBox.setTextFill(Paint.valueOf("red"));
+        }
+    }
+
+    // ITEM SEARCH
+    @FXML
+    private void searchButtonAction() {
+        searchButton.setDisable(true);
+        if (searchTextField.getText().equals("")) {
+            autoRefreshResume();
+        } else {
+            autoRefreshPause();
+            searchButton.setText("Hľadám...");
+            reloadMainTable(searchTextField.getText());
+            searchButton.setText("Vyhľadať");
+        }
+        searchButton.setDisable(false);
+    }
+
+    @FXML
+    private void searchTextFieldKeyPressed(KeyEvent keyEvent) {
+        if (keyEvent.getCode() == KeyCode.ENTER) {
+            searchButtonAction();
         }
     }
 
