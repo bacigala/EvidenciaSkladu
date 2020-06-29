@@ -263,6 +263,13 @@ public class AccountDAO {
             result = statement.executeQuery();
             if (!result.next()) throw new UserWarningException("Zvolené konto (už) neexistuje.");
 
+            // restrict deletion of the last administrator account
+            statement = conn.prepareStatement(
+                    "SELECT 1 FROM account WHERE id <> ? and admin = 1");
+            statement.setInt(1, accountToDelete.getId());
+            result = statement.executeQuery();
+            if (!result.next()) throw new UserWarningException("Nemožno odstrániť jedniného administrátora.");
+
             // verify whether transactions with given userId exist
             statement = conn.prepareStatement(
                     "SELECT 1 FROM move WHERE account_id = ?");
