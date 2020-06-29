@@ -172,8 +172,6 @@ public class FXMLMainWindowController implements Initializable {
                 itemDetailsChangeButton.setDisable(false);
                 itemMoveHistoryButton.setDisable(false);
             }
-        } else {
-            autoRefreshResume();
         }
     }
 
