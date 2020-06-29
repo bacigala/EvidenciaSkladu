@@ -23,7 +23,10 @@ public class FXMLSimpleChoiceDialogController<Q> implements Initializable {
     private Q theChoice = null;
 
     public void setChoiceList(ObservableList<Q> choiceList) {
-        if (choiceList != null) mainChoiceBox.setItems(choiceList);
+        if (choiceList != null) {
+            mainChoiceBox.setItems(choiceList);
+            if (choiceList.size() == 1) mainChoiceBox.setValue(choiceList.get(0));
+        }
     }
 
     public void setLabelText(String labelText) {

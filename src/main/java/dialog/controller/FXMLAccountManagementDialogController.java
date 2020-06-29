@@ -5,6 +5,7 @@ import databaseAccess.AccountDAO;
 import databaseAccess.CustomExceptions.UserWarningException;
 import dialog.DialogFactory;
 import domain.Account;
+import javafx.beans.Observable;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -115,7 +116,9 @@ public class FXMLAccountManagementDialogController implements Initializable {
                         FXMLSimpleChoiceDialogController<Account> controller = fxmlLoader.getController();
                         stage.setTitle("Prevod transakcii");
 
-                        controller.setChoiceList(accountList);
+                        ObservableList<Account> choiceList = FXCollections.observableArrayList(accountList);
+                        choiceList.remove(targetAccount);
+                        controller.setChoiceList(choiceList);
                         controller.setLabelText("Transkakcie previesť pod konto:");
 
                         stage.showAndWait();
