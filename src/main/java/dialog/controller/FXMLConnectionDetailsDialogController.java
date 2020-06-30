@@ -62,6 +62,7 @@ public class FXMLConnectionDetailsDialogController implements Initializable {
             // change successful and verified
             DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Pripojené.");
             closeDialog();
+            return;
         } else {
             DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Nepodarlo sa poripojiť.");
         }

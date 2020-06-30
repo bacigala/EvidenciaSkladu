@@ -70,33 +70,13 @@ public class FXMLUserLoginDialogController implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        DialogFactory df = DialogFactory.getInstance();
-        if (ConnectionFactory.getInstance().hasValidConnectionDetails()) {
-            if (Login.getInstance().hasUser()) {
-                // user logged in - offer logout
-                disableInput();
-                usernameTextField.setText(Login.getInstance().getLoggedUserUsername());
-                loginButton.setText("Odhlásiť");
-                loginButton.requestFocus();
-            } else {
-                // nobody logged in - offer login
-                loginButton.setText("Prihlásiť sa");
-                enableInput();
-                usernameTextField.requestFocus();
-            }                        
-        } else {
-            // error - no server connection
-            disableInput();
-            loginButton.setDisable(true);
-            df.showAlert(Alert.AlertType.ERROR, "Nepodarilo sa pripojiť k databáze.");
-        }
-
-        Platform.runLater(() -> usernameTextField.requestFocus());
+        startUp();
     }   
     
     private void enableInput() {
         usernameTextField.setDisable(false);
         passwordTextField.setDisable(false);
+        loginButton.setDisable(false);
     }
     
     private void disableInput() {
@@ -110,6 +90,32 @@ public class FXMLUserLoginDialogController implements Initializable {
     @FXML
     private void openConnectionDetails() {
         DialogFactory.getInstance().showConnectionDetailsDialog();
+        startUp();
+    }
+
+    private void startUp() {
+        DialogFactory df = DialogFactory.getInstance();
+        if (ConnectionFactory.getInstance().hasValidConnectionDetails()) {
+            if (Login.getInstance().hasUser()) {
+                // user logged in - offer logout
+                disableInput();
+                usernameTextField.setText(Login.getInstance().getLoggedUserUsername());
+                loginButton.setText("Odhlásiť");
+                loginButton.requestFocus();
+            } else {
+                // nobody logged in - offer login
+                loginButton.setText("Prihlásiť sa");
+                enableInput();
+                usernameTextField.requestFocus();
+            }
+        } else {
+            // error - no server connection
+            disableInput();
+            loginButton.setDisable(true);
+            df.showAlert(Alert.AlertType.ERROR, "Nepodarilo sa pripojiť k databáze.");
+        }
+
+        Platform.runLater(() -> usernameTextField.requestFocus());
     }
     
 }
