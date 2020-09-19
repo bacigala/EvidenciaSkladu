@@ -169,7 +169,7 @@ public class CategoryDAO {
      * @param categoryToTakeOver - category that takes all items from deleted one.
      */
     public void deleteCategory(Category categoryToDelete, Category categoryToTakeOver) throws Exception {
-        if (!Login.getInstance().hasAdmin()) throw new UserWarningException("Prihláste sa prosím.");
+            if (!Login.getInstance().hasAdmin()) throw new UserWarningException("Prihláste sa prosím.");
         if (categoryToDelete == null) throw new IllegalArgumentException();
         if (categoryToDelete.getId() == 1) throw new IllegalArgumentException(); // default category cannot be deleted
 

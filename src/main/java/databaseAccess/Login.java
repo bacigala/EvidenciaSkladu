@@ -1,9 +1,15 @@
 package databaseAccess;
 
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Properties;
 
 /**
  * Manages user login and password verification.
@@ -65,6 +71,23 @@ public class Login {
                 if (conn != null) connFactory.releaseConnection(conn);
             } catch (SQLException e) {
                 e.printStackTrace();
+            }
+        }
+
+        // save username for later pre-filled login forms
+        if (answer) {
+            try {
+                Properties appProps = new Properties();
+                Path PropertyFile = Paths.get("EvidenciaSkladu.properties");
+                Reader PropReader = Files.newBufferedReader(PropertyFile);
+                appProps.load(PropReader);
+                appProps.setProperty("username", username);
+
+                Writer PropWriter = Files.newBufferedWriter(PropertyFile);
+                appProps.store(PropWriter, "Application Properties");
+                PropWriter.close();
+            } catch (Exception Ex) {
+                System.out.println("write Exception: " + Ex.getMessage());
             }
         }
 

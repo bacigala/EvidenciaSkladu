@@ -9,7 +9,13 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
+import java.io.Reader;
+import java.io.Writer;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,6 +68,23 @@ public class FXMLConnectionDetailsDialogController implements Initializable {
             // change successful and verified
             DialogFactory.getInstance().showAlert(Alert.AlertType.INFORMATION, "Pripojené.");
             closeDialog();
+
+            //write new connection details to app properties
+            try {
+                Properties appProps = new Properties();
+                Path PropertyFile = Paths.get("EvidenciaSkladu.properties");
+                Reader PropReader = Files.newBufferedReader(PropertyFile);
+                appProps.load(PropReader);
+                appProps.setProperty("server-ip", ip);
+                appProps.setProperty("server-port", port);
+
+                Writer PropWriter = Files.newBufferedWriter(PropertyFile);
+                appProps.store(PropWriter,"Application Properties for app Evidencia Skladu");
+                PropWriter.close();
+            } catch (Exception Ex) {
+                System.err.println("Properties Write Exception: " + Ex.getMessage());
+            }
+
             return;
         } else {
             DialogFactory.getInstance().showAlert(Alert.AlertType.ERROR, "Nepodarlo sa poripojiť.");

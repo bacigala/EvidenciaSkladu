@@ -10,7 +10,13 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Properties;
 import java.util.ResourceBundle;
 
 public class FXMLUserLoginDialogController implements Initializable {
@@ -101,12 +107,32 @@ public class FXMLUserLoginDialogController implements Initializable {
                 disableInput();
                 usernameTextField.setText(Login.getInstance().getLoggedUserUsername());
                 loginButton.setText("Odhlásiť");
-                loginButton.requestFocus();
+                Platform.runLater(() -> loginButton.requestFocus());
             } else {
                 // nobody logged in - offer login
                 loginButton.setText("Prihlásiť sa");
+
+                String username = "";
+                // try to fetch username from app properties
+                try {
+                    Properties appProps = new Properties();
+                    Path PropertyFile = Paths.get("EvidenciaSkladu.properties");
+                    Reader PropReader = Files.newBufferedReader(PropertyFile);
+                    appProps.load(PropReader);
+
+                    username = appProps.getProperty("username", "");
+                    PropReader.close();
+                } catch (IOException e) {
+                    System.err.println("PropertiesFileNotFoundException: " + e.getMessage());
+                }
+
+                usernameTextField.setText(username);
                 enableInput();
-                usernameTextField.requestFocus();
+                if (username.equals("")) {
+                    Platform.runLater(() -> usernameTextField.requestFocus());
+                } else {
+                    Platform.runLater(() -> passwordTextField.requestFocus());
+                }
             }
         } else {
             // error - no server connection
@@ -114,8 +140,6 @@ public class FXMLUserLoginDialogController implements Initializable {
             loginButton.setDisable(true);
             df.showAlert(Alert.AlertType.ERROR, "Nepodarilo sa pripojiť k databáze.");
         }
-
-        Platform.runLater(() -> usernameTextField.requestFocus());
     }
     
 }

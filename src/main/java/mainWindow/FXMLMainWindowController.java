@@ -26,10 +26,16 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.ResourceBundle;
 
 /**
@@ -100,8 +106,25 @@ public class FXMLMainWindowController implements Initializable {
         selectedItemPropertiesTable.getColumns().addAll(attributeName, attributeValue);
         selectedItemPropertiesTable.setPlaceholder(new Label("Bez ďalších atribútov."));
 
+        // try to retrieve server IP and port from properties, otherwise use default
+        String ip = "";
+        String port = "";
+
+        try {
+            Properties appProps = new Properties();
+            Path PropertyFile = Paths.get("EvidenciaSkladu.properties");
+            Reader PropReader = Files.newBufferedReader(PropertyFile);
+            appProps.load(PropReader);
+
+            ip = appProps.getProperty("server-ip", "");
+            port = appProps.getProperty("server-port", "");
+            PropReader.close();
+        } catch (IOException e) {
+            System.err.println("PropertiesFileNotFoundException: " + e.getMessage());
+        }
+
         // test default connection settings, require login information
-        if (ConnectionFactory.getInstance().setBasicUserConnectionDetails()) {
+        if (ConnectionFactory.getInstance().setConnectionDetails(ip, port)) {
             // successfully established database connection
             openLogInSettings();
         } else {
