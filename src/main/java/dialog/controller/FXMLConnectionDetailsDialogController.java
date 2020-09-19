@@ -73,8 +73,12 @@ public class FXMLConnectionDetailsDialogController implements Initializable {
             try {
                 Properties appProps = new Properties();
                 Path PropertyFile = Paths.get("EvidenciaSkladu.properties");
-                Reader PropReader = Files.newBufferedReader(PropertyFile);
-                appProps.load(PropReader);
+                try {
+                    Reader PropReader = Files.newBufferedReader(PropertyFile);
+                    appProps.load(PropReader);
+                } catch (Exception e) {
+                    System.out.println("no recent property file found");
+                }
                 appProps.setProperty("server-ip", ip);
                 appProps.setProperty("server-port", port);
 
